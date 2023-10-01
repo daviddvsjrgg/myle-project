@@ -4,22 +4,22 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames';
 
 const user = {
-  name: 'Tom Cook',
-  email: 'tom@example.com',
+  name: 'David Dwiyanto',
+  email: 'david@example.com',
   imageUrl:
     'https://images.unsplash.com/photo-1526800544336-d04f0cbfd700?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80',
 }
 const navigation = [
-  { name: 'Dashboard', href: '#', current: true },
-  { name: 'Team', href: '#', current: false },
-  { name: 'Projects', href: '#', current: false },
-  { name: 'Calendar', href: '#', current: false },
-  { name: 'Reports', href: '#', current: false },
+  { name: 'Dashboard', href: '#', current: false },
+  { name: 'Projek', href: '#', current: false },
+  { name: 'Manajemen Data', href: '#', current: false },
+  { name: 'Manajemen User', href: '#', current: false },
+  { name: 'Laporan', href: '#', current: false },
 ]
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
   { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '/login' },
+  { name: 'Logout', href: '/login' },
 ]
 
 const dashboard = () => {
