@@ -6,7 +6,7 @@ const Login = () => {
     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
       <img
         className="mx-auto h-10 w-auto"
-        src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600   "
+        src="https://images.unsplash.com/photo-1582845512747-e42001c95638?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
         alt="Your Company"
       />
       <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
@@ -38,9 +38,9 @@ const Login = () => {
               Password
             </label>
             <div className="text-sm">
-              <a href="" className="font-semibold text-indigo-600 hover:text-indigo-500">
+              <p href="" className="font-semibold text-indigo-600 hover:text-indigo-500">
                Lupa password?
-              </a>
+              </p>
             </div>
           </div>
           <div className="mt-2">
