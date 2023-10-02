@@ -6,7 +6,7 @@ import {
 
 import Login from './pages/Login';
 import Register from "./pages/Register";
-import Dashboard from "./pages/halaman/dashboard";
+import Dashboard from "./pages/authPages/dashboard";
 
 function App() {
   return (

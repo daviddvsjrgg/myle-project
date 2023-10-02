@@ -2,6 +2,7 @@ import { Fragment } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames';
+import Url from '../../url/Url';
 
 const user = {
   name: 'David Dwiyanto',
@@ -179,17 +180,7 @@ const dashboard = () => {
     <header className="bg-white shadow">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
-        <ul>
-            <li>
-                <a href='/login'>/login</a>
-            </li>
-            <li>
-                <a href='/register'>/register</a>
-            </li>
-            <li>
-                <a href='/'>/dashboard</a>
-            </li>
-        </ul>
+        <Url />
       </div>
     </header>
     <main>

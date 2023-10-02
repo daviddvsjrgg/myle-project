@@ -1,4 +1,5 @@
 import React from 'react'
+import Url from '../url/Url'
 
 const Register = () => {
   return (
@@ -101,6 +102,7 @@ const Register = () => {
           Login
         </a>
       </p>
+    <Url />
     </div>
   </div>
   )

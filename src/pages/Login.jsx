@@ -1,4 +1,5 @@
 import React from 'react'
+import Url from '../url/Url'
 
 const Login = () => {
   return (
@@ -71,18 +72,7 @@ const Login = () => {
           Register
         </a>
       </p>
-        <h1>url-nya -{'>'}</h1>
-        <ul>
-            <li>
-                <a href='/login'>/login</a>
-            </li>
-            <li>
-                <a href='/register'>/register</a>
-            </li>
-            <li>
-                <a href='/'>/dashboard</a>
-            </li>
-        </ul>
+       <Url />
     </div>
   </div>
   )
