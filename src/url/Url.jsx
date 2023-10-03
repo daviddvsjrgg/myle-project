@@ -14,6 +14,24 @@ const Url = () => {
             <li>
                 <a href='/register'>/register</a>
             </li>
+            <li>
+                <a href='/manajemen-data'>/manajemen-data</a>
+            </li>
+            <li>
+                <a href='/manajemen-user'>/manajemen-user</a>
+            </li>
+            <li>
+                <a href='/projek'>/projek</a>
+            </li>
+            <li>
+                <a href='/laporan'>/laporan</a>
+            </li>
+            <li>
+                <a href='/kalkulasi'>/kalkulasi</a>
+            </li>
+            <li>
+                <a href='/404'>/404</a>
+            </li>
         </ul>
     </div>
   )
