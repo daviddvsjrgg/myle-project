@@ -1,6 +1,34 @@
 import React from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
 
+const people = [
+  {
+    namaProjek: 'Test Automation',
+    nama: 'David Dwiyanto',
+    department: 'QC Intern',
+    role: 'Researcher',
+    email: 'jane.cooper@example.com',
+    image: 'https://bit.ly/33HnjK0',
+  },
+  {
+    namaProjek: 'John Doe',
+    nama: 'Regional Paradigm Technician',
+    department: 'Optimization',
+    role: 'Tester',
+    email: 'john.doe@example.com',
+    image: 'https://bit.ly/3I9nL2D',
+  },
+  {
+    namaProjek: 'Veronica Lodge',
+    nama: 'Regional Paradigm Technician',
+    department: 'Optimization',
+    role: ' Software Engineer',
+    email: 'veronica.lodge@example.com',
+    image: 'https://bit.ly/3vaOTe1',
+  },
+  // More people...
+];
+
 const ManajemenData = () => {
   return (
     <div className="min-h-full">
@@ -16,15 +44,16 @@ const ManajemenData = () => {
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
           
         <div className="flex flex-col">
-            <div className="overflow-x-auto">
-                    <div className="py-3 pl-2">
-                        <div className="relative max-w-xs">
+        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        
+        <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                        <div className="relative max-w-xs py-3 ml-1">
                             <label htmlFor="hs-table-search" className="sr-only">
                                 Search
                             </label>
                             <input
                                 type="text"
-                                name="hs-table-search"
+                                namaProjek="hs-table-search"
                                 id="hs-table-search"
                                 className="block w-full p-3 pl-10 text-sm border-gray-200 rounded-md focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
                                 placeholder="Search..."
@@ -42,134 +71,72 @@ const ManajemenData = () => {
                                 </svg>
                             </div>
                         </div>
-                    </div>
-                <div className="p-1.5 w-full inline-block align-middle">
-                    <div className="overflow-hidden border rounded-lg">
-                      
-
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                                    >
-                                        No
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                                    >
-                                        Nama
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase "
-                                    >
-                                        Penanggung Jawab
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase "
-                                    >
-                                        Edit
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-xs font-bold text-right text-gray-500 uppercase "
-                                    >
-                                        Delete
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                <tr>
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                                        1
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        Jone Doe
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        jonne62@gmail.com
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-green-500 hover:text-green-700"
-                                            href="/manajemen-data"
-                                        >
-                                            Edit
-                                        </a>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-red-500 hover:text-red-700"
-                                            href="/manajemen-data"
-                                        >
-                                            Delete
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                                        2
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        Jone Doe
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        jonne62@gmail.com
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-green-500 hover:text-green-700"
-                                            href="/manajemen-data"
-                                        >
-                                            Edit
-                                        </a>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-red-500 hover:text-red-700"
-                                            href="/manajemen-data"
-                                        >
-                                            Delete
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                                        3
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        Jone Doe
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        jonne62@gmail.com
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-green-500 hover:text-green-700"
-                                            href="/manajemen-data"
-                                        >
-                                            Edit
-                                        </a>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                        <a
-                                            className="text-red-500 hover:text-red-700"
-                                            href="/manajemen-data"
-                                        >
-                                            Delete
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+          <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Nama Projek
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Penanggung Jawab
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                  <th scope="col" className="relative px-6 py-3">
+                    <span className="sr-only">Edit</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {people.map(person => (
+                  <tr key={person.email}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <img className="h-10 w-10 rounded-full" src={person.image} alt="" />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{person.namaProjek}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{person.nama}</div>
+                      <div className="text-sm text-gray-500">{person.department}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className="px-2 inline-flex text-xs leading-5
+                      font-semibold rounded-full bg-green-100 text-green-800"
+                      >
+                        Active
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <a href="/manajemen-data" className="text-indigo-600 hover:text-indigo-900">
+                        Detail
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
+      </div>
+    </div>
+
 
         </div>
       </main>
