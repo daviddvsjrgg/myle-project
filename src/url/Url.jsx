@@ -15,7 +15,7 @@ const Url = () => {
                 <a href='/register'>/register</a>
             </li>
             <li>
-                <a href='/manajemen-data'>/manajemen-data</a>
+                <a href='/manajemen-projek'>/manajemen-projek</a>
             </li>
             <li>
                 <a href='/manajemen-user'>/manajemen-user</a>
