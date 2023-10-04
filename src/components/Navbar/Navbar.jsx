@@ -12,7 +12,7 @@ const user = {
   }
   const navigation = [
     { name: 'Dashboard', href: '/', current: false },
-    { name: 'Manajemen Data', href: '/manajemen-data', current: false },
+    { name: 'Manajemen Projek', href: '/manajemen-projek', current: false },
     { name: 'Manajemen User', href: '/manajemen-user', current: false },
     { name: 'Projek', href: '/projek', current: false },
     { name: 'Laporan', href: '/laporan', current: false },

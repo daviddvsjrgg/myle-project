@@ -3,39 +3,39 @@ import Navbar from '../../../../components/Navbar/Navbar'
 
 const people = [
   {
+    number : '1',
     namaProjek: 'Test Automation',
     nama: 'David Dwiyanto',
     department: 'QC Intern',
     role: 'Researcher',
     email: 'jane.cooper@example.com',
-    image: 'https://bit.ly/33HnjK0',
   },
   {
+    number : '2',
     namaProjek: 'John Doe',
     nama: 'Regional Paradigm Technician',
     department: 'Optimization',
     role: 'Tester',
     email: 'john.doe@example.com',
-    image: 'https://bit.ly/3I9nL2D',
   },
   {
+    number : '3',
     namaProjek: 'Veronica Lodge',
     nama: 'Regional Paradigm Technician',
     department: 'Optimization',
     role: ' Software Engineer',
     email: 'veronica.lodge@example.com',
-    image: 'https://bit.ly/3vaOTe1',
   },
   // More people...
 ];
 
-const ManajemenData = () => {
+const ManajemenProjek = () => {
   return (
     <div className="min-h-full">
       <Navbar />
       <header className="bg-white shadow">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Manajemen Data</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Manajemen Projek</h1>
         </div>
       </header>
 
@@ -43,11 +43,8 @@ const ManajemenData = () => {
       <main>
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
           
-        <div className="flex flex-col">
-        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        
-        <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                        <div className="relative max-w-xs py-3 ml-1">
+        <div className="flex flex-col ml-1 mr-1">
+                        <div className="relative max-w-xs py-3">
                             <label htmlFor="hs-table-search" className="sr-only">
                                 Search
                             </label>
@@ -71,10 +68,19 @@ const ManajemenData = () => {
                                 </svg>
                             </div>
                         </div>
+        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        
+        <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
           <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    No
+                  </th>
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -101,11 +107,15 @@ const ManajemenData = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {people.map(person => (
                   <tr key={person.email}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-2 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <img className="h-10 w-10 rounded-full" src={person.image} alt="" />
+                        <div className="ml-5">
+                          <div className="text-sm font-medium text-gray-900">{person.number}</div>
                         </div>
+                      </div>
+                    </td>
+                    <td className="px-2 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{person.namaProjek}</div>
                         </div>
@@ -124,7 +134,7 @@ const ManajemenData = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <a href="/manajemen-data" className="text-indigo-600 hover:text-indigo-900">
+                      <a href="/manajemen-projek" className="text-indigo-600 hover:text-indigo-900">
                         Detail
                       </a>
                     </td>
@@ -146,4 +156,4 @@ const ManajemenData = () => {
   )
 }
 
-export default ManajemenData
+export default ManajemenProjek

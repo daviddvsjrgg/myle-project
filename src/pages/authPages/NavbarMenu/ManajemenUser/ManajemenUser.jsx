@@ -43,11 +43,8 @@ const ManajemenUser = () => {
       <main>
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
 
-        <div className="flex flex-col">
-        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        
-        <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                        <div className="relative max-w-xs py-3 ml-1">
+        <div className="flex flex-col ml-1 mr-1">
+                        <div className="relative max-w-xs py-3">
                             <label htmlFor="hs-table-search" className="sr-only">
                                 Search
                             </label>
@@ -71,6 +68,9 @@ const ManajemenUser = () => {
                                 </svg>
                             </div>
                         </div>
+        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        
+        <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
           <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
