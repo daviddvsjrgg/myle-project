@@ -13,6 +13,7 @@ import ManajemenUser from "./pages/authPages/NavbarMenu/ManajemenUser/ManajemenU
 import Projek from "./pages/authPages/NavbarMenu/Projek/Projek";
 import Laporan from "./pages/authPages/NavbarMenu/Laporan/Laporan";
 import Kalkulasi from "./pages/authPages/NavbarMenu/Kalkulasi/Kalkulasi";
+import AddManajemenProjek from "./pages/authPages/NavbarMenu/ManajemenProjek/AddManajemenProjek/AddManajemenProjek";
 
 function App() {
   return (
@@ -23,7 +24,11 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/404" element={<NotFound404 />} />
+
+            {/* Manajemen Projek */}
             <Route path="/manajemen-projek" element={<ManajemenProjek />} />
+            <Route path="/manajemen-projek/projek-baru" element={<AddManajemenProjek />} />
+
             <Route path="/manajemen-user" element={<ManajemenUser />} />
             <Route path="/projek" element={<Projek />} />
             <Route path="/laporan" element={<Laporan />} />
