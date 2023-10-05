@@ -33,7 +33,7 @@ const ManajemenProjek = () => {
   return (
     <div className="min-h-full">
       <Navbar />
-      <header className="bg-white drop-shadow-xl">
+      <header className="bg-white drop-shadow-md">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Manajemen Projek</h1>
         </div>
