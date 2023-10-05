@@ -5,16 +5,16 @@ const posts = [
   {
     id: 1,
     title: 'Boost your conversion rate',
-    href: '#',
+    href: '/toProjectTest',
     description:
       'Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.',
     date: 'Mar 16, 2020',
     datetime: '2020-03-16',
-    category: { title: 'Marketing', href: '#' },
+    category: { title: 'Marketing', href: '/titleTest' },
     author: {
       name: 'Michael Foster',
       role: 'Co-Founder / CTO',
-      href: '#',
+      href: '/profileTest',
       imageUrl:
         'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     },
@@ -22,16 +22,16 @@ const posts = [
   {
     id: 1,
     title: 'Boost your conversion rate',
-    href: '#',
+    href: '/toProjectTest',
     description:
       'Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.',
     date: 'Mar 16, 2020',
     datetime: '2020-03-16',
-    category: { title: 'Marketing', href: '#' },
+    category: { title: 'Marketing', href: '/titleTest' },
     author: {
       name: 'Michael Foster',
       role: 'Co-Founder / CTO',
-      href: '#',
+      href: 'profileTest',
       imageUrl:
         'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     },
@@ -39,16 +39,16 @@ const posts = [
   {
     id: 1,
     title: 'Boost your conversion rate',
-    href: '#',
+    href: '/toProjectTest',
     description:
       'Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.',
     date: 'Mar 16, 2020',
     datetime: '2020-03-16',
-    category: { title: 'Marketing', href: '#' },
+    category: { title: 'Marketing', href: '/titleTest' },
     author: {
       name: 'Michael Foster',
       role: 'Co-Founder / CTO',
-      href: '#',
+      href: '/profileTest',
       imageUrl:
         'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     },
@@ -81,7 +81,7 @@ const Projek = () => {
               </div>
             <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
               {posts.map((post) => (
-              <a href="/projek" className="group block mx-auto rounded-lg p-6 bg-white ring-1 ring-slate-900/5 drop-shadow-lg space-y-3 hover:bg-gray-100 hover:bg-gray-100">
+              <div className="group block mx-auto rounded-lg p-6 bg-white ring-1 ring-slate-900/5 drop-shadow-lg space-y-3 hover:bg-gray-100 hover:ring-gray-200">
               <div className="flex items-center space-x-3">
                 <article key={post.id} className="flex max-w-xl flex-col items-start justify-between">
                   <div className="flex items-center gap-x-4 text-xs">
@@ -118,7 +118,7 @@ const Projek = () => {
                   </div>
                 </article>
              </div>
-             </a>
+             </div>
               ))}
             </div>
           </div>
