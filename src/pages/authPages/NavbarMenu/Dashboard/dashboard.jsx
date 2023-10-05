@@ -1,3 +1,4 @@
+import Bottom from '../../../../components/BottomBar/Bottom';
 import Navbar from '../../../../components/Navbar/Navbar';
 
 
@@ -17,6 +18,7 @@ const dashboard = () => {
       </main>
       {/* End - Content */}
 
+     <Bottom />
     </div>
   )
 }
