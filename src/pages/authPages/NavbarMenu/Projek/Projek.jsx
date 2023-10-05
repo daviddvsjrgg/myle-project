@@ -72,15 +72,17 @@ const Projek = () => {
 
             <div className="bg-white">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl lg:mx-0">
+              <div className="mx-auto max-w-2xl lg:mx-0">
 
-                {/* Header */}
+                  {/* Header */}
 
-                {/* End Header */}
+                  {/* End Header */}
 
-            </div>
+              </div>
             <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
               {posts.map((post) => (
+              <a href="/projek" className="group block mx-auto rounded-lg p-6 bg-white ring-1 ring-slate-900/5 drop-shadow-lg space-y-3 hover:bg-gray-100 hover:bg-gray-100">
+              <div className="flex items-center space-x-3">
                 <article key={post.id} className="flex max-w-xl flex-col items-start justify-between">
                   <div className="flex items-center gap-x-4 text-xs">
                     <time dateTime={post.datetime} className="text-gray-500">
@@ -94,7 +96,7 @@ const Projek = () => {
                     </a>
                   </div>
                   <div className="group relative">
-                    <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                    <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900">
                       <a href={post.href}>
                         <span className="absolute inset-0" />
                         {post.title}
@@ -115,6 +117,8 @@ const Projek = () => {
                     </div>
                   </div>
                 </article>
+             </div>
+             </a>
               ))}
             </div>
           </div>

@@ -33,7 +33,7 @@ const ManajemenUser = () => {
   return (
     <div className="min-h-full">
       <Navbar />
-      <header className="bg-white shadow">
+      <header className="bg-white drop-shadow-xl">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Manajemen User</h1>
         </div>
@@ -71,7 +71,7 @@ const ManajemenUser = () => {
         <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         
         <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-          <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+          <div className="drop-shadow-md overflow-hidden border-b border-gray-200 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
