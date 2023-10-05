@@ -1,5 +1,6 @@
 import React from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
+import Bottom from '../../../../components/BottomBar/Bottom';
 
 const people = [
   {
@@ -137,6 +138,7 @@ const ManajemenUser = () => {
       </main>
       {/* End - Content */}
       
+      <Bottom />
     </div>
   )
 }

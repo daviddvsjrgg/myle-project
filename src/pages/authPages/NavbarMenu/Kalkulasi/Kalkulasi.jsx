@@ -1,5 +1,6 @@
 import React from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
+import Bottom from '../../../../components/BottomBar/Bottom'
 
 const Kalkulasi = () => {
   return (
@@ -17,6 +18,7 @@ const Kalkulasi = () => {
       </main>
       {/* End - Content */}
       
+      <Bottom />
     </div>
   )
 }
