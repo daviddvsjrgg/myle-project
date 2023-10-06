@@ -97,23 +97,22 @@ const AddManajemenProjek = () => {
                 </p>
 
             <div class="columns-1 mt-8">
-                <div class="">
-                <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
-                        Nama Projek
-                    </label>
-                    <div className="mt-2">
-                        <div className="rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                        <input
-                            autoFocus
-                            type="text"
-                            name="username"
-                            id="username"
-                            autoComplete="username"
-                            className="block flex- border-0 bg-transparent py-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                            placeholder=""
-                        />
-                        </div>
-                    </div>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            <div className="sm:col-span-3">
+              <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                Nama Projek
+              </label>
+              <div className="mt-2 sm:max-w-md">
+                <input
+                  autoFocus
+                  type="text"
+                  name="first-name"
+                  id="first-name"
+                  autoComplete="given-name"
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
                 </div>
                 <div class="">
                 <Listbox value={selected} onChange={setSelected}>
