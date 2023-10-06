@@ -4,7 +4,7 @@ import Navbar from '../../../../../components/Navbar/Navbar'
 import { PhotoIcon } from '@heroicons/react/24/solid'
 import { Fragment, useState } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import classNames from 'classnames';
 
 
@@ -93,41 +93,41 @@ const AddManajemenProjek = () => {
                 <div className="border-b border-gray-900/10 pb-12">
                 <h2 className="text-base font-semibold leading-7 text-gray-900">Profil Projek</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
-                    Form dibawah akan tampil di halaman projek.
+                    Masukkan informasi projek kamu, pada form dibawah.
                 </p>
 
-            <div class="flex flex-row mt-10">
-                <div class="basis-2/4">
+            <div class="columns-1 mt-8">
+                <div class="">
                 <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
                         Nama Projek
                     </label>
-                    <div className="mt-2 mr-2">
-                        <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                    <div className="mt-2">
+                        <div className="rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                         <input
                             autoFocus
                             type="text"
                             name="username"
                             id="username"
                             autoComplete="username"
-                            className="block flex-1 border-0 bg-transparent py-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                            className="block flex- border-0 bg-transparent py-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                             placeholder=""
                         />
                         </div>
                     </div>
                 </div>
-                <div class="basis-3/4">
+                <div class="">
                 <Listbox value={selected} onChange={setSelected}>
                         {({ open }) => (
                             <>
-                            <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">Penanggung Jawab</Listbox.Label>
-                            <div className="relative mt-2">
+                            <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900 mt-6">Penanggung Jawab</Listbox.Label>
+                            <div className="relative mt-2 sm:max-w-none">
                                 <Listbox.Button className="relative w-full cursor-default rounded-md bg-white mb-1 py-2 pl-3 pr-5 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                 <span className="flex items-center">
                                     <img src={selected.avatar} alt="" className="h-5 w-5 flex-shrink-0 rounded-full" />
                                     <span className="ml-3 block truncate">{selected.name}</span>
                                 </span>
                                 <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
-                                    <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                    <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                                 </span>
                                 </Listbox.Button>
 
@@ -227,20 +227,21 @@ const AddManajemenProjek = () => {
                     </div>
                     </div>
                 </div>
-                </div>
-             </div>
+            
+
+
 
             <div className="mt-6 flex items-center justify-end gap-x-6">
-                <button type="button" className="text-sm font-semibold leading-6 text-gray-900">
-                Cancel
-                </button>
                 <button
                 type="submit"
                 className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
-                Save
+                Tambahkan
                 </button>
             </div>
+                </div>
+             </div>
+
          </form>
         </div>
       </main>
