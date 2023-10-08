@@ -18,6 +18,9 @@ const Url = () => {
                 <a href='/manajemen-projek'>/manajemen-projek</a>
             </li>
             <li>
+                <a href='/manajemen-projek/projek-baru'>/manajemen-projek/projek-baru</a>
+            </li>
+            <li>
                 <a href='/manajemen-user'>/manajemen-user</a>
             </li>
             <li>
