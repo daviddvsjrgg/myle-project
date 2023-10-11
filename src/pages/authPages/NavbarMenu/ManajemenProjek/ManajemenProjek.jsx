@@ -5,35 +5,35 @@ import Bottom from '../../../../components/BottomBar/Bottom';
 const people = [
   {
     number : '1',
-    namaProjek: 'Test Automation',
+    nama_projek: 'Test Automation',
     nama: 'David Dwiyanto',
     department: 'QC Intern',
     role: 'Researcher',
-    email: 'jane.cooper@example.com',
+    email: 'jane1.cooper@example.com',
   },
   {
     number : '2',
-    namaProjek: 'John Doe',
+    nama_projek: 'John Doe',
     nama: 'Regional Paradigm Technician',
-    department: 'Optimization',
+    department: 'Optimization12',
     role: 'Tester',
-    email: 'john.doe@example.com',
+    email: 'john1.doe@example.com',
   },
   {
     number : '3',
-    namaProjek: 'Veronica Lodge',
+    nama_projek: 'Veronica Lodge',
     nama: 'Regional Paradigm Technician',
-    department: 'Optimization',
-    role: ' Software Engineer',
-    email: 'veronica.lodge@example.com',
+    department: 'Optimizatio1',
+    role: ' Software1 Engineer',
+    email: 'veronica1.lodge@example.com',
   },
   {
     number : '4',
-    namaProjek: 'Veronica Lodge',
+    nama_projek: 'Veronica Lodge',
     nama: 'Regional Paradigm Technician',
-    department: 'Optimization',
-    role: ' Software Engineer',
-    email: 'veronica.lodge@example.com',
+    department: 'Optimization2',
+    role: ' Software2 Engineer',
+    email: 'veronica2.lodge@example.com',
   },
   // More people...
 ];
@@ -54,8 +54,8 @@ const ManajemenProjek = () => {
           
         <div className="flex flex-col ml-1 mr-1">
                         
-            <div class="flex justify-between ...">
-              <div class="order-last">
+            <div className="flex justify-between ...">
+              <div className="order-last">
                 <a href="/manajemen-projek/projek-baru" className="mb-3 group block max-w-sm rounded-lg p-2.5 bg-gray-50 ring-1 ring-slate-900/5 shadow-sm space-y-3 hover:bg-indigo-600 hover:ring-indigo-600">
                   <div className="flex items-center space-x-3">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -73,7 +73,7 @@ const ManajemenProjek = () => {
                 </label>
                 <input
                   type="text"
-                  namaProjek="hs-table-search"
+                  nama_projek="hs-table-search"
                   id="hs-table-search"
                   className="block w-full p-3 pl-10 text-sm border-gray-200 rounded-md focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
                   placeholder="Cari..."
@@ -144,7 +144,7 @@ const ManajemenProjek = () => {
                     <td className="px-2 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{person.namaProjek}</div>
+                          <div className="text-sm font-medium text-gray-900">{person.nama_projek}</div>
                         </div>
                       </div>
                     </td>
