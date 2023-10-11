@@ -5,33 +5,33 @@ import Bottom from '../../../../components/BottomBar/Bottom'
 const posts = [
   {
     id: 1,
-    title: 'Boost your conversion rate',
+    title: 'Bilingual 2021',
     href: '/toProjectTest',
     description:
       'Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.',
-    date: 'Mar 16, 2020',
+    date: '24 Juli, 2021',
     datetime: '2020-03-16',
-    category: { title: 'Marketing', href: '/titleTest' },
+    category: { title: 'Informatika', href: '/titleTest' },
     author: {
-      name: 'Michael Foster',
-      role: 'Co-Founder / CTO',
+      name: 'Joshua Ronaldo',
+      role: 'Ketua Kelas',
       href: '/profileTest',
       imageUrl:
         'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     },
   },
   {
-    id: 1,
-    title: 'Boost your conversion rate',
+    id: 2,
+    title: 'Aplikasi Manajemen',
     href: '/toProjectTest',
     description:
       'aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.',
-    date: 'Mar 16, 2020',
+    date: '31 Juli, 2023',
     datetime: '2020-03-16',
-    category: { title: 'Marketing', href: '/titleTest' },
+    category: { title: 'MGE', href: '/titleTest' },
     author: {
-      name: 'Michael Foster',
-      role: 'Co-Founder / CTO',
+      name: 'Albert Evando',
+      role: 'Intern',
       href: 'profileTest',
       imageUrl:
         'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
