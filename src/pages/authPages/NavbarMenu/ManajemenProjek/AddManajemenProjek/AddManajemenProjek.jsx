@@ -58,7 +58,7 @@ const AddManajemenProjek = () => {
             <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-3">
               <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
-                Nama Projek
+                Nama Projek *
               </label>
               <div className="mt-2 sm:max-w-md">
                 <input
@@ -97,7 +97,7 @@ const AddManajemenProjek = () => {
 
                     <div className="col-span-full">
                     <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900">
-                        Cover photo
+                        Cover photo *
                     </label>
                     <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                         <div className="text-center">
@@ -121,7 +121,7 @@ const AddManajemenProjek = () => {
               <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div class="sm:col-span-4">
                     <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900">
-                        Penanggung Jawab
+                        Penanggung Jawab *
                     </label>
                 <Combobox value={selected} onChange={setSelected}>
                   <div className="relative mt-2">
@@ -192,7 +192,7 @@ const AddManajemenProjek = () => {
                 </div>
 
                 <div class="sm:col-span-2">
-                  <label for="last-name" class="block text-sm font-medium leading-6 text-gray-900">Label</label>
+                  <label for="last-name" class="block text-sm font-medium leading-6 text-gray-900">Label *</label>
                   <div class="mt-2">
                     <input type="text" name="last-name" id="last-name" autocomplete="family-name" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </input>
