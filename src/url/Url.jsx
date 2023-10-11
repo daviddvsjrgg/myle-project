@@ -6,7 +6,7 @@ const Url = () => {
         <h3>{'Urlnya ->'}</h3>
         <ul>
             <li>
-                <a href='/'>/ {'(Dashboard)'}</a>
+                <a href='/'>/</a>
             </li>
             <li>
                 <a href='/login'>/login</a>
