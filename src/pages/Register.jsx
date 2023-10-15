@@ -19,7 +19,7 @@ const Register = () => {
       <form className="space-y-6" action="#" method="POST">
         <div>
           <label htmlFor="nama" className="block text-sm font-medium leading-6 text-gray-900">
-            Nama
+            Username
           </label>
           <div className="mt-2">
             <input
