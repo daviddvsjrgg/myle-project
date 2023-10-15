@@ -16,6 +16,7 @@ import Kalkulasi from "./pages/authPages/NavbarMenu/Kalkulasi/Kalkulasi";
 import AddManajemenProjek from "./pages/authPages/NavbarMenu/ManajemenProjek/AddManajemenProjek/AddManajemenProjek";
 import Personal from "./pages/authPages/NavbarMenu/Personal/Personal";
 import AddPersonal from "./pages/authPages/NavbarMenu/Personal/AddPersonal/AddPersonal";
+import AddUser from "./pages/authPages/NavbarMenu/ManajemenUser/AddUser/AddUser";
 
 function App() {
   return (
@@ -31,7 +32,10 @@ function App() {
             <Route path="/manajemen-projek" element={<ManajemenProjek />} />
             <Route path="/manajemen-projek/projek-baru" element={<AddManajemenProjek />} />
 
+            {/* Manajemen User */}
             <Route path="/manajemen-user" element={<ManajemenUser />} />
+            <Route path="/manajemen-user/user-baru" element={<AddUser />} />
+
             <Route path="/projek" element={<Projek />} />
 
             {/* Projek Personal */}
