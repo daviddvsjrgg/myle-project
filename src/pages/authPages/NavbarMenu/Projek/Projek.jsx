@@ -17,7 +17,7 @@ const posts = [
       role: 'Ketua Kelas',
       href: '/profileTest',
       imageUrl:
-        'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
     },
   },
   {
@@ -31,44 +31,44 @@ const posts = [
     category: { title: 'MGE', href: '/titleTest' },
     author: {
       name: 'Albert Evando',
-      role: 'Intern',
+      role: 'QC Intern',
       href: 'profileTest',
       imageUrl:
-        'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+        'https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHVzZXIlMjBwcm9maWxlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
     },
   },
   {
-    id: 1,
-    title: 'Boost your conversion rate',
+    id: 3,
+    title: 'Test Automation',
     href: '/toProjectTest',
     description:
       'Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.',
-    date: 'Mar 16, 2020',
-    datetime: '2020-03-16',
-    category: { title: 'Marketing', href: '/titleTest' },
+    date: 'Okt 21, 2022',
+    datetime: '2023-10-10',
+    category: { title: 'MGE', href: '/titleTest' },
     author: {
-      name: 'Michael Foster',
-      role: 'Co-Founder / CTO',
+      name: 'David Dwiyanto',
+      role: 'QC Intern',
       href: '/profileTest',
       imageUrl:
-        'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+        'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHVzZXIlMjBwcm9maWxlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
     },
   },
   {
-    id: 1,
-    title: 'Boost your conversion rate',
+    id: 4,
+    title: 'Project One',
     href: '/toProjectTest',
     description:
       'Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.',
-    date: 'Mar 16, 2020',
+    date: 'Mar 16, 2023',
     datetime: '2020-03-16',
-    category: { title: 'Marketing', href: '/titleTest' },
+    category: { title: 'Public', href: '/titleTest' },
     author: {
-      name: 'Michael Foster',
-      role: 'Co-Founder / CTO',
+      name: 'Veronica',
+      role: 'Produk Manager',
       href: '/profileTest',
       imageUrl:
-        'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
     },
   },
   // More posts...

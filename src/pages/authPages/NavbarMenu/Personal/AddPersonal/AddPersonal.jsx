@@ -1,7 +1,7 @@
 
 import React from 'react'
-import Bottom from '../../../../../components/BottomBar/Bottom'
 import Navbar from '../../../../../components/Navbar/Navbar'
+import Bottom from '../../../../../components/BottomBar/Bottom'
 import { PhotoIcon } from '@heroicons/react/24/solid'
 
 const AddPersonal = () => {

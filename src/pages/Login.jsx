@@ -23,6 +23,7 @@ const Login = () => {
           </label>
           <div className="mt-2">
             <input
+              autoFocus
               id="email"
               name="email"
               type="email"

@@ -26,7 +26,6 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/404" element={<NotFound404 />} />
 
             {/* Manajemen Projek */}
             <Route path="/manajemen-projek" element={<ManajemenProjek />} />
@@ -44,6 +43,11 @@ function App() {
 
             <Route path="/laporan" element={<Laporan />} />
             <Route path="/kalkulasi" element={<Kalkulasi />} />
+
+            {/* 404 Page */}
+            <Route path="*" element={<NotFound404 />} />
+            <Route path="/404" element={<NotFound404 />} />
+
         </Routes>
       </BrowserRouter>
     </div>

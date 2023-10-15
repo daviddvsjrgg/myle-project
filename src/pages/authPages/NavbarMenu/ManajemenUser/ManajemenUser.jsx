@@ -4,28 +4,36 @@ import Bottom from '../../../../components/BottomBar/Bottom';
 
 const people = [
   {
-    name: 'Jane Cooper',
-    title: 'Regional Paradigm Technician',
+    name: 'David Dwiyanto',
+    title: 'QC Intern',
     department: 'Optimization',
     role: 'Admin',
-    email: 'jane.cooper@example.com',
-    image: 'https://images.unsplash.com/photo-1696246847440-bb0047ba93ca?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=500&q=60',
+    email: 'david@gmail.com',
+    image: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHVzZXIlMjBwcm9maWxlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
   },
   {
-    name: 'John Doe',
-    title: 'Regional Paradigm Technician',
+    name: 'Joshua Ronaldo',
+    title: 'Ketua Kelas',
     department: 'Optimization',
-    role: 'Tester',
-    email: 'john.doe@example.com',
-    image: 'https://images.unsplash.com/photo-1663953241579-2258ac3fee75?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    role: 'User',
+    email: 'joshua@gmail.com',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
   },
   {
-    name: 'Veronica Lodge',
-    title: 'Regional Paradigm Technician',
+    name: 'Albert Evando',
+    title: 'QC Intern',
     department: 'Optimization',
-    role: ' Software Engineer',
-    email: 'veronica.lodge@example.com',
-    image: 'https://images.unsplash.com/photo-1696253930743-e2977a17dd59?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxN3x8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    role: ' User',
+    email: 'albert@gmail.com',
+    image: 'https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHVzZXIlMjBwcm9maWxlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
+  },
+  {
+    name: 'Veronica',
+    title: 'Produk Manager',
+    department: 'Optimization',
+    role: 'User',
+    email: 'veronica@gmail.com',
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
   },
   // More people...
 ];
@@ -130,7 +138,6 @@ const ManajemenUser = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{person.title}</div>
-                      <div className="text-sm text-gray-500">{person.department}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {person.role}

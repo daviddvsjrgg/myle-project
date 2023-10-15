@@ -35,7 +35,7 @@ const AddUser = () => {
                         type="button"
                         className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                         >
-                        Change
+                        Ubah
                         </button>
                     </div>
                     </div>
@@ -121,7 +121,7 @@ const AddUser = () => {
                         <select
                         id="akses"
                         name="akses"
-                        autoComplete="akses-name"
+                        autoComplete="akses"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         >
                         <option>User</option>
