@@ -1,8 +1,12 @@
 import React from 'react'
+import Navbar from '../components/Navbar/Navbar'
+import Bottom from '../components/BottomBar/Bottom'
+
 
 const NotFound404 = () => {
   return (
     <div>
+      <Navbar />
          <main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
          <div className="text-center">
           <p className="text-6xl font-semibold text-indigo-600">404</p>
@@ -21,6 +25,7 @@ const NotFound404 = () => {
           </div>
         </div>
       </main>
+      <Bottom />
     </div>
   )
 }

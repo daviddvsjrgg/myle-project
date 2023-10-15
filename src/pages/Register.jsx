@@ -23,6 +23,7 @@ const Register = () => {
           </label>
           <div className="mt-2">
             <input
+              autoFocus
               id="nama"
               name="nama"
               type="text"
@@ -39,6 +40,7 @@ const Register = () => {
           </label>
           <div className="mt-2">
             <input
+              placeholder='ex:example@gmail.com'
               id="email"
               name="email"
               type="email"
