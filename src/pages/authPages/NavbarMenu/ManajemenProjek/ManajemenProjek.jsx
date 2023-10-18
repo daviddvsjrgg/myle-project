@@ -7,7 +7,7 @@ const people = [
     number : '1',
     nama_projek: 'Bilingual 2021',
     nama: 'Joshua Ronaldo',
-    department: 'Ketua EKlas',
+    department: 'Ketua Kelas',
     role: 'Researcher',
     email: 'joshua@example.com',
   },
