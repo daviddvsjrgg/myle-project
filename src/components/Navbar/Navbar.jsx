@@ -17,7 +17,6 @@ const user = {
     { name: 'Projek', href: '/projek', current: false },
     { name: 'Personal', href: '/personal', current: false },
     { name: 'Laporan', href: '/laporan', current: false },
-    { name: 'Kalkulasi', href: '/kalkulasi', current: false },
   ]
   const userNavigation = [
     { name: 'Profil Anda', href: '#' },
