@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import Url from '../url/Url'
 import { useNavigate } from 'react-router-dom';
 import {  createUserWithEmailAndPassword  } from 'firebase/auth';
 import { auth } from '../config/firebase/firebase';
@@ -132,7 +131,6 @@ const Register = () => {
           Login
         </a>
       </p>
-    <Url />
     </div>
   </div>
   )
