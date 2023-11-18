@@ -4,6 +4,10 @@ import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames';
 
+import {  signOut } from "firebase/auth";
+import {auth} from '../../config/firebase/firebase';
+import { useNavigate } from 'react-router-dom';
+
 const user = {
     name: 'David Dwiyanto',
     email: 'david@example.com',
@@ -19,10 +23,27 @@ const user = {
   ]
   const userNavigation = [
     { name: 'Profil Anda', href: '#' },
+  ]
+
+  const logout = [
     { name: 'Logout', href: '/login' },
   ]
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {               
+    signOut(auth).then(() => {
+    // Sign-out successful.
+        navigate("/login");
+        console.log("Signed out successfully")
+    }).catch((error) => {
+    // An error happened.
+    console.log(error)
+    });
+}
+
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
     {({ open }) => (
@@ -92,6 +113,22 @@ const Navbar = () => {
                           {({ active }) => (
                             <a
                               href={item.href}
+                              className={classNames(
+                                active ? 'bg-gray-100' : '',
+                                'block px-4 py-2 text-sm text-gray-700'
+                              )}
+                            >
+                              {item.name}
+                            </a>
+                          )}
+                        </Menu.Item>
+                      ))}
+                      {logout.map((item) => (
+                        <Menu.Item key={item.name}>
+                          {({ active }) => (
+                            <a
+                              href='/login'
+                              onClick={handleLogout}
                               className={classNames(
                                 active ? 'bg-gray-100' : '',
                                 'block px-4 py-2 text-sm text-gray-700'
