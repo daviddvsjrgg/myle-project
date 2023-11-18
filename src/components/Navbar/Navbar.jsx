@@ -4,13 +4,18 @@ import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames';
 
-import {  signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import {auth} from '../../config/firebase/firebase';
 import { useNavigate } from 'react-router-dom';
 
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from "firebase/auth";
+
+
+
+
 const user = {
     name: 'David Dwiyanto',
-    email: 'david@example.com',
     imageUrl:
       'https://images.unsplash.com/photo-1526800544336-d04f0cbfd700?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80',
   }
@@ -30,6 +35,27 @@ const user = {
   ]
 
 const Navbar = () => {
+
+  const [ userEmail, setUserEmail ] = useState('');
+
+  useEffect(()=>{
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // User is signed in, see docs for a list of available properties
+          // https://firebase.google.com/docs/reference/js/firebase.User
+          const uid = user.email;
+          setUserEmail(uid)
+          // ...
+          console.log("uid", uid)
+        } else {
+          // User is signed out
+          // ...
+          console.log("user is logged out")
+        }
+      });
+     
+}, [])
+
   const navigate = useNavigate();
 
   const handleLogout = () => {               
@@ -183,7 +209,7 @@ const Navbar = () => {
               </div>
               <div className="ml-3">
                 <div className="text-base font-medium leading-none text-white">{user.name}</div>
-                <div className="text-sm font-medium leading-none text-gray-400">{user.email}</div>
+                <div className="text-sm font-medium leading-none text-gray-400">{userEmail}</div>
               </div>
               {/* <button
                 type="button"
