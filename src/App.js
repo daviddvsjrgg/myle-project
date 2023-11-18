@@ -17,6 +17,7 @@ import Personal from "./pages/authPages/NavbarMenu/Personal/Personal";
 import AddPersonal from "./pages/authPages/NavbarMenu/Personal/AddPersonal/AddPersonal";
 import AddUser from "./pages/authPages/NavbarMenu/ManajemenUser/AddUser/AddUser";
 import Dashboard from "./pages/authPages/NavbarMenu/Dashboard/Dashboard";
+import Url from "./url/Url";
 
 function App() {
   return (
@@ -47,6 +48,9 @@ function App() {
             {/* 404 Page */}
             <Route path="*" element={<NotFound404 />} />
             <Route path="/404" element={<NotFound404 />} />
+
+            {/* URL */}
+            <Route path="/url" element={<Url />} />
 
         </Routes>
       </BrowserRouter>

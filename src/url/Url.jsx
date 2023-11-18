@@ -44,6 +44,9 @@ const Url = () => {
             <li>
                 <a href='/404'>/404</a>
             </li>
+            <li>
+                <a href='/Url'>/Url</a>
+            </li>
         </ul>
     </div>
   )
