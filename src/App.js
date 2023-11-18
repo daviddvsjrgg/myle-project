@@ -6,7 +6,6 @@ import {
 
 import Login from './pages/Login';
 import Register from "./pages/Register";
-import Dashboard from "./pages/authPages/NavbarMenu/Dashboard/dashboard";
 import NotFound404 from "./url/NotFound404";
 import ManajemenProjek from "./pages/authPages/NavbarMenu/ManajemenProjek/ManajemenProjek";
 import ManajemenUser from "./pages/authPages/NavbarMenu/ManajemenUser/ManajemenUser";
@@ -17,6 +16,7 @@ import AddManajemenProjek from "./pages/authPages/NavbarMenu/ManajemenProjek/Add
 import Personal from "./pages/authPages/NavbarMenu/Personal/Personal";
 import AddPersonal from "./pages/authPages/NavbarMenu/Personal/AddPersonal/AddPersonal";
 import AddUser from "./pages/authPages/NavbarMenu/ManajemenUser/AddUser/AddUser";
+import Dashboard from "./pages/authPages/NavbarMenu/Dashboard/Dashboard";
 
 function App() {
   return (
