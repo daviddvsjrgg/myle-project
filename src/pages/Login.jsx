@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { auth } from '../config/firebase/firebase';
-import {  signInWithEmailAndPassword   } from 'firebase/auth';
+import { signInWithEmailAndPassword  } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom'
 
 
@@ -9,23 +9,61 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessageEmail, setErrorMessageEmail] = useState('');
+  const [errorMessagePassword, setErrorMessagePassword] = useState('');
+  const [errorMessageLogin, setErrorMessageLogin] = useState('');
      
-  const onLogin = (e) => {
-      e.preventDefault();
-      signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-          // Signed in
+  const onLogin = async (e) => {  
+    e.preventDefault();
+  
+    emailValidation();
+    passwordValidation();    
+    
+      if (email === '' || password === '') {
+        return;
+      } else {
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
-          navigate("/")
+          navigate("/");
           console.log(user);
-      })
-      .catch((error) => {
+          setErrorMessageEmail('');
+          setErrorMessagePassword('');
+        } catch (error) {
           const errorCode = error.code;
           const errorMessage = error.message;
-          console.log(errorCode, errorMessage)
-      });
-     
-  }
+          console.log(errorCode, errorMessage);
+          setErrorMessageLogin('Email atau password salah')
+          navigate("/login");
+        }
+      }
+    
+    };
+    
+    const handleEmailChange = (e) => {
+      setEmail(e.target.value);
+      setErrorMessageEmail('');
+      setErrorMessageLogin('')
+    };
+    
+    const emailValidation = () => {
+      if (email === '') {
+        setErrorMessageEmail('Email tidak boleh kosong');
+      }
+    };
+    
+    const handlePasswordChange = (e) => {
+      setPassword(e.target.value);
+      setErrorMessagePassword('');
+      setErrorMessageLogin('')
+    };
+    
+    const passwordValidation = () => {
+      if (password === '') {
+        setErrorMessagePassword('Password tidak boleh kosong');
+      }
+    };
+  
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -39,8 +77,19 @@ const Login = () => {
         Silahkan Login
       </h2>
     </div>
-
     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+      {errorMessageLogin && (
+        <div id="alert-2" className="flex items-center p-4 mb-4 text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+        <svg className="flex-shrink-0 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+        </svg>
+        <span className="sr-only">Info</span>
+        <div className="ms-3 text-sm font-medium">
+          {errorMessageLogin}
+        </div>
+      </div>
+      
+      )}
         <div>
           <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
             Email address
@@ -51,11 +100,19 @@ const Login = () => {
               id="email"
               name="email"
               type="email"
-              onChange={(e)=>setEmail(e.target.value)}
+              onChange={handleEmailChange}
               autoComplete="email"
               required
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inse placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                errorMessageEmail ? 'ring-red-600' : 'ring-gray-300'
+              }`}
             />
+            {errorMessageEmail && (
+              <div className="text-red-500 text-sm mt-1">
+                {errorMessageEmail}
+              </div>
+            )}
+
           </div>
         </div>
 
@@ -75,11 +132,19 @@ const Login = () => {
               id="password"
               name="password"
               type="password"
-              onChange={(e)=>setPassword(e.target.value)}
+              onChange={handlePasswordChange}
+              onBlur={passwordValidation}
               autoComplete="current-password"
               required
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                errorMessagePassword ? 'ring-red-600' : 'ring-gray-300'
+              }`}
             />
+            {errorMessagePassword && (
+              <div className="text-red-500 text-sm mt-1">
+                {errorMessagePassword}
+              </div>
+            )}
           </div>
         </div>
 

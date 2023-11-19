@@ -31,7 +31,7 @@ const user = {
   ]
 
   const profil = [
-    { name: 'Profil Anda', href: '#' },
+    { name: 'Profil Anda', href: '/none' },
   ]
 
 const Navbar = () => {
@@ -43,14 +43,12 @@ const Navbar = () => {
         if (user) {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/firebase.User
-          const uid = user.email;
-          setUserEmail(uid)
+          const email = user.email;
+          setUserEmail(email)
           // ...
-          console.log("uid", uid)
         } else {
           // User is signed out
           // ...
-          console.log("user is logged out")
         }
       });
      
@@ -65,7 +63,7 @@ const Navbar = () => {
         console.log("Signed out successfully")
     }).catch((error) => {
     // An error happened.
-    console.log(error)
+        console.log(error)
     });
 }
 
@@ -138,7 +136,7 @@ const Navbar = () => {
                         <Menu.Item key={item.name}>
                           {({ active }) => (
                             <a
-                              href='#'
+                              href={item.href}
                               className={classNames(
                                 active ? 'bg-gray-100' : '',
                                 'block px-4 py-2 text-sm text-gray-700'
@@ -153,7 +151,7 @@ const Navbar = () => {
                         <Menu.Item key={item.name}>
                           {({ active }) => (
                             <a
-                              href='/login'
+                              href={item.href}
                               onClick={handleLogout}
                               className={classNames(
                                 active ? 'bg-gray-100' : '',
@@ -222,11 +220,22 @@ const Navbar = () => {
               </button> */}
             </div>
             <div className="mt-3 space-y-1 px-2">
+              {profil.map((item) => (
+                <Disclosure.Button
+                  key={item.name}
+                  as="a"
+                  href={item.href}
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                >
+                  {item.name}
+                </Disclosure.Button>
+              ))}
               {userNavigation.map((item) => (
                 <Disclosure.Button
                   key={item.name}
                   as="a"
                   href={item.href}
+                  onClick={handleLogout}
                   className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                 >
                   {item.name}
