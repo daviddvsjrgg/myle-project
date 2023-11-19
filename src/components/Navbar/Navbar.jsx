@@ -11,9 +11,6 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
 
-
-
-
 const user = {
     name: 'David Dwiyanto',
     imageUrl:
@@ -39,7 +36,7 @@ const Navbar = () => {
   const [ userEmail, setUserEmail ] = useState('');
 
   useEffect(()=>{
-    onAuthStateChanged(auth, (user) => {
+     const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/firebase.User
@@ -47,11 +44,12 @@ const Navbar = () => {
           setUserEmail(email)
           // ...
         } else {
-          // User is signed out
-          // ...
+          setUserEmail('');
         }
       });
-     
+      return () => {
+        unsubscribe();
+      }
 }, [])
 
   const navigate = useNavigate();
