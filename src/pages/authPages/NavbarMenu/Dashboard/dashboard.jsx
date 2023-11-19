@@ -10,20 +10,20 @@ const Dashboard = () => {
   const [ userEmail, setUserEmail ] = useState('');
 
   useEffect(()=>{
-    onAuthStateChanged(auth, (user) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/firebase.User
-          const uid = user.uid;
-          setUserEmail(uid)
+          const email = user.email;
+          setUserEmail(email)
           // ...
         } else {
-          // User is signed out
-          // ...
-          console.log("user is logged out")
+          setUserEmail('');
         }
       });
-     
+      return () => {
+        unsubscribe();
+      }
 }, [])
 
   return (

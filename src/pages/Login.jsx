@@ -162,6 +162,11 @@ const Login = () => {
           Register
         </a>
       </p>
+            <div className="akun mt-10">
+                <p>email: ilham@gmail.com</p>
+                <p>password: 12345678</p>
+                <p>role: admin</p>
+              </div>
     </div>
   </div>
   )
