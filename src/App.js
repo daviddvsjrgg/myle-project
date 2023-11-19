@@ -1,57 +1,64 @@
-import {
-   BrowserRouter,
-   Routes,
-   Route, 
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "./config/firebase/firebase"; // Adjust the path based on your project structure
 
 import Login from './pages/Login';
 import Register from "./pages/Register";
 import NotFound404 from "./url/NotFound404";
 import ManajemenProjek from "./pages/authPages/NavbarMenu/ManajemenProjek/ManajemenProjek";
-import ManajemenUser from "./pages/authPages/NavbarMenu/ManajemenUser/ManajemenUser";
-import Projek from "./pages/authPages/NavbarMenu/Projek/Projek";
-import Laporan from "./pages/authPages/NavbarMenu/Laporan/Laporan";
-import Kalkulasi from "./pages/authPages/NavbarMenu/Kalkulasi/Kalkulasi";
 import AddManajemenProjek from "./pages/authPages/NavbarMenu/ManajemenProjek/AddManajemenProjek/AddManajemenProjek";
+import ManajemenUser from "./pages/authPages/NavbarMenu/ManajemenUser/ManajemenUser";
+import AddUser from "./pages/authPages/NavbarMenu/ManajemenUser/AddUser/AddUser";
+import Projek from "./pages/authPages/NavbarMenu/Projek/Projek";
 import Personal from "./pages/authPages/NavbarMenu/Personal/Personal";
 import AddPersonal from "./pages/authPages/NavbarMenu/Personal/AddPersonal/AddPersonal";
-import AddUser from "./pages/authPages/NavbarMenu/ManajemenUser/AddUser/AddUser";
+import Laporan from "./pages/authPages/NavbarMenu/Laporan/Laporan";
+import Kalkulasi from "./pages/authPages/NavbarMenu/Kalkulasi/Kalkulasi";
 import Dashboard from "./pages/authPages/NavbarMenu/Dashboard/Dashboard";
 import Url from "./url/Url";
 
 function App() {
+  const [user] = useAuthState(auth);
+
+
+  const ProtectedRoute = ({ element, path }) => {
+    if (!user && path !== '/login') {
+      // If the user is not authenticated and not on the login page, redirect to the login page
+      return <Navigate replace to="/login" state={{ from: path }} />;
+    }
+  
+    // If the user is authenticated and trying to access the login page, redirect to the dashboard
+    if (user && path === '/login') {
+      return <Navigate replace to="/" />;
+    }
+  
+    return element;
+  };
+
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-            {/* Manajemen Projek */}
-            <Route path="/manajemen-projek" element={<ManajemenProjek />} />
-            <Route path="/manajemen-projek/projek-baru" element={<AddManajemenProjek />} />
+          {/* Protected Routes */}
+          <Route path="/" element={<ProtectedRoute element={<Dashboard />} path="/" />} />
+          <Route path="/manajemen-projek" element={<ProtectedRoute element={<ManajemenProjek />} path="/manajemen-projek" />} />
+          <Route path="/manajemen-projek/projek-baru" element={<ProtectedRoute element={<AddManajemenProjek />} path="/manajemen-projek/projek-baru" />} />
+          <Route path="/manajemen-user" element={<ProtectedRoute element={<ManajemenUser />} path="/manajemen-user" />} />
+          <Route path="/manajemen-user/user-baru" element={<ProtectedRoute element={<AddUser />} path="/manajemen-user/user-baru" />} />
+          <Route path="/projek" element={<ProtectedRoute element={<Projek />} path="/projek" />} />
+          <Route path="/personal" element={<ProtectedRoute element={<Personal />} path="/personal" />} />
+          <Route path="/personal/projek-baru" element={<ProtectedRoute element={<AddPersonal />} path="/personal/projek-baru" />} />
+          <Route path="/laporan" element={<ProtectedRoute element={<Laporan />} path="/laporan" />} />
+          <Route path="/kalkulasi" element={<ProtectedRoute element={<Kalkulasi />} path="/kalkulasi" />} />
 
-            {/* Manajemen User */}
-            <Route path="/manajemen-user" element={<ManajemenUser />} />
-            <Route path="/manajemen-user/user-baru" element={<AddUser />} />
-
-            <Route path="/projek" element={<Projek />} />
-
-            {/* Projek Personal */}
-            <Route path="/personal" element={<Personal />} />
-            <Route path="/personal/projek-baru" element={<AddPersonal />} />
-
-            <Route path="/laporan" element={<Laporan />} />
-            <Route path="/kalkulasi" element={<Kalkulasi />} />
-
-            {/* 404 Page */}
-            <Route path="*" element={<NotFound404 />} />
-            <Route path="/404" element={<NotFound404 />} />
-
-            {/* URL */}
-            <Route path="/url" element={<Url />} />
-
+          {/* Public Routes */}
+          <Route path="/404" element={<NotFound404 />} />
+          <Route path="*" element={<NotFound404 />} />
+          <Route path="/url" element={<Url />} />
+          
         </Routes>
       </BrowserRouter>
     </div>
