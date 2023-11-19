@@ -22,11 +22,17 @@ function App() {
 
 
   const ProtectedRoute = ({ element, path }) => {
-    return user ? (
-      element
-    ) : (
-      <Navigate replace to="/login" state={{ from: path }} />
-    );
+    if (!user && path !== '/login') {
+      // If the user is not authenticated and not on the login page, redirect to the login page
+      return <Navigate replace to="/login" state={{ from: path }} />;
+    }
+  
+    // If the user is authenticated and trying to access the login page, redirect to the dashboard
+    if (user && path === '/login') {
+      return <Navigate replace to="/" />;
+    }
+  
+    return element;
   };
 
   return (
@@ -52,6 +58,7 @@ function App() {
           <Route path="/404" element={<NotFound404 />} />
           <Route path="*" element={<NotFound404 />} />
           <Route path="/url" element={<Url />} />
+          
         </Routes>
       </BrowserRouter>
     </div>
