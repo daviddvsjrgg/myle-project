@@ -16,25 +16,22 @@ import Laporan from "./pages/authPages/NavbarMenu/Laporan/Laporan";
 import Kalkulasi from "./pages/authPages/NavbarMenu/Kalkulasi/Kalkulasi";
 import Dashboard from "./pages/authPages/NavbarMenu/Dashboard/Dashboard";
 import Url from "./url/Url";
+import LoadingNavbar from "./components/Loading/LoadingNavbar/LoadingNavbar";
 
 function LoadingSpinner() {
   return (
-        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 bg-white dark:bg-gray-800">
-          <div className="relative max-w-sm p-6 border border-gray-100 rounded-lg shadow-md dark:border-gray-800 dark:hover:bg-gray-700">
-            <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center h-screen bg-white dark:bg-gray-800">
-              {/* Loading Animation*/}
-              {/* <div class="flex justify-center items-center h-screen">
-                <div class="rounded-full h-20 w-20 bg-indigo-600 animate-ping"></div>
-              </div> */}
-              <div class="flex justify-center items-center h-screen">
-                <div class="animate-spin">
-                <img src="https://images.unsplash.com/photo-1582845512747-e42001c95638?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"></img>
-                </div>
-              </div>
-              {/* Loading Animation*/}
-            </div>
+      <div className="">
+        <LoadingNavbar />
+        <div className="relative">
+          <div
+            class="absolute inset-x-1/2 top-72 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status">
+            <span
+              class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
+              >Loading...</span>
           </div>
         </div>
+      </div>
   
   );
 }
@@ -42,11 +39,11 @@ function LoadingSpinner() {
 function App() {
   const [user, loading] = useAuthState(auth);
 
-  if (loading) {
-    return <LoadingSpinner />
-  }
-
+  
   const ProtectedRoute = ({ element, path }) => {
+    if (loading) {
+      return <LoadingSpinner />
+    }
     return user ? (
       element
     ) : (
