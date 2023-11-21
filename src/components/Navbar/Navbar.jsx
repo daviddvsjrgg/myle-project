@@ -5,17 +5,13 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames';
 
 import { signOut } from "firebase/auth";
-import {auth} from '../../config/firebase/firebase';
+import { auth } from '../../config/firebase/firebase';
 import { useNavigate } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
+import { useAuthState } from 'react-firebase-hooks/auth';
 
-const user = {
-    name: 'David Dwiyanto',
-    imageUrl:
-      'https://images.unsplash.com/photo-1526800544336-d04f0cbfd700?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80',
-  }
   const navigation = [
     { name: 'Dashboard', href: '/', current: false },
     { name: 'Manajemen Projek', href: '/manajemen-projek', current: false },
@@ -33,18 +29,25 @@ const user = {
 
 const Navbar = () => {
 
-  const [ userEmail, setUserEmail ] = useState('');
+  const [ user ] = useAuthState(auth);
+  const [ username, setUsername ] = useState('');
+  const [ email, setEmail ] = useState('');
+  const [ photo, setPhoto ] = useState('');
 
   useEffect(()=>{
-     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/firebase.User
+          const username = user.displayName;
           const email = user.email;
-          setUserEmail(email)
+          const photo = user.photoURL;
+          setUsername(username)
+          setEmail(email)
+          setPhoto(photo)
           // ...
         } else {
-          setUserEmail('');
+          setUsername('');
         }
       });
       return () => {
@@ -117,7 +120,7 @@ const Navbar = () => {
                     <Menu.Button className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                       <span className="absolute -inset-1.5" />
                       <span className="sr-only">Open user menu</span>
-                      <img className="h-8 w-8 rounded-full" src={user.imageUrl} alt="" />
+                      <img className="h-8 w-8 rounded-full" src={photo == '' || photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="" />
                     </Menu.Button>
                   </div>
                   <Transition
@@ -202,11 +205,12 @@ const Navbar = () => {
           <div className="border-t border-gray-700 pb-3 pt-4">
             <div className="flex items-center px-5">
               <div className="flex-shrink-0">
-                <img className="h-10 w-10 rounded-full" src={user.imageUrl} alt="" />
+                <img className="h-10 w-10 rounded-full" src={photo == '' || photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="profile-pic" />
               </div>
+              
               <div className="ml-3">
-                <div className="text-base font-medium leading-none text-white">{user.name}</div>
-                <div className="text-sm font-medium leading-none text-gray-400">{userEmail}</div>
+                <div className="text-base font-medium leading-none text-white">{username == '' || username ? username : "users"}</div>
+                <div className="text-sm font-medium leading-none text-gray-400 mt-1">{email}</div>
               </div>
               {/* <button
                 type="button"
