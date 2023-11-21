@@ -1,7 +1,11 @@
 import React, { useState } from 'react'
-import { auth } from '../config/firebase/firebase';
 import { signInWithEmailAndPassword  } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom'
+
+// Login
+import { auth } from '../config/firebase/firebase';
+import { signInWithGoogle } from '../Services/handleGoogleLogin/GoogleLogin';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 
 const Login = () => {
@@ -12,7 +16,16 @@ const Login = () => {
   const [errorMessageEmail, setErrorMessageEmail] = useState('');
   const [errorMessagePassword, setErrorMessagePassword] = useState('');
   const [errorMessageLogin, setErrorMessageLogin] = useState('');
-     
+  
+  const [ user ] = useAuthState(auth);
+  const toDashboard = () => {
+    if (user) {
+      navigate('/');
+    } else {
+      navigate('/login')
+    }
+  }
+
   const onLogin = async (e) => {  
     e.preventDefault();
   
@@ -151,22 +164,34 @@ const Login = () => {
           <button
             type="submit"
             onClick={onLogin}
-            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 mt-7 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
+            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 mt-7 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             Login
           </button>
         </div>
-      <p className="mt-10 text-center text-sm text-gray-500">
-        Belum punya akun?{' '}
-        <a href="/register" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-          Register
-        </a>
-      </p>
+
+        <div className='mt-4 relative'>
+          <button
+          onClick={signInWithGoogle} 
+          className="absolute top-0 right-0 px-5 py-1 border flex gap-2 border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150">
+              <img className="w-6 h-6" src="https://www.svgrepo.com/show/475656/google-color.svg" loading="lazy" alt="google logo" />
+              <span className=''>Login with Google</span>
+          </button>
+        </div>
+         <div className='mt-20'> 
+          <p className="text-center text-sm text-gray-500">
+            Belum punya akun?{' '}
+            <a href="/register" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+              Register
+            </a>
+          </p>
+        </div>
             <div className="akun mt-10">
                 <p>email: ilham@gmail.com</p>
                 <p>password: 12345678</p>
                 <p>role: admin</p>
               </div>
+
+
     </div>
   </div>
   )
