@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
-import { useAuthState } from 'react-firebase-hooks/auth';
 
   const navigation = [
     { name: 'Dashboard', href: '/', current: false },
@@ -24,12 +23,10 @@ import { useAuthState } from 'react-firebase-hooks/auth';
   ]
 
   const profil = [
-    { name: 'Profil Anda', href: '/none' },
+    { name: 'Profil Anda', href: '/myProfile' },
   ]
 
 const Navbar = () => {
-
-  const [ user ] = useAuthState(auth);
   const [ username, setUsername ] = useState('');
   const [ email, setEmail ] = useState('');
   const [ photo, setPhoto ] = useState('');
@@ -61,7 +58,6 @@ const Navbar = () => {
     signOut(auth).then(() => {
     // Sign-out successful.
         navigate("/login");
-        console.log("Signed out successfully")
     }).catch((error) => {
     // An error happened.
         console.log(error)
@@ -120,7 +116,7 @@ const Navbar = () => {
                     <Menu.Button className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                       <span className="absolute -inset-1.5" />
                       <span className="sr-only">Open user menu</span>
-                      <img className="h-8 w-8 rounded-full" src={photo == '' || photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="" />
+                      <img className="h-8 w-8 rounded-full" src={photo === '' || photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="" />
                     </Menu.Button>
                   </div>
                   <Transition
@@ -205,11 +201,11 @@ const Navbar = () => {
           <div className="border-t border-gray-700 pb-3 pt-4">
             <div className="flex items-center px-5">
               <div className="flex-shrink-0">
-                <img className="h-10 w-10 rounded-full" src={photo == '' || photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="profile-pic" />
+                <img className="h-10 w-10 rounded-full" src={photo === '' || photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="profile-pic" />
               </div>
               
               <div className="ml-3">
-                <div className="text-base font-medium leading-none text-white">{username == '' || username ? username : "users"}</div>
+                <div className="text-base font-medium leading-none text-white">{username === '' || username ? username : "users"}</div>
                 <div className="text-sm font-medium leading-none text-gray-400 mt-1">{email}</div>
               </div>
               {/* <button

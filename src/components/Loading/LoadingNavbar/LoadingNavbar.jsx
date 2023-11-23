@@ -1,15 +1,8 @@
 import React from 'react'
-import { Fragment } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Disclosure, Menu } from '@headlessui/react'
+import { Bars3Icon } from '@heroicons/react/24/outline'
 import classNames from 'classnames';
 
-
-const user = {
-    name: 'David Dwiyanto',
-    imageUrl:
-      'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp',
-  }
   const navigation = [
     { name: 'Dashboard', href: '/', current: false },
     { name: 'Manajemen Projek', href: '/manajemen-projek', current: false },
@@ -17,14 +10,7 @@ const user = {
     { name: 'Projek', href: '/projek', current: false },
     { name: 'Laporan', href: '/laporan', current: false },
   ]
-  const userNavigation = [
-    { name: 'Logout', href: '/login' },
-  ]
-
-  const profil = [
-    { name: 'Profil Anda', href: '/none' },
-  ]
-
+  
 const LoadingNavbar = () => {
   return (
     <Disclosure as="nav" className="bg-gray-800">
@@ -77,7 +63,7 @@ const LoadingNavbar = () => {
                     <Menu.Button className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                       <span className="absolute -inset-1.5" />
                       <span className="sr-only">Open user menu</span>
-                      <img className="h-8 w-8 rounded-full animate-pulse" src={user.imageUrl} alt="" />
+                      <img className="h-8 w-8 rounded-full animate-pulse" src="https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp" alt="" />
                     </Menu.Button>
                   </div>
                   

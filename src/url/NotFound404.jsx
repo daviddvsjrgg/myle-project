@@ -1,12 +1,37 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar/Navbar'
 import Bottom from '../components/BottomBar/Bottom'
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../config/firebase/firebase';
+
 
 
 const NotFound404 = () => {
+
+  const [ email, setEmail ] = useState('');
+
+  useEffect(()=>{
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        const email = user.displayName;
+        setEmail(email)
+        // ...
+      } else {
+        setEmail('');
+      }
+    });
+    return () => {
+      unsubscribe();
+    }
+}, [])
+
+  const numberWa = '628990256825';
+  const text = "Hai David, sepertinya halaman ini bermasalah (url)"
   return (
     <div>
-      <Navbar />
+      {email ?  <Navbar /> : ''}
          <main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
          <div className="text-center">
           <p className="text-6xl font-semibold text-indigo-600">404</p>
@@ -19,8 +44,8 @@ const NotFound404 = () => {
             >
               Kembali ke Dashboard
             </a>
-            <a href="/" className="text-sm font-semibold text-gray-900">
-              Hubungi Developer {'(To Dashboard)'} <span aria-hidden="true">&rarr;</span>
+            <a href={`https://wa.me/${numberWa}?text=${text}`} className="text-sm font-semibold text-gray-900">
+              Hubungi Developer {'(To WhatsApp)'} <span aria-hidden="true">&rarr;</span>
             </a>
           </div>
         </div>
