@@ -5,8 +5,6 @@ import { useNavigate } from 'react-router-dom'
 // Login
 import { auth } from '../config/firebase/firebase';
 import { signInWithGoogle } from '../Services/handleGoogleLogin/GoogleLogin';
-import { useAuthState } from 'react-firebase-hooks/auth';
-
 
 const Login = () => {
 
@@ -17,15 +15,6 @@ const Login = () => {
   const [errorMessagePassword, setErrorMessagePassword] = useState('');
   const [errorMessageLogin, setErrorMessageLogin] = useState('');
   
-  const [ user ] = useAuthState(auth);
-  const toDashboard = () => {
-    if (user) {
-      navigate('/');
-    } else {
-      navigate('/login')
-    }
-  }
-
   const onLogin = async (e) => {  
     e.preventDefault();
   
@@ -169,12 +158,18 @@ const Login = () => {
           </button>
         </div>
 
-        <div className='mt-4 relative'>
+        <div className="flex items-center justify-center mt-2 mb-2">
+          <div className="border-b border-slate-200 dark:border-slate-800 w-2/3"></div>
+          <span className="mx-4 text-slate-500 dark:text-slate-500">or</span>
+          <div className="border-b border-slate-200 dark:border-slate-800 w-2/3"></div>
+        </div>
+        
+        <div className='relative'>
           <button
           onClick={signInWithGoogle} 
-          className="absolute top-0 right-0 px-5 py-1 border flex gap-2 border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150">
+          className="absolute w-full bg-center top-0 right-0 px-5 py-1 border flex items-center justify-center gap-2 border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150">
               <img className="w-6 h-6" src="https://www.svgrepo.com/show/475656/google-color.svg" loading="lazy" alt="google logo" />
-              <span className=''>Login with Google</span>
+              <span className=''>Login dengan Google</span>
           </button>
         </div>
          <div className='mt-20'> 
@@ -185,13 +180,6 @@ const Login = () => {
             </a>
           </p>
         </div>
-            <div className="akun mt-10">
-                <p>email: ilham@gmail.com</p>
-                <p>password: 12345678</p>
-                <p>role: admin</p>
-              </div>
-
-
     </div>
   </div>
   )
