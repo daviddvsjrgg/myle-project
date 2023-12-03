@@ -6,30 +6,98 @@ import { auth } from '../config/firebase/firebase';
 const Register = () => {
   const navigate = useNavigate();
 
+  const [ username, setUsername ] = useState('');
   const [ email, setEmail ] = useState('');
   const [ password, setPassword ] = useState('');
+  const [ samePassword, setSamePassword ] = useState('');
+
+  const [ errorMessageUsername, setErrorMessageUsername ] = useState('');
+  const [ errorMessageEmail, setErrorMessageEmail ] = useState('');
+  const [ errorMessagePassword, setErrorMessagePassword ] = useState('');
+  const [ errorMessageSamePassword, setErrorMessageSamePassword ] = useState('');
+  
+  const [ errorMessageRegister, setErrorMessageRegister] = useState('');
 
   const onSubmit = async (e) => {
     e.preventDefault()
-   
-    await createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-          // Signed in
-          const user = userCredential.user;
-          console.log(user);
-          navigate("/login")
-          // ...
-      })
-      .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.log(errorCode, errorMessage);
-          // ..
-      });
 
- 
-  }
+    usernameValidation();
+    emailValidation();
+    passwordValidation();
+    samePasswordValidation();
 
+    if (username === '' || email === '' || password === '' || samePassword === '' || (samePassword != password) ) {
+      return null;
+    } else {
+        try {
+          await createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                // Signed in
+                const user = userCredential.user;
+                console.log(user);
+                navigate("/")
+                // ...  
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorCode, errorMessage);
+                // ..
+                setErrorMessageRegister("Sesuatu telah terjadi, pastikan email anda unik dan sesuai format!")
+            });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+
+    const handleUsernameChange = (e) => {
+      setUsername(e.target.value);
+      setErrorMessageUsername("");
+    }
+
+    const usernameValidation = () => {
+      if ( username === '' ) {
+        setErrorMessageUsername("Username tidak boleh kosong")
+      }
+    }
+
+    const handleEmailChange = (e) => {
+      setEmail(e.target.value);
+      setErrorMessageEmail("");
+    }
+
+    const emailValidation = () => {
+      if ( email === '' ) {
+        setErrorMessageEmail("Email tidak boleh kosong")
+      }
+    }
+
+    const handlePasswordChange = (e) => {
+      setPassword(e.target.value);
+      if (password.length == 7) {
+        setErrorMessagePassword("");
+      }
+    }
+
+    const passwordValidation = () => {
+      if ( password.length < 8 ) {
+        setErrorMessagePassword("Password minimal 8 karakter")
+      }
+    }
+
+    const handleSamePassword = (e) => {
+      setSamePassword(e.target.value);
+    }
+
+    const samePasswordValidation = () => {
+      if ( samePassword != password ) {
+        setErrorMessageSamePassword("Password tidak sama dengan input sebelumnya")
+      } else if ( samePassword == password ) {
+        setErrorMessageSamePassword("")
+      }
+    }
+    
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -42,8 +110,19 @@ const Register = () => {
         Silahkan Register
       </h2>
     </div>
-
     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+      {errorMessageRegister && (
+        <div class="flex items-center p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300" role="alert">
+          <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+          </svg>
+          <span class="sr-only">Info</span>
+          <div>
+            {errorMessageRegister}
+          </div>
+      </div>
+      )}
+    
         <div>
           <label htmlFor="nama" className="block text-sm font-medium leading-6 text-gray-900">
             Username
@@ -54,9 +133,17 @@ const Register = () => {
               id="nama"
               name="nama"
               type="text"
+              onChange={handleUsernameChange}
               autoComplete="nama"
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                errorMessageUsername ? 'ring-red-600' : 'ring-gray-300'
+              }`}
             />
+            {errorMessageUsername && (
+              <div className="text-red-500 text-sm mt-1">
+                {errorMessageUsername}
+              </div>
+            )}
           </div>
         </div>
 
@@ -70,12 +157,18 @@ const Register = () => {
               id="email"
               name="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               autoComplete="email"
               required
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                errorMessageEmail ? 'ring-red-600' : 'ring-gray-300'
+              }`}
             />
+             {errorMessageEmail && (
+              <div className="text-red-500 text-sm mt-1">
+                {errorMessageEmail}
+              </div>
+            )}
           </div>
         </div>
 
@@ -90,12 +183,18 @@ const Register = () => {
               id="password"
               name="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               autoComplete="current-password"
               required
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                errorMessagePassword ? 'ring-red-600' : 'ring-gray-300'
+              }`}
               />
+               {errorMessagePassword && (
+                <div className="text-red-500 text-sm mt-1">
+                  {errorMessagePassword}
+                </div>
+              )}
           </div>
         </div>
 
@@ -110,9 +209,17 @@ const Register = () => {
               id="passwordTest"
               name="passwordTest"
               type="password"
+              onChange={handleSamePassword}
               autoComplete="current-password"
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                errorMessageSamePassword ? 'ring-red-600' : 'ring-gray-300'
+              }`}
             />
+             {errorMessageSamePassword && (
+                <div className="text-red-500 text-sm mt-1">
+                  {errorMessageSamePassword}
+                </div>
+              )}
           </div>
         </div>
 

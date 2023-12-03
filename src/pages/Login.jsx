@@ -22,7 +22,7 @@ const Login = () => {
     passwordValidation();    
     
       if (email === '' || password === '') {
-        return;
+        return null;
       } else {
         try {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
