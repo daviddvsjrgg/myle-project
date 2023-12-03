@@ -40,7 +40,6 @@ function LoadingSpinner() {
 
 function App() {
   const [user, loading] = useAuthState(auth);
-
   
   const ProtectedRoute = ({ element, path }) => {
     if (loading) {
