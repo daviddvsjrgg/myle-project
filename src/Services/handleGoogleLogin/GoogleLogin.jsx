@@ -1,16 +1,10 @@
-import { Navigate } from "react-router-dom";
-import { auth } from '../../config/firebase/firebase';
 import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
+import { auth } from "../../config/firebase/firebase";
 
 const provider = new GoogleAuthProvider()
 
-export const signInWithGoogle = () => {
+export const signInWithGoogle = async () => {
     
-    signInWithRedirect(auth, provider).then((result) => {
-    if(auth) {
-        return <Navigate replace to="/" />;
-    }
-  }).catch((error) => {
-    console.log(error);
-  })
+    signInWithRedirect(auth, provider);
+  
 };
