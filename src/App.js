@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "./config/firebase/firebase"; // Adjust the path based on your project structure
+import { auth, db } from "./config/firebase/firebase"; // Adjust the path based on your project structure
 
 import Login from './pages/Login';
 import Register from "./pages/Register";
@@ -17,6 +17,9 @@ import Kalkulasi from "./pages/authPages/NavbarMenu/Kalkulasi/Kalkulasi";
 import Dashboard from "./pages/authPages/NavbarMenu/Dashboard/Dashboard";
 import Url from "./url/Url";
 import LoadingNavbar from "./components/Loading/LoadingNavbar/LoadingNavbar";
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect } from "react";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 
 function LoadingSpinner() {
   return (
@@ -54,6 +57,45 @@ function App() {
   };
 
   const ProtectedRouteLogin = ({ element, path }) => {
+
+    useEffect(()=>{
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user && loading) {
+              // User is signed in, see docs for a list of available properties
+              // https://firebase.google.com/docs/reference/js/firebase.User
+              // Assuming db is your Firestore instance
+              const usersCollection = collection(db, "users");
+
+              // Check if a document with the same idUsers already exists
+              const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+
+              if (querySnapshot.size === 0) {
+                // No existing document found, add a new one
+                try {
+                  const docRef = await addDoc(usersCollection, {
+                    idUser: user.uid, 
+                    emailUser: user.email,
+                    roleUser: "user"
+                  });
+                  console.log("Document written with ID: ", docRef.id);
+                } catch (e) {
+                  console.error("Error adding document: ", e);
+                }
+              } else {
+                // Document with the same idUsers already exists, handle accordingly
+                console.log("Document with the same idUsers already exists");
+                // You may choose to update the existing document here
+              }
+              // ...
+            } else {
+              return null;
+            }
+          });
+          return () => {
+            unsubscribe();
+          }
+    }, [])
+
     if (loading) {
       return  <div className="">
                 <div className="relative">
