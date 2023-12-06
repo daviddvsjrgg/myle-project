@@ -73,6 +73,7 @@ function App() {
                 // No existing document found, add a new one
                 try {
                   const docRef = await addDoc(usersCollection, {
+                    username: user.displayName,
                     idUser: user.uid, 
                     emailUser: user.email,
                     roleUser: "user"

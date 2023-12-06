@@ -3,17 +3,18 @@ import { signInWithEmailAndPassword  } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom'
 
 // Login
-import { auth, db } from '../config/firebase/firebase';
+import { auth } from '../config/firebase/firebase';
 import { signInWithGoogle } from '../Services/handleGoogleLogin/GoogleLogin';
-import { collection, addDoc, query, where, getDocs } from "firebase/firestore"; 
 
 const Login = () => {
 
   const navigate = useNavigate();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessageEmail, setErrorMessageEmail] = useState('');
   const [errorMessagePassword, setErrorMessagePassword] = useState('');
+
   const [errorMessageLogin, setErrorMessageLogin] = useState('');
   
   const onLogin = async (e) => {  
@@ -26,32 +27,8 @@ const Login = () => {
         return null;
       } else {
         try {
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
+          await signInWithEmailAndPassword(auth, email, password);
           navigate("/");
-          // Assuming db is your Firestore instance
-          const usersCollection = collection(db, "users");
-
-          // Check if a document with the same idUsers already exists
-          const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
-
-          if (querySnapshot.size === 0) {
-            // No existing document found, add a new one
-            try {
-              const docRef = await addDoc(usersCollection, {
-                idUser: user.uid, 
-                emailUser: user.email,
-                roleUser: "admin"
-              });
-              console.log("Document written with ID: ", docRef.id);
-            } catch (e) {
-              console.error("Error adding document: ", e);
-            }
-          } else {
-            // Document with the same idUsers already exists, handle accordingly
-            console.log("Document with the same idUsers already exists");
-            // You may choose to update the existing document here
-          }
 
           setErrorMessageEmail('');
           setErrorMessagePassword('');
