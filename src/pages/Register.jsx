@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase/firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../config/firebase/firebase';
+import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -17,7 +18,8 @@ const Register = () => {
   const [ errorMessageSamePassword, setErrorMessageSamePassword ] = useState('');
   
   const [ errorMessageRegister, setErrorMessageRegister] = useState('');
-
+  
+  const regexEmail = /^\S+@\S+\.\S+$/;
   const onSubmit = async (e) => {
     e.preventDefault()
 
@@ -26,28 +28,49 @@ const Register = () => {
     passwordValidation();
     samePasswordValidation();
 
-    if (username === '' || email === '' || password === '' || samePassword === '' || (samePassword !== password) ) {
+
+    if (username === '' || email === '' || password === '' || samePassword === '' || (samePassword !== password || errorMessagePassword === "Password minimal 8 karakter") || !email.match(
+      regexEmail) ) {
       return null;
     } else {
-        try {
-          await createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                // Signed in
-                const user = userCredential.user;
-                console.log(user);
-                navigate("/")
-                // ...  
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.log(errorCode, errorMessage);
-                // ..
-                setErrorMessageRegister("Sesuatu telah terjadi, pastikan email anda unik dan sesuai format!");
-            });
-        } catch (error) {
-          console.log(error);
-        }
+          try {
+            await createUserWithEmailAndPassword(auth, email, password)
+            navigate('/');
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+              const user = userCredential.user;
+              // Assuming db is your Firestore instance
+              const usersCollection = collection(db, "users");
+    
+              // Check if a document with the same idUsers already exists
+              const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+    
+              if (querySnapshot.size === 0) {
+                // No existing document found, add a new one
+                try {
+                  const docRef = await addDoc(usersCollection, {
+                    username: username,
+                    idUser: user.uid, 
+                    emailUser: user.email,
+                    roleUser: "admin"
+                  });
+                  console.log("Document written with ID: ", docRef.id);
+                } catch (e) {
+                  console.error("Error adding document: ", e);
+                }
+              } else {
+                // Document with the same idUsers already exists, handle accordingly
+                console.log("Document with the same idUsers already exists");
+                // You may choose to update the existing document here
+              }
+    
+              setErrorMessageEmail('');
+              setErrorMessagePassword('');
+            } catch (error) {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              console.log(errorCode, errorMessage);
+              setErrorMessageRegister("Sesuatu telah terjadi, pastikan email kamu unik")
+            }
       }
     }
 
@@ -70,18 +93,28 @@ const Register = () => {
     const emailValidation = () => {
       if ( email === '' ) {
         setErrorMessageEmail("Email tidak boleh kosong")
+      } else if ( email.length > 0) {
+        if ( !email.match(regexEmail) ) {
+          setErrorMessageEmail("Format email kamu salah")
+        } else {
+          setErrorMessageEmail("")
+        }
       }
     }
 
     const handlePasswordChange = (e) => {
       setPassword(e.target.value);
-      if (password.length === 7) {
+      if (password.length >= 7) {
         setErrorMessagePassword("");
+      } else  if ( password.length <= 7 ) {
+        setErrorMessagePassword("Password minimal 8 karakter")
       }
     }
 
     const passwordValidation = () => {
-      if ( password.length < 8 ) {
+     if ( password.length >= 8) {
+        setErrorMessagePassword("")
+      } else  if ( password.length <= 7 ) {
         setErrorMessagePassword("Password minimal 8 karakter")
       }
     }
