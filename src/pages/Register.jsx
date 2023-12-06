@@ -20,6 +20,7 @@ const Register = () => {
   const [ errorMessageRegister, setErrorMessageRegister] = useState('');
   
   const regexEmail = /^\S+@\S+\.\S+$/;
+
   const onSubmit = async (e) => {
     e.preventDefault()
 
@@ -28,15 +29,20 @@ const Register = () => {
     passwordValidation();
     samePasswordValidation();
 
-
-    if (username === '' || email === '' || password === '' || samePassword === '' || (samePassword !== password || errorMessagePassword === "Password minimal 8 karakter") || !email.match(
-      regexEmail) ) {
+    // Validation
+    if (
+      username === '' ||
+       email === '' ||
+        password === '' ||
+         samePassword === '' ||
+          samePassword !== password ||
+           !email.match(regexEmail) ) {
       return null;
     } else {
           try {
             await createUserWithEmailAndPassword(auth, email, password)
-            navigate('/');
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            navigate('/');
               const user = userCredential.user;
               // Assuming db is your Firestore instance
               const usersCollection = collection(db, "users");
@@ -62,14 +68,20 @@ const Register = () => {
                 console.log("Document with the same idUsers already exists");
                 // You may choose to update the existing document here
               }
-    
+              setErrorMessageUsername('');
               setErrorMessageEmail('');
               setErrorMessagePassword('');
+              setErrorMessageSamePassword('');
             } catch (error) {
               const errorCode = error.code;
               const errorMessage = error.message;
               console.log(errorCode, errorMessage);
-              setErrorMessageRegister("Sesuatu telah terjadi, pastikan email kamu unik")
+              setErrorMessageRegister("Sesuatu telah terjadi, pastikan email dan field yang kamu isikan benar")
+              if (errorCode === "auth/weak-password") {
+                setErrorMessagePassword("Password minimal 6 karakter")
+              } else if ( errorCode === "auth/email-already-in-use") {
+                setErrorMessageEmail("Email telah digunakan")
+              }
             }
       }
     }
@@ -104,19 +116,23 @@ const Register = () => {
 
     const handlePasswordChange = (e) => {
       setPassword(e.target.value);
-      if (password.length >= 7) {
-        setErrorMessagePassword("");
-      } else  if ( password.length <= 7 ) {
-        setErrorMessagePassword("Password minimal 8 karakter")
-      }
+      setErrorMessagePassword("")
+      // if (password.length >= 7) {
+      //   setErrorMessagePassword("");
+      // } else  if ( password.length <= 7 ) {
+      //   setErrorMessagePassword("Password minimal 8 karakter")
+      // }
     }
 
     const passwordValidation = () => {
-     if ( password.length >= 8) {
-        setErrorMessagePassword("")
-      } else  if ( password.length <= 7 ) {
-        setErrorMessagePassword("Password minimal 8 karakter")
+      if ( password === '' ) {
+        setErrorMessagePassword("Password tidak boleh kosong")
       }
+    //  if ( password.length >= 8) {
+    //     setErrorMessagePassword("")
+    //   } else  if ( password.length <= 7 ) {
+    //     setErrorMessagePassword("Password minimal 8 karakter")
+    //   }
     }
 
     const handleSamePassword = (e) => {
