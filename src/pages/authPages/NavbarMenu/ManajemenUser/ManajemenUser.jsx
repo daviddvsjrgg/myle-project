@@ -1,44 +1,30 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
 import Bottom from '../../../../components/BottomBar/Bottom';
-
-const people = [
-  {
-    name: 'David Dwiyanto',
-    title: 'QC Intern',
-    department: 'Optimization',
-    role: 'Admin',
-    email: 'david@gmail.com',
-    image: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHVzZXIlMjBwcm9maWxlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
-  },
-  {
-    name: 'Joshua Ronaldo',
-    title: 'Ketua Kelas',
-    department: 'Optimization',
-    role: 'User',
-    email: 'joshua@gmail.com',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
-  },
-  {
-    name: 'Albert Evando',
-    title: 'QC Intern',
-    department: 'Optimization',
-    role: ' User',
-    email: 'albert@gmail.com',
-    image: 'https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHVzZXIlMjBwcm9maWxlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
-  },
-  {
-    name: 'Veronica',
-    title: 'Produk Manager',
-    department: 'Optimization',
-    role: 'User',
-    email: 'veronica@gmail.com',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
-  },
-  // More people...
-];
+import { db } from '../../../../config/firebase/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
 const ManajemenUser = () => {
+ 
+  const [ data, setData ] = useState([]);
+
+  useEffect(() =>{
+    const fetchData = async () => {
+      const usersCollection = collection(db, "users");
+
+      try {
+        const snapshot = await getDocs(usersCollection);
+        const fetchedData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setData(fetchedData);
+      } catch (error) {
+        console.log("Error fetching data: ", error);
+      }
+    }
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-full">
@@ -123,24 +109,24 @@ const ManajemenUser = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {people.map(person => (
-                  <tr key={person.email} className='hover:bg-gray-100'>
+                {data.map(item => (
+                  <tr key={item.id} className='hover:bg-gray-100'>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
-                          <img className="h-10 w-10 rounded-full" src={person.image} alt="" />
+                          <img className="h-10 w-10 rounded-full" src={item.image ? 'null' : 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp'} alt="" />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{person.name}</div>
-                          <div className="text-sm text-gray-500">{person.email}</div>
+                          <div className="text-sm font-medium text-gray-900">{item.username}</div>
+                          <div className="text-sm text-gray-500">{item.emailUser}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{person.title}</div>
+                      <div className="text-sm text-gray-900">{item.title ? 'null' : 'Belum ada jabatan'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {person.role}
+                      {item.roleUser}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <a href="/manajemen-user" className="text-indigo-600 hover:text-indigo-900">
