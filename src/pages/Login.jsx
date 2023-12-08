@@ -161,7 +161,7 @@ const Login = () => {
 
         <div className="flex items-center justify-center mt-2 mb-2">
           <div className="border-b border-slate-200 dark:border-slate-800 w-2/3"></div>
-          <span className="mx-4 text-slate-500 dark:text-slate-500">or</span>
+          <span className="mx-4 text-slate-500 dark:text-slate-500">atau</span>
           <div className="border-b border-slate-200 dark:border-slate-800 w-2/3"></div>
         </div>
         
