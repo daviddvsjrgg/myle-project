@@ -5,19 +5,20 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames';
 
 import { signOut } from "firebase/auth";
-import { auth } from '../../config/firebase/firebase';
+import { auth, db } from '../../config/firebase/firebase';
 import { useNavigate } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
-  const navigation = [
-    { name: 'Dashboard', href: '/', current: false },
-    { name: 'Manajemen Projek', href: '/manajemen-projek', current: false },
-    { name: 'Manajemen User', href: '/manajemen-user', current: false },
-    { name: 'Projek', href: '/projek', current: false },
-    { name: 'Laporan', href: '/laporan', current: false },
-  ]
+  // const navigation = [
+  //   { name: 'Dashboard', href: '/', current: false },
+  //   { name: 'Manajemen Projek', href: '/manajemen-projek', current: false },
+  //   { name: 'Manajemen User', href: '/manajemen-user', current: false },
+  //   { name: 'Projek', href: '/projek', current: false },
+  //   { name: 'Laporan', href: '/laporan', current: false },
+  // ]
   const userNavigation = [
     { name: 'Logout', href: '/login' },
   ]
@@ -30,22 +31,34 @@ const Navbar = () => {
   const [ username, setUsername ] = useState('');
   const [ email, setEmail ] = useState('');
   const [ photo, setPhoto ] = useState('');
+  const [ role, setRole ] = useState('');
+  
 
   useEffect(()=>{
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
+
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/firebase.User
-          const username = user.displayName;
-          const email = user.email;
-          const photo = user.photoURL;
-          setUsername(username)
-          setEmail(email)
-          setPhoto(photo)
+            const usersCollection = collection(db, "users");
+    
+            try {
+              const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+              // Field from firestore
+              const getUsername = querySnapshot.docs.map(doc => doc.data().usernameUser);
+              const getEmail = querySnapshot.docs.map(doc => doc.data().emailUser);
+              const getPhoto = querySnapshot.docs.map(doc => doc.data().imageUser);
+              const getRole = querySnapshot.docs[0].data().roleUser;
+              setUsername(getUsername);
+              setEmail(getEmail);
+              setPhoto(getPhoto);
+              setRole(getRole);
+
+            } catch (error) {
+              console.log("Error: " + error)
+            }
+          
           // ...
-        } else {
-          setUsername('');
-        }
+        
       });
       return () => {
         unsubscribe();
@@ -81,7 +94,38 @@ const Navbar = () => {
               </div>
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                  {navigation.map((item) => (
+                  {console.log(role)}
+                  {(role === "user" || role === "admin") && (
+                    <>
+                      <a href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                        Dashboard
+                      </a>
+                    </>
+                  )}
+                  {role === "admin" && (
+                    <>
+                      <a href="/manajemen-projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                        Manajemen Projek
+                      </a>
+                      <a href="/manajemen-user" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                        Manajemen User
+                      </a>
+                    </>
+                  )}
+                  {(role === "user" || role === "admin") && (
+                    <>
+                      <a href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                        Projek
+                      </a>
+                      <a href="/laporan" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                        Laporan
+                      </a>
+                    </>
+                  )}
+
+                  {/*below is the main NAVIGATION*/}
+
+                  {/* {navigation.map((item) => (
                     <a
                       key={item.name}
                       href={item.href}
@@ -95,7 +139,7 @@ const Navbar = () => {
                     >
                       {item.name}
                     </a>
-                  ))}
+                  ))} */}
                 </div>
               </div>
             </div>
@@ -116,7 +160,7 @@ const Navbar = () => {
                     <Menu.Button className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                       <span className="absolute -inset-1.5" />
                       <span className="sr-only">Open user menu</span>
-                      <img className="h-8 w-8 rounded-full" src={photo === '' || photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="" />
+                      <img className="h-8 w-8 rounded-full" src={photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="" />
                     </Menu.Button>
                   </div>
                   <Transition
@@ -180,34 +224,41 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-
+                  
         <Disclosure.Panel className="md:hidden">
           <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-            {navigation.map((item) => (
-              <Disclosure.Button
-                key={item.name}
-                as="a"
-                href={item.href}
-                className={classNames(
-                  item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                  'block rounded-md px-3 py-2 text-base font-medium'
-                )}
-                aria-current={item.current ? 'page' : undefined}
-              >
-                {item.name}
+              <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                Dashboard
               </Disclosure.Button>
-            ))}
+              {role === "admin" && (
+                <>
+                  <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                    Manajemen Projek
+                  </Disclosure.Button>
+                  <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                    Manajemen User
+                  </Disclosure.Button>
+                </>
+              )}
+              <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                Projek
+              </Disclosure.Button>
+              <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                Laporan
+              </Disclosure.Button>
           </div>
           <div className="border-t border-gray-700 pb-3 pt-4">
             <div className="flex items-center px-5">
               <div className="flex-shrink-0">
-                <img className="h-10 w-10 rounded-full" src={photo === '' || photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="profile-pic" />
+                <img className="h-10 w-10 rounded-full" src={photo ? photo : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"} alt="profile-pic" />
               </div>
               
               <div className="ml-3">
                 <div className="text-base font-medium leading-none text-white">{username === '' || username ? username : "users"}</div>
                 <div className="text-sm font-medium leading-none text-gray-400 mt-1">{email}</div>
               </div>
+
+              {/* used to be bell button */}
               {/* <button
                 type="button"
                 className="relative ml-auto flex-shrink-0 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
