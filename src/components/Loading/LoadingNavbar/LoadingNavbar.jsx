@@ -1,20 +1,11 @@
-import React from 'react'
 import { Disclosure, Menu } from '@headlessui/react'
 import { Bars3Icon } from '@heroicons/react/24/outline'
-import classNames from 'classnames';
 
-  const navigation = [
-    { name: 'Dashboard', href: '/', current: false },
-    { name: 'Manajemen Projek', href: '/manajemen-projek', current: false },
-    { name: 'Manajemen User', href: '/manajemen-user', current: false },
-    { name: 'Projek', href: '/projek', current: false },
-    { name: 'Laporan', href: '/laporan', current: false },
-  ]
   
 const LoadingNavbar = () => {
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
-    {({ open }) => (
       <>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
@@ -28,21 +19,7 @@ const LoadingNavbar = () => {
               </div>
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                  {navigation.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className={classNames(
-                        item.current
-                          ? 'bg-gray-900 text-white'
-                          : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                        'rounded-md px-3 py-2 text-sm font-medium'
-                      )}
-                      aria-current={item.current ? 'page' : undefined}
-                    >
-                      {item.name}
-                    </a>
-                  ))}
+                  {/* used to be Navigation */}
                 </div>
               </div>
             </div>
@@ -83,7 +60,6 @@ const LoadingNavbar = () => {
 
        
       </>
-    )}
   </Disclosure>
   )
 }

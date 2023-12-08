@@ -3,23 +3,31 @@ import Navbar from '../../../../components/Navbar/Navbar';
 
 import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from '../../../../config/firebase/firebase';
+import { auth, db } from '../../../../config/firebase/firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 
 const Dashboard = () => {
   const [ username, setUsername ] = useState('');
 
   useEffect(()=>{
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
+
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/firebase.User
-          const username = user.displayName;
-          setUsername(username)
+            const usersCollection = collection(db, "users");
+    
+            try {
+              const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+              // Field from firestore
+              const getUsername = querySnapshot.docs.map(doc => doc.data().usernameUser);
+              setUsername(getUsername);
+
+            } catch (error) {
+              console.log("Error: " + error)
+            }
           // ...
-        } else {
-          setUsername('');
-        }
+        
       });
       return () => {
         unsubscribe();

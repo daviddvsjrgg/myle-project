@@ -54,10 +54,11 @@ const Register = () => {
                 // No existing document found, add a new one
                 try {
                   const docRef = await addDoc(usersCollection, {
-                    username: username,
+                    usernameUser: username,
                     idUser: user.uid, 
                     emailUser: user.email,
-                    roleUser: "admin"
+                    roleUser: "admin",
+                    imageUser: "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"
                   });
                   console.log("Document written with ID: ", docRef.id);
                 } catch (e) {
