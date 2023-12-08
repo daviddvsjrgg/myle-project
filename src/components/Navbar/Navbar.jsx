@@ -94,7 +94,6 @@ const Navbar = () => {
               </div>
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                  {console.log(role)}
                   {(role === "user" || role === "admin") && (
                     <>
                       <a href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
