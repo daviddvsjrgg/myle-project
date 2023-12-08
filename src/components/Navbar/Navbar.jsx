@@ -232,18 +232,18 @@ const Navbar = () => {
               </Disclosure.Button>
               {role === "admin" && (
                 <>
-                  <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                  <Disclosure.Button as="a" href="/manajemen-projek" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                     Manajemen Projek
                   </Disclosure.Button>
-                  <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                  <Disclosure.Button as="a" href="/manajemen-user" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                     Manajemen User
                   </Disclosure.Button>
                 </>
               )}
-              <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+              <Disclosure.Button as="a" href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                 Projek
               </Disclosure.Button>
-              <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+              <Disclosure.Button as="a" href="/laporan" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                 Laporan
               </Disclosure.Button>
           </div>
