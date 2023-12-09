@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 import { signOut } from "firebase/auth";
 import { auth, db } from '../../config/firebase/firebase';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
@@ -22,24 +22,25 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
   const userNavigation = [
     { name: 'Logout', href: '/login' },
   ]
-
+  
   const profil = [
     { name: 'Profil Anda', href: '/myProfile' },
   ]
-
-const Navbar = () => {
+  
+  const Navbar = () => {
   const [ username, setUsername ] = useState('');
   const [ email, setEmail ] = useState('');
   const [ photo, setPhoto ] = useState('');
   const [ role, setRole ] = useState('');
   
-
+  const navigate = useNavigate();
+  
   useEffect(()=>{
-
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-          // User is signed in, see docs for a list of available properties
-          // https://firebase.google.com/docs/reference/js/firebase.User
-            const usersCollection = collection(db, "users");
+    
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+      const usersCollection = collection(db, "users");
     
             try {
               const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
@@ -55,6 +56,7 @@ const Navbar = () => {
 
             } catch (error) {
               console.log("Error: " + error)
+              navigate("/login");
             }
           
           // ...
@@ -65,7 +67,6 @@ const Navbar = () => {
       }
 }, [])
 
-  const navigate = useNavigate();
 
   const handleLogout = () => {               
     signOut(auth).then(() => {
@@ -226,9 +227,13 @@ const Navbar = () => {
                   
         <Disclosure.Panel className="md:hidden">
           <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-              <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
-                Dashboard
-              </Disclosure.Button>
+              {(role === "user" || role === "admin") && (
+                <>
+                  <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                    Dashboard
+                  </Disclosure.Button>
+                </>
+              )}
               {role === "admin" && (
                 <>
                   <Disclosure.Button as="a" href="/manajemen-projek" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
@@ -239,12 +244,16 @@ const Navbar = () => {
                   </Disclosure.Button>
                 </>
               )}
-              <Disclosure.Button as="a" href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
-                Projek
-              </Disclosure.Button>
-              <Disclosure.Button as="a" href="/laporan" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
-                Laporan
-              </Disclosure.Button>
+              {(role === "user" || role === "admin") && (
+                <>
+                  <Disclosure.Button as="a" href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                    Projek
+                  </Disclosure.Button>
+                  <Disclosure.Button as="a" href="/laporan" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                    Laporan
+                  </Disclosure.Button>
+                </>
+              )}
           </div>
           <div className="border-t border-gray-700 pb-3 pt-4">
             <div className="flex items-center px-5">
