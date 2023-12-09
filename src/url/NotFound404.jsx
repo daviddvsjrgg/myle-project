@@ -2,38 +2,50 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar/Navbar'
 import Bottom from '../components/BottomBar/Bottom'
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../config/firebase/firebase';
+import { auth, db } from '../config/firebase/firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 
 
 const NotFound404 = () => {
 
-  const [ email, setEmail ] = useState('');
+  const [ role, setRole ] = useState('');
 
   useEffect(()=>{
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        const email = user.displayName;
-        setEmail(email)
-        // ...
-      } else {
-        setEmail('');
+    
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+      const usersCollection = collection(db, "users");
+    
+            try {
+              const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+              // Field from firestore
+              const getRole = querySnapshot.docs[0].data().roleUser;
+              setRole(getRole);
+
+            } catch (error) {
+              console.log("Error: " + error)
+            }
+          
+          // ...
+        
+      });
+      return () => {
+        unsubscribe();
       }
-    });
-    return () => {
-      unsubscribe();
-    }
 }, [])
 
   const numberWa = '628990256825';
   const text = "Hai David, sepertinya halaman ini bermasalah (url)"
+
   return (
     <div>
-      {email ?  <Navbar /> : ''}
-         <main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
-         <div className="text-center">
+    <Navbar />
+    {role === "user" && (
+      <>
+        <main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
+          <div className="text-center">
           <p className="text-6xl font-semibold text-indigo-600">404</p>
           <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl">Halaman Tidak Ada</h1>
           <p className="mt-6 text-base leading-7 text-gray-600">Maaf, halaman yang anda cari tidak ada.</p>
@@ -41,17 +53,19 @@ const NotFound404 = () => {
             <a
               href="/"
               className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
+              >
               Kembali ke Dashboard
             </a>
             <a href={`https://wa.me/${numberWa}?text=${text}`} className="text-sm font-semibold text-gray-900">
-              Hubungi Developer {'(To WhatsApp)'} <span aria-hidden="true">&rarr;</span>
-            </a>
-          </div>
-        </div>
-      </main>
-      <Bottom />
-    </div>
+              Hubungi Developer {'(via WhatsApp)'} <span aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            </div>
+        </main>
+        <Bottom />
+      </>
+      )}
+      </div>
   )
 }
 
