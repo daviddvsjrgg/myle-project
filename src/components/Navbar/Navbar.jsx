@@ -56,6 +56,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 
             } catch (error) {
               console.log("Error: " + error)
+              navigate('/login')
             }
           
           // ...
@@ -64,7 +65,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
       return () => {
         unsubscribe();
       }
-}, [])
+}, [navigate])
 
 
   const handleLogout = () => {               
