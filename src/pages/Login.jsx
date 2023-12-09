@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
-import { signInWithEmailAndPassword  } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithRedirect  } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom'
 
 // Login
 import { auth } from '../config/firebase/firebase';
-import { signInWithGoogle } from '../Services/handleGoogleLogin/GoogleLogin';
 
 const Login = () => {
 
@@ -17,6 +16,12 @@ const Login = () => {
 
   const [errorMessageLogin, setErrorMessageLogin] = useState('');
   
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider()
+    signInWithRedirect(auth, provider);
+  
+};
+
   const onLogin = async (e) => {  
     e.preventDefault();
   

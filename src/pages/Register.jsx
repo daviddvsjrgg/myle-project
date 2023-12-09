@@ -42,7 +42,6 @@ const Register = () => {
           try {
             await createUserWithEmailAndPassword(auth, email, password)
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            navigate('/');
               const user = userCredential.user;
               // Assuming db is your Firestore instance
               const usersCollection = collection(db, "users");
@@ -61,6 +60,7 @@ const Register = () => {
                     imageUser: "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"
                   });
                   console.log("Document written with ID: ", docRef.id);
+                  navigate('/');
                 } catch (e) {
                   console.error("Error adding document: ", e);
                 }
