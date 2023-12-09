@@ -20,7 +20,7 @@ const Dashboard = () => {
             try {
               const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
               // Field from firestore
-              const getUsername = querySnapshot.docs.map(doc => doc.data().usernameUser);
+              const getUsername = querySnapshot.docs[0].data().usernameUser;
               setUsername(getUsername);
 
             } catch (error) {

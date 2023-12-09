@@ -18,7 +18,7 @@ import Dashboard from "./pages/authPages/NavbarMenu/Dashboard/Dashboard";
 import Url from "./url/Url";
 import LoadingNavbar from "./components/Loading/LoadingNavbar/LoadingNavbar";
 import { onAuthStateChanged } from "firebase/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 
 function LoadingSpinner() {
@@ -43,10 +43,42 @@ function LoadingSpinner() {
 
 function App() {
   const [user, loading] = useAuthState(auth);
+  const [ role, setRole ] = useState('');
   
-  const ProtectedRoute = ({ element, path }) => {
+
+ 
+  const ProtectedRoute = ({ element, path, allowedRoles }) => {
+
+      useEffect(()=>{
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+              const usersCollection = collection(db, "users");
+      
+              try {
+                const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+                // Field from firestore
+                const getRole = querySnapshot.docs[0].data().roleUser;
+                setRole(getRole);
+    
+              } catch (error) {
+                console.log("Error: " + error)
+              }
+            // ...
+          
+        });
+        return () => {
+          unsubscribe();
+        }
+    }, [])
+
     if (loading) {
       return <LoadingSpinner />
+    }
+
+    if (allowedRoles && !allowedRoles.includes(role)) {
+      // User doesn't have the required role, redirect to an unauthorized page or show an error
+      return <NotFound404 />
     }
     
     return user ? (
@@ -130,18 +162,20 @@ function App() {
 
           {/* Protected Routes */}
           <Route path="/" element={<ProtectedRoute element={<Dashboard />} path="/" />} />
-          <Route path="/manajemen-projek" element={<ProtectedRoute element={<ManajemenProjek />} path="/manajemen-projek" />} />
-          <Route path="/manajemen-projek/projek-baru" element={<ProtectedRoute element={<AddManajemenProjek />} path="/manajemen-projek/projek-baru" />} />
-          <Route path="/manajemen-user" element={<ProtectedRoute element={<ManajemenUser />} path="/manajemen-user" />} />
-          <Route path="/manajemen-user/user-baru" element={<ProtectedRoute element={<AddUser />} path="/manajemen-user/user-baru" />} />
+          <Route path="/manajemen-projek" element={<ProtectedRoute element={<ManajemenProjek />} path="/manajemen-projek" allowedRoles={['admin']} />} />
+          <Route path="/manajemen-projek/projek-baru" element={<ProtectedRoute element={<AddManajemenProjek />} path="/manajemen-projek/projek-baru" allowedRoles={['admin', 'manager']} />} />
+          <Route path="/manajemen-user" element={<ProtectedRoute element={<ManajemenUser />} path="/manajemen-user" allowedRoles={['admin']} />} />
+          <Route path="/manajemen-user/user-baru" element={<ProtectedRoute element={<AddUser />} path="/manajemen-user/user-baru" allowedRoles={['admin']} />} />
           <Route path="/projek" element={<ProtectedRoute element={<Projek />} path="/projek" />} />
           <Route path="/personal" element={<ProtectedRoute element={<Personal />} path="/personal" />} />
           <Route path="/personal/projek-baru" element={<ProtectedRoute element={<AddPersonal />} path="/personal/projek-baru" />} />
           <Route path="/laporan" element={<ProtectedRoute element={<Laporan />} path="/laporan" />} />
           <Route path="/kalkulasi" element={<ProtectedRoute element={<Kalkulasi />} path="/kalkulasi" />} />
 
-          {/* Public Routes */}
+          {/* Public Routes (Need Authentication) */}
           <Route path="*" element={<NotFound404 />} />
+          
+          {/* Public Routes */}
           <Route path="/register" element={<Register />} />
           <Route path="/url" element={<Url />} />
         

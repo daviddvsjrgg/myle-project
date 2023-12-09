@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 import { signOut } from "firebase/auth";
 import { auth, db } from '../../config/firebase/firebase';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
@@ -45,9 +45,9 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
             try {
               const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
               // Field from firestore
-              const getUsername = querySnapshot.docs.map(doc => doc.data().usernameUser);
-              const getEmail = querySnapshot.docs.map(doc => doc.data().emailUser);
-              const getPhoto = querySnapshot.docs.map(doc => doc.data().imageUser);
+              const getUsername = querySnapshot.docs[0].data().usernameUser;
+              const getEmail = querySnapshot.docs[0].data().emailUser;
+              const getPhoto = querySnapshot.docs[0].data().imageUser;
               const getRole = querySnapshot.docs[0].data().roleUser;
               setUsername(getUsername);
               setEmail(getEmail);
@@ -56,7 +56,6 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 
             } catch (error) {
               console.log("Error: " + error)
-              navigate("/login");
             }
           
           // ...
