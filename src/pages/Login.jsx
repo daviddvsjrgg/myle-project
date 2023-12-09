@@ -17,9 +17,8 @@ const Login = () => {
   const [errorMessageLogin, setErrorMessageLogin] = useState('');
   
   const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider()
+    const provider = new GoogleAuthProvider(); 
     signInWithRedirect(auth, provider);
-  
 };
 
   const onLogin = async (e) => {  

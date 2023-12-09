@@ -114,10 +114,10 @@ const ManajemenUser = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
-                          <img className="h-10 w-10 rounded-full" src={item.image ? 'null' : 'https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp'} alt="" />
+                          <img className="h-10 w-10 rounded-full" src={item.imageUser} alt="" />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{item.username}</div>
+                          <div className="text-sm font-medium text-gray-900">{item.usernameUser}</div>
                           <div className="text-sm text-gray-500">{item.emailUser}</div>
                         </div>
                       </div>
