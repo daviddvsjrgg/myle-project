@@ -28,11 +28,9 @@ const Login = () => {
   const onLogin = async (e) => {  
     e.preventDefault();
   
-    emailValidation();
-    passwordValidation();    
-    
       if (email === '' || password === '') {
-        return null;
+        emailValidation();
+        passwordValidation();  
       } else {
         try {
           await signInWithEmailAndPassword(auth, email, password);
@@ -184,12 +182,11 @@ const Login = () => {
          <div className='mt-20'> 
           <p className="text-center text-sm text-gray-500">
             Belum punya akun?{' '}
-            <a href="/register" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-              Register
+            <a href="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+              Register-(maintenance)
             </a>
           </p>
         </div>
-        <h1>admin1@gmail.com | 123456 | login(admin)</h1>
     </div>
   </div>
   )

@@ -23,12 +23,7 @@ const Register = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault()
-
-    usernameValidation();
-    emailValidation();
-    passwordValidation();
-    samePasswordValidation();
-
+    
     // Validation
     if (
       username === '' ||
@@ -37,7 +32,11 @@ const Register = () => {
          samePassword === '' ||
           samePassword !== password ||
            !email.match(regexEmail) ) {
-      return null;
+            // Do this
+            usernameValidation();
+            emailValidation();
+            passwordValidation();
+            samePasswordValidation();
     } else {
           try {
             await createUserWithEmailAndPassword(auth, email, password)
