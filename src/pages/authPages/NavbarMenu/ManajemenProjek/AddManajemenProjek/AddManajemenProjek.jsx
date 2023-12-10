@@ -1,29 +1,45 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Bottom from '../../../../../components/BottomBar/Bottom'
 import Navbar from '../../../../../components/Navbar/Navbar'
 import { PhotoIcon } from '@heroicons/react/24/solid'
 import { Fragment, useState } from 'react'
 import { Combobox, Transition } from '@headlessui/react'
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '../../../../../config/firebase/firebase'
 
-  const people = [
-    { id: 1, name: 'David Dwiyanto' },
-    { id: 2, name: 'Joshua Ronaldo' },
-    { id: 3, name: 'Albert Evando' },
-    { id: 4, name: 'Veronica' },
-  ]
-
+  
 
 const AddManajemenProjek = () => {
 
-  const [selected, setSelected] = useState(people[0])
+  const [ data, setData ] = useState([]);
+
+  useEffect(() =>{
+    const fetchData = async () => {
+      const usersCollection = collection(db, "users");
+
+      try {
+        const snapshot = await getDocs(usersCollection);
+        const fetchedData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setData(fetchedData);
+      } catch (error) {
+        console.log("Error fetching data: ", error);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const [selected, setSelected] = useState(data[0])
   const [query, setQuery] = useState('')
 
   const filteredPeople =
     query === ''
-      ? people
-      : people.filter((person) =>
-          person.name
+      ? data
+      : data.filter((person) =>
+          person.usernameUser
             .toLowerCase()
             .replace(/\s+/g, '')
             .includes(query.toLowerCase().replace(/\s+/g, ''))
@@ -128,7 +144,7 @@ const AddManajemenProjek = () => {
                         id="pic"
                         name="pic"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        displayValue={(person) => person.name}
+                        displayValue={(person) => person.usernameUser}
                         onChange={(event) => setQuery(event.target.value)}
                       />
                       <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -148,12 +164,12 @@ const AddManajemenProjek = () => {
                       <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                         {filteredPeople.length === 0 && query !== '' ? (
                           <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                            Nothing found.
+                            Tidak ditemukan.
                           </div>
                         ) : (
                           filteredPeople.map((person) => (
                             <Combobox.Option
-                              key={person.id}
+                              key={person.idUser}
                               className={({ active }) =>
                                 `relative cursor-default select-none py-2 pl-10 pr-4 ${
                                   active ? 'bg-indigo-500 text-white' : 'text-gray-900'
@@ -168,7 +184,7 @@ const AddManajemenProjek = () => {
                                       selected ? 'font-medium' : 'font-normal'
                                     }`}
                                   >
-                                    {person.name}
+                                    {person.usernameUser}
                                   </span>
                                   {selected ? (
                                     <span
