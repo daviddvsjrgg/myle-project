@@ -44,6 +44,88 @@ const AddManajemenProjek = () => {
             .replace(/\s+/g, '')
             .includes(query.toLowerCase().replace(/\s+/g, ''))
         )
+        
+  // Validation
+  const [ namaProjek, setNamaProjek ] = useState('');
+  const [ label, setLabel ] = useState('');
+  const [ deskripsi, setDeskripsi ] = useState('');
+
+  const [ errorMessageNamaProjek, setErrorMessageNamaProjek ] = useState('');
+  const [ errorMessageLabel, setErrorMessageLabel ] = useState('');
+  const [ errorPengguna, setErrorPengguna ] = useState('');
+
+
+
+  // onClick
+  const handleSubmitProjek = async (e) => {
+    e.preventDefault()
+    
+    const getPenggunaValidation = document.getElementById('pic').value;
+    const setPenggunaValidation = getPenggunaValidation.toString();
+    if (namaProjek === '' || label === '' || setPenggunaValidation === '') {
+      namaProjekValidation();
+      labelValdiation();
+      
+      //Validasi Pengguna
+      const getPengguna = document.getElementById('pic').value;
+      const setPengguna = getPengguna.toString();
+      if (setPengguna === '') {
+        setErrorPengguna("Penanggung jawab tidak boleh kosong")
+      } else if (setPengguna !== ''){
+        setErrorPengguna("")
+      }  
+
+
+    } else {
+      try {
+        const getPengguna = document.getElementById('pic').value;
+        const setPengguna = getPengguna.toString();
+
+        // Some Front-end hehe
+        if (setPengguna !== ''){
+          setErrorPengguna("")
+        }
+        
+        console.log("Nama: " + namaProjek)
+        console.log("Label: " + label)
+        console.log("Penanggung Jawab: " + setPengguna)
+        console.log("Deskripsi: " + deskripsi)
+
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+   
+
+  }
+
+  const handleNamaProjekOnChange = (e) => {
+    setNamaProjek(e.target.value);
+    setErrorMessageNamaProjek("");
+  }
+
+  const namaProjekValidation = () => {
+    if (namaProjek === '') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      setErrorMessageNamaProjek("Nama projek tidak boleh kosong")
+    }
+  }
+
+  const handleLabelOnChange = (e) => {
+    setLabel(e.target.value);
+    setErrorMessageLabel("");
+  }
+
+  const labelValdiation = () => {
+    if (label === '') {
+      setErrorMessageLabel("Label tidak boleh kosong")
+    }
+  }
+
+  const handleDeskripsiOnChange = (e) => {
+    setDeskripsi(e.target.value);
+  }
 
 
   return (
@@ -57,18 +139,15 @@ const AddManajemenProjek = () => {
 
       {/* Start - Content */}
       <main>
-        <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-        <form className='m-4'>
+        <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8 p-3">
             <div className="space-y-12">
-                
-
                 <div className="border-b border-gray-900/10 pb-12">
                 <h2 className="text-base font-semibold leading-7 text-gray-900">Profil Projek</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
                     Masukkan informasi projek kamu, pada form dibawah.
                 </p>
 
-            <div class="columns-1 mt-8">
+            <div className="columns-1 mt-8">
             <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-3">
               <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
@@ -80,9 +159,17 @@ const AddManajemenProjek = () => {
                   type="text"
                   name="first-name"
                   id="first-name"
+                  onChange={handleNamaProjekOnChange}
                   autoComplete="given-name"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                    errorMessageNamaProjek ? 'ring-red-600' : 'ring-gray-300'
+                  }`}
                 />
+                {errorMessageNamaProjek && (
+                  <div className="text-red-500 text-sm mt-1">
+                      {errorMessageNamaProjek}  
+                  </div>
+                )}
               </div>
             </div>
                 </div>
@@ -93,14 +180,15 @@ const AddManajemenProjek = () => {
                 </div>
 
                     <div className="col-span-full">
-                    <label htmlFor="about" className="block text-sm font-medium leading-6 text-gray-900">
+                    <label htmlFor="text-area-projek" className="block text-sm font-medium leading-6 text-gray-900">
                         Deskripsi Projek
                     </label>
                     <div className="mt-2">
                         <textarea
-                        id="about"
-                        name="about"
+                        id="text-area-projek"
+                        name="text-area-projek"
                         rows={3}
+                        onChange={handleDeskripsiOnChange}
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         defaultValue={''}
                         />
@@ -132,8 +220,8 @@ const AddManajemenProjek = () => {
                     </div>
                 </div>
                
-              <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                <div class="sm:col-span-4">
+              <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                <div className="sm:col-span-4">
                     <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900">
                         Penanggung Jawab *
                     </label>
@@ -141,10 +229,13 @@ const AddManajemenProjek = () => {
                   <div className="relative mt-2">
                     <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible focus-visible:ring-offset-2 focus-visible:ring-offset-1-300 sm:text-sm">
                       <Combobox.Input
+                        placeholder='Cari penanggung jawab...'
                         id="pic"
                         name="pic"
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        displayValue={(person) => person.usernameUser}
+                        className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                          errorPengguna ? 'ring-red-600' : 'ring-gray-300'
+                        }`}
+                        displayValue={(person) => person.emailUser}
                         onChange={(event) => setQuery(event.target.value)}
                       />
                       <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -161,7 +252,8 @@ const AddManajemenProjek = () => {
                       leaveTo="opacity-0"
                       afterLeave={() => setQuery('')}
                     >
-                      <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      <Combobox.Options 
+                      className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                         {filteredPeople.length === 0 && query !== '' ? (
                           <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                             Tidak ditemukan.
@@ -202,35 +294,53 @@ const AddManajemenProjek = () => {
                         )}
                       </Combobox.Options>
                     </Transition>
+                    {errorPengguna && (
+                      <div className="text-red-500 text-sm mt-1 p-1">
+                          {errorPengguna}  
+                      </div>
+                    )}
                     <p className="mt-3 text-sm leading-6 text-gray-600">Pilih penanggung jawab dari users untuk mengatur projeknya.</p>
                   </div>
                 </Combobox>
                 </div>
 
-                <div class="sm:col-span-2">
-                  <label for="last-name" class="block text-sm font-medium leading-6 text-gray-900">Label *</label>
-                  <div class="mt-2">
-                    <input type="text" name="last-name" id="last-name" autocomplete="family-name" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium leading-6 text-gray-900">Label *</label>
+                  <div className="mt-2">
+                    <input 
+                      placeholder='ex:Bilingual, Private, atau Lain-lain'
+                      type="text" 
+                      name="last-name" 
+                      id="last-name" 
+                      onChange={handleLabelOnChange}
+                      autoComplete="family-name" 
+                      className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                        errorMessageLabel ? 'ring-red-600' : 'ring-gray-300'
+                      }`}>
+                    
                     </input>
+                    {errorMessageLabel && (
+                      <div className="text-red-500 text-sm mt-1 pl-1">
+                          {errorMessageLabel}  
+                      </div>
+                    )}
                     <p className="mt-3 ml-1 text-sm leading-6 text-gray-600">Label akan muncul di halaman projek sebagai tagline.</p>
                   </div>
                 </div>
               </div>
-
-
 
                 </div>
              </div>
 
               <div className="mt-6 flex items-center justify-end gap-x-6">
                   <button
-                  type="submit"
-                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
+                    type="submit"
+                    onClick={handleSubmitProjek}
+                    className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
                   Tambahkan
                   </button>
               </div>
-         </form>
         </div>
       </main>
       {/* End - Content */}

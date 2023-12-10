@@ -176,8 +176,9 @@ function App() {
           <Route path="*" element={<NotFound404 />} />
           
           {/* Public Routes */}
-          <Route path="/register" element={<Register />} />
+          <Route path="/register-admin" element={<Register />} />
           <Route path="/url" element={<Url />} />
+          <Route path="/belum-siap-mazeh-dalam-perbaikan" element={<NotFound404 />} />
         
         </Routes>
       </BrowserRouter>
