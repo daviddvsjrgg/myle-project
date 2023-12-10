@@ -17,8 +17,12 @@ const Login = () => {
   const [errorMessageLogin, setErrorMessageLogin] = useState('');
   
   const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider(); 
-    signInWithRedirect(auth, provider);
+    try {
+      const provider = new GoogleAuthProvider();
+      signInWithRedirect(auth, provider);
+    } catch (error) {
+      console.error("An error occurred during Google sign-in:", error);
+    }
 };
 
   const onLogin = async (e) => {  
@@ -185,6 +189,7 @@ const Login = () => {
             </a>
           </p>
         </div>
+        <h1>admin1@gmail.com | 123456 | login(admin)</h1>
     </div>
   </div>
   )
