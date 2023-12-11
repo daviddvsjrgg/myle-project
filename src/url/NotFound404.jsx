@@ -42,7 +42,7 @@ const NotFound404 = () => {
   return (
     <div>
     <Navbar />
-    {role === "user" && (
+    {(role === "user" || role === "admin") && (
       <>
         <main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
           <div className="text-center">
