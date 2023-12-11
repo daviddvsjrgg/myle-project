@@ -185,6 +185,7 @@ const Login = () => {
             <a href="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
               Register-(maintenance)
             </a>
+        <h1>Akun admin : admin1@gmail.com || 123456 </h1>
           </p>
         </div>
     </div>
