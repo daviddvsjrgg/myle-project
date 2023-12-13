@@ -116,8 +116,8 @@ const AddManajemenProjek = () => {
                             try {   
                               const docRef = await addDoc(usersCollection, {
                                 nameProject: namaProjek,
-                                descriptionProjek: deskripsi,
-                                imageUrlProjek: downloadURL,
+                                descriptionProject: deskripsi,
+                                imageUrlProject: downloadURL,
                                 picProject: setPengguna,
                                 labelProject: label,
                               });
@@ -127,7 +127,7 @@ const AddManajemenProjek = () => {
                             } catch (error) {
                                 console.log(error);
                             }
-                          }, 8000);
+                          }, 6000);
                         } catch (error) {
                           
                         }
@@ -136,7 +136,6 @@ const AddManajemenProjek = () => {
                       });
                     }).catch(error => {
                       console.error('Error uploading file:', error);
-                      setErrorMessageLabel("lebih dari 2mb")
                     });
                   } 
                   if (droppedFile !== null ){
@@ -150,8 +149,8 @@ const AddManajemenProjek = () => {
                           try {   
                             const docRef = await addDoc(usersCollection, {
                               nameProject: namaProjek,
-                              descriptionProjek: deskripsi,
-                              imageUrlProjek: downloadURL,
+                              descriptionProject: deskripsi,
+                              imageUrlProject: downloadURL,
                               picProject: setPengguna,
                               labelProject: label,
                             });
@@ -166,7 +165,6 @@ const AddManajemenProjek = () => {
                         console.error('Error getting download URL:', error);
                       });
                     }).catch(error => {
-                      setErrorMessageLabel("lebih dari 2mb")
                       console.error('Error uploading file:', error);
                     });
                   }
@@ -174,8 +172,8 @@ const AddManajemenProjek = () => {
                     try {   
                       const docRef = await addDoc(usersCollection, {
                         nameProject: namaProjek,
-                        descriptionProjek: deskripsi,
-                        imageUrlProjek: "https://images.unsplash.com/photo-1635321349581-d3a6ff81a9a6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG5vJTIwaW1hZ2V8ZW58MHx8MHx8fDA%3D",
+                        descriptionProject: deskripsi,
+                        imageUrlProject: "https://images.unsplash.com/photo-1635321349581-d3a6ff81a9a6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG5vJTIwaW1hZ2V8ZW58MHx8MHx8fDA%3D",
                         picProject: setPengguna,
                         labelProject: label,
                       });
@@ -535,9 +533,9 @@ const AddManajemenProjek = () => {
                      <button
                      type="submit"
                      disabled
-                     className="animate-pulse animate-infinite rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                     className="animate-pulse animate-infinite rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                      >
-                   Tambahkan
+                   Loading...
                    </button>
                    
                   )
