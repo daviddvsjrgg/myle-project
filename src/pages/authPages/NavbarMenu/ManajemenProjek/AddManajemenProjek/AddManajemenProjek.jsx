@@ -114,12 +114,17 @@ const AddManajemenProjek = () => {
                         try {
                           setTimeout(async () => {
                             try {   
+                              const currentDate = new Date();
+                              const options = { day: 'numeric', month: 'short', year: 'numeric' };
+                              const formattedDateString = currentDate.toLocaleDateString('id-ID', options);
                               const docRef = await addDoc(usersCollection, {
                                 nameProject: namaProjek,
                                 descriptionProject: deskripsi,
                                 imageUrlProject: downloadURL,
                                 picProject: setPengguna,
                                 labelProject: label,
+                                statusProject: "Active",
+                                createdAt: formattedDateString,
                               });
                               console.log("Document written with ID: ", docRef.id);
                               window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -127,7 +132,7 @@ const AddManajemenProjek = () => {
                             } catch (error) {
                                 console.log(error);
                             }
-                          }, 6000);
+                          }, 5000);
                         } catch (error) {
                           
                         }
@@ -147,12 +152,17 @@ const AddManajemenProjek = () => {
                         console.log('File download URL:', downloadURL);
                         setTimeout(async () => {
                           try {   
+                            const currentDate = new Date();
+                            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+                            const formattedDateString = currentDate.toLocaleDateString('id-ID', options);
                             const docRef = await addDoc(usersCollection, {
                               nameProject: namaProjek,
                               descriptionProject: deskripsi,
                               imageUrlProject: downloadURL,
                               picProject: setPengguna,
                               labelProject: label,
+                              statusProject: "Active",
+                              createdAt: formattedDateString,
                             });
                             console.log("Document written with ID: ", docRef.id);
                             window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -160,7 +170,7 @@ const AddManajemenProjek = () => {
                           } catch (error) {
                               console.log(error);
                           }
-                        }, 8000);
+                        }, 5000);
                       }).catch(error => {
                         console.error('Error getting download URL:', error);
                       });
@@ -170,12 +180,17 @@ const AddManajemenProjek = () => {
                   }
                 } else {
                     try {   
+                      const currentDate = new Date();
+                      const options = { day: 'numeric', month: 'short', year: 'numeric' };
+                      const formattedDateString = currentDate.toLocaleDateString('id-ID', options);
                       const docRef = await addDoc(usersCollection, {
                         nameProject: namaProjek,
                         descriptionProject: deskripsi,
                         imageUrlProject: "https://images.unsplash.com/photo-1635321349581-d3a6ff81a9a6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG5vJTIwaW1hZ2V8ZW58MHx8MHx8fDA%3D",
                         picProject: setPengguna,
                         labelProject: label,
+                        statusProject: "Active",
+                        createdAt: formattedDateString,
                       });
                       console.log("Document written with ID: ", docRef.id);
                       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
