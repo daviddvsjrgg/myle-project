@@ -18,6 +18,8 @@ const Register = () => {
   const [ errorMessageSamePassword, setErrorMessageSamePassword ] = useState('');
   
   const [ errorMessageRegister, setErrorMessageRegister] = useState('');
+
+  const [ clickedRegister, setClickedRegister ] = useState(false);
   
   const regexEmail = /^\S+@\S+\.\S+$/;
 
@@ -38,6 +40,7 @@ const Register = () => {
             passwordValidation();
             samePasswordValidation();
     } else {
+          setClickedRegister(true)
           try {
             await createUserWithEmailAndPassword(auth, email, password)
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -56,7 +59,8 @@ const Register = () => {
                     idUser: user.uid, 
                     emailUser: user.email,
                     roleUser: "user",
-                    imageUser: "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"
+                    imageUser: "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp",
+                    positionUser: ""
                   });
                   console.log("Document written with ID: ", docRef.id);
                   navigate('/');
@@ -76,10 +80,13 @@ const Register = () => {
               const errorCode = error.code;
               const errorMessage = error.message;
               console.log(errorCode, errorMessage);
+              setClickedRegister(false)
               setErrorMessageRegister("Sesuatu telah terjadi, pastikan email dan field yang kamu isikan benar")
               if (errorCode === "auth/weak-password") {
+                setClickedRegister(false)
                 setErrorMessagePassword("Password minimal 6 karakter")
               } else if ( errorCode === "auth/email-already-in-use") {
+                setClickedRegister(false)
                 setErrorMessageEmail("Email telah digunakan")
               }
             }
@@ -273,13 +280,24 @@ const Register = () => {
         </div>
 
         <div>
-          <button
-            type="submit"
-            onClick={onSubmit}
-            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 mt-7 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Register
-          </button>
+          {clickedRegister ? (
+            <button
+              type="submit"
+              disabled
+              className="animate-pulse flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 mt-7 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Loading...
+            </button>
+          ) : 
+            <button
+              type="submit"
+              onClick={onSubmit}
+              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 mt-7 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Register
+            </button>
+          }
+          
         </div>
       <p className="mt-10 text-center text-sm text-gray-500">
         Sudah punya akun?{' '}

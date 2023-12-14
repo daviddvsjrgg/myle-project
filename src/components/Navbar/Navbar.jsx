@@ -1,7 +1,7 @@
 import React from 'react'
 import { Fragment } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Disclosure, Menu, Transition, Popover} from '@headlessui/react'
+import { Bars3Icon, XMarkIcon} from '@heroicons/react/24/outline'
 import classNames from 'classnames';
 
 import { signOut } from "firebase/auth";
@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { ChevronDownIcon } from '@heroicons/react/20/solid'
+
 
   // const navigation = [
   //   { name: 'Dashboard', href: '/', current: false },
@@ -104,21 +106,70 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
                   )}
                   {role === "admin" && (
                     <>
-                      <a href="/manajemen-projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
-                        Manajemen Projek
-                      </a>
-                      <a href="/manajemen-user" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
-                        Manajemen User
-                      </a>
+                     <Popover className="relative">
+                      <Popover.Button className="inline-flex gap-x-1 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">
+                        <span>Manajemen</span>
+                        <ChevronDownIcon className="h-5 w-5" aria-hidden="true" />
+                      </Popover.Button>
+
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-200"
+                        enterFrom="opacity-0 translate-y-1"
+                        enterTo="opacity-100 translate-y-0"
+                        leave="transition ease-in duration-150"
+                        leaveFrom="opacity-100 translate-y-0"
+                        leaveTo="opacity-0 translate-y-1"
+                      >
+                        <Popover.Panel className="absolute left-1/2 z-10 mt-5 flex w-screen max-w-max -translate-x-1/2 px-4">
+                          <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+                            <div className="p-4">
+                                <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                  <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                                      <path d="M5.566 4.657A4.505 4.505 0 016.75 4.5h10.5c.41 0 .806.055 1.183.157A3 3 0 0015.75 3h-7.5a3 3 0 00-2.684 1.657zM2.25 12a3 3 0 013-3h13.5a3 3 0 013 3v6a3 3 0 01-3 3H5.25a3 3 0 01-3-3v-6zM5.25 7.5c-.41 0-.806.055-1.184.157A3 3 0 016.75 6h10.5a3 3 0 012.683 1.657A4.505 4.505 0 0018.75 7.5H5.25z" />
+                                    </svg>
+                                  </div>
+                                  <div>
+                                    <a href="/manajemen-projek" className="font-semibold text-gray-900">
+                                      Manajemen Projek
+                                      <span className="absolute inset-0" />
+                                    </a>
+                                    <p className="mt-1 text-gray-600">Menampilkan list projek</p>
+                                  </div>
+                                </div>
+                                <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                                  <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                                    <path fillRule="evenodd" d="M8.25 6.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-4.38z" clipRule="evenodd" />
+                                    <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a3.75 3.75 0 013.57-4.047zM20.226 19.389a8.287 8.287 0 00-1.308-5.135 3.75 3.75 0 013.57 4.047l-.01.121a.563.563 0 01-.373.486l-.115.04c-.567.2-1.156.349-1.764.441z" />
+                                  </svg>
+                                  </div>
+                                  <div>
+                                    <a href="/manajemen-user" className="font-semibold text-gray-900">
+                                      Manajemen User
+                                      <span className="absolute inset-0" />
+                                    </a>
+                                    <p className="mt-1 text-gray-600">Menampilkan list user</p>
+                                  </div>
+                                </div>
+                            </div>
+                          </div>
+                        </Popover.Panel>
+                      </Transition>
+                    </Popover>
                     </>
                   )}
                   {(role === "user" || role === "admin") && (
                     <>
                       <a href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
-                        Projek
+                        Mata Kuliah
                       </a>
-                      <a href="/laporan" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
-                        Laporan
+                      <a href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                        Jadwal Kuliah
+                      </a>
+                      <a href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                        Deadline Tugas
                       </a>
                     </>
                   )}
@@ -235,22 +286,71 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
                 </>
               )}
               {role === "admin" && (
-                <>
-                  <Disclosure.Button as="a" href="/manajemen-projek" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
-                    Manajemen Projek
-                  </Disclosure.Button>
-                  <Disclosure.Button as="a" href="/manajemen-user" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
-                    Manajemen User
-                  </Disclosure.Button>
+               <>
+                <Popover className="relative">
+                  <Popover.Button className="inline-flex gap-x-1 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">
+                    <span>Manajemen</span>
+                    <ChevronDownIcon className="h-5 w-5" aria-hidden="true" />
+                  </Popover.Button>
+
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-200"
+                    enterFrom="opacity-0 translate-y-1"
+                    enterTo="opacity-100 translate-y-0"
+                    leave="transition ease-in duration-150"
+                    leaveFrom="opacity-100 translate-y-0"
+                    leaveTo="opacity-0 translate-y-1"
+                  >
+                    <Popover.Panel className="absolute left-1/2 z-10 mt-5 flex w-screen max-w-max -translate-x-1/2 px-4">
+                      <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+                        <div className="p-4">
+                            <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                              <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                                  <path d="M5.566 4.657A4.505 4.505 0 016.75 4.5h10.5c.41 0 .806.055 1.183.157A3 3 0 0015.75 3h-7.5a3 3 0 00-2.684 1.657zM2.25 12a3 3 0 013-3h13.5a3 3 0 013 3v6a3 3 0 01-3 3H5.25a3 3 0 01-3-3v-6zM5.25 7.5c-.41 0-.806.055-1.184.157A3 3 0 016.75 6h10.5a3 3 0 012.683 1.657A4.505 4.505 0 0018.75 7.5H5.25z" />
+                                </svg>
+                              </div>
+                              <div>
+                                <a href="/manajemen-projek" className="font-semibold text-gray-900">
+                                  Manajemen Projek
+                                  <span className="absolute inset-0" />
+                                </a>
+                                <p className="mt-1 text-gray-600">Menampilkan list projek</p>
+                              </div>
+                            </div>
+                            <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                              <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                                <path fillRule="evenodd" d="M8.25 6.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-4.38z" clipRule="evenodd" />
+                                <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a3.75 3.75 0 013.57-4.047zM20.226 19.389a8.287 8.287 0 00-1.308-5.135 3.75 3.75 0 013.57 4.047l-.01.121a.563.563 0 01-.373.486l-.115.04c-.567.2-1.156.349-1.764.441z" />
+                              </svg>
+                              </div>
+                              <div>
+                                <a href="/manajemen-user" className="font-semibold text-gray-900">
+                                  Manajemen User
+                                  <span className="absolute inset-0" />
+                                </a>
+                                <p className="mt-1 text-gray-600">Menampilkan list user</p>
+                              </div>
+                            </div>
+                        </div>
+                      </div>
+                    </Popover.Panel>
+                  </Transition>
+                </Popover>
                 </>
               )}
               {(role === "user" || role === "admin") && (
                 <>
                   <Disclosure.Button as="a" href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
-                    Projek
+                    Mata Kuliah
                   </Disclosure.Button>
                   <Disclosure.Button as="a" href="/laporan" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
-                    Laporan
+                    Jadwal Kuliah
+                  </Disclosure.Button>
+                  <Disclosure.Button as="a" href="/laporan" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                    Deadline Tugas
                   </Disclosure.Button>
                 </>
               )}
