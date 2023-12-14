@@ -535,7 +535,7 @@ const AddManajemenProjek = () => {
                           {errorMessageLabel}  
                       </div>
                     )}
-                    <p className="mt-3 pl-1 text-sm leading-6 text-gray-600">Label akan muncul di halaman projek sebagai tagline.</p>
+                    <p className="mt-3 pl-1 text-sm leading-6 text-gray-600">Label akan menjadi tagline projek.</p>
                   </div>
                 </div>
               </div>

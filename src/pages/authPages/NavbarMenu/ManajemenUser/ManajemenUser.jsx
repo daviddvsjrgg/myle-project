@@ -41,7 +41,7 @@ const ManajemenUser = () => {
 
         <div className="flex flex-col ml-1 mr-1">
         <div className="flex justify-between ...">
-              <div className="order-last">
+              {/* <div className="order-last">
                 <a href="/manajemen-user/user-baru" className="mb-3 group block max-w-sm rounded-lg p-2.5 bg-gray-50 ring-1 ring-slate-900/5 shadow-sm space-y-3 hover:bg-indigo-600 hover:ring-indigo-600">
                   <div className="flex items-center space-x-3">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
@@ -50,7 +50,7 @@ const ManajemenUser = () => {
                     <h3 className="text-slate-900 group-hover:text-white text-sm font-semibold">User Baru</h3>
                   </div>
                 </a>
-              </div>
+              </div> */}
               <div>
                          
               <div className="relative max-w-xs">
