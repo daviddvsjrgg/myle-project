@@ -83,7 +83,7 @@ const Projek = () => {
                         <span className="absolute inset-0" />
                         {project.nameProject}
                     </h3>
-                    <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{project.descriptionProject !== "" ? project.descriptionProject : "Projek ini belum ada deskripsi..."}</p>
+                    {/* <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{project.descriptionProject !== "" ? project.descriptionProject : "Projek ini belum ada deskripsi..."}</p> */}
                   </div>
                   <div className="relative mt-8 flex items-center gap-x-4">
                     <img src={project.userData.imageUser} alt="" className="h-10 w-10 rounded-full bg-gray-50" />
@@ -94,7 +94,7 @@ const Projek = () => {
                           {project.userData.usernameUser}
                         </a>
                       </p>
-                      <p className="text-gray-600">{project.userData.positionUser ?? "Belum ada Jabatan"}</p>
+                      <p className="text-gray-600">{project.userData.positionUser !== "" ? project.userData.positionUser : "Belum ada Jabatan"}</p>
                     </div>
                   </div>
                 </article>

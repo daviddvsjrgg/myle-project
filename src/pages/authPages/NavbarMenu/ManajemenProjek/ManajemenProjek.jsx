@@ -152,7 +152,7 @@ const ManajemenProjek = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{project.userData.usernameUser}</div>
-                      <div className="text-sm text-gray-500">{project.userData.positionUser ?? 'Belum ada jabatan'}</div>
+                      <div className="text-sm text-gray-500">{project.userData.positionUser !== "" ? project.userData.positionUser : "Belum ada Jabatan"}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span

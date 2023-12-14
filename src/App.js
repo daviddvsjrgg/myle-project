@@ -110,7 +110,8 @@ function App() {
                     idUser: user.uid, 
                     emailUser: user.email,
                     roleUser: "user",
-                    imageUser: user.photoURL
+                    imageUser: user.photoURL,
+                    positionUser: ""
                   });
                   console.log("Document written with ID: ", docRef.id);
                 } catch (e) {
