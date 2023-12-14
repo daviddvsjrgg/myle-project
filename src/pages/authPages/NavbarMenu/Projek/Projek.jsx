@@ -80,10 +80,8 @@ const Projek = () => {
                   </div>
                   <div className="group relative">
                     <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900">
-                      <a href={project.nameProject}>
                         <span className="absolute inset-0" />
                         {project.nameProject}
-                      </a>
                     </h3>
                     <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{project.descriptionProject !== "" ? project.descriptionProject : "Projek ini belum ada deskripsi..."}</p>
                   </div>

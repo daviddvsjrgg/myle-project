@@ -20,6 +20,7 @@ import LoadingNavbar from "./components/Loading/LoadingNavbar/LoadingNavbar";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import RegisterAdmin from "./pages/RegisterAdmin";
 
 function LoadingSpinner() {
   return (
@@ -176,7 +177,8 @@ function App() {
           <Route path="*" element={<NotFound404 />} />
           
           {/* Public Routes */}
-          <Route path="/register-admin" element={<Register />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/register-admin" element={<RegisterAdmin />} />
           <Route path="/url" element={<Url />} />
           <Route path="/belum-siap-mazeh-dalam-perbaikan" element={<NotFound404 />} />
         
