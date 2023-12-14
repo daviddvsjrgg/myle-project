@@ -26,3 +26,6 @@ yarn-error.log*
 firebase.json
 .firebase
 config
+
+.gitignore
+tailwind.config.js

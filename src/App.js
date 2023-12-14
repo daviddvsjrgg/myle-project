@@ -180,7 +180,6 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/register-admin" element={<RegisterAdmin />} />
           <Route path="/url" element={<Url />} />
-          <Route path="/belum-siap-mazeh-dalam-perbaikan" element={<NotFound404 />} />
         
         </Routes>
       </BrowserRouter>

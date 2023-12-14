@@ -15,37 +15,40 @@ const Url = () => {
                 <a href='/register'>3. /register</a>
             </li>
             <li>
-                <a href='/manajemen-projek'>4. /manajemen-projek</a>
+                <a href='/register-admin'>4. /register-admin</a>
             </li>
             <li>
-                <a href='/manajemen-projek/projek-baru'>5. /manajemen-projek/projek-baru</a>
+                <a href='/manajemen-projek'>5. /manajemen-projek</a>
             </li>
             <li>
-                <a href='/manajemen-user'>6. /manajemen-user</a>
+                <a href='/manajemen-projek/projek-baru'>6. /manajemen-projek/projek-baru</a>
             </li>
             <li>
-                <a href='/manajemen-user/user-baru'>7. /manajemen-user/user-baru</a>
+                <a href='/manajemen-user'>7. /manajemen-user</a>
             </li>
             <li>
-                <a href='/projek'>8. /projek</a>
+                <a href='/manajemen-user/user-baru'>8. /manajemen-user/user-baru</a>
             </li>
             <li>
-                <a href='/personal'>9. /personal</a>
+                <a href='/projek'>9. /projek</a>
             </li>
             <li>
-                <a href='/personal/projek-baru'>10. /personal/projek-baru</a>
+                <a href='/personal'>10. /personal</a>
             </li>
             <li>
-                <a href='/laporan'>11. /laporan</a>
+                <a href='/personal/projek-baru'>11. /personal/projek-baru</a>
             </li>
             <li>
-                <a href='/kalkulasi'>12. /kalkulasi</a>
+                <a href='/laporan'>12. /laporan</a>
             </li>
             <li>
-                <a href='/404'>13. /all-unspecified-url</a>
+                <a href='/kalkulasi'>13. /kalkulasi</a>
             </li>
             <li>
-                <a href='/Url'>14. /Url</a>
+                <a href='/404'>14. /any</a>
+            </li>
+            <li>
+                <a href='/Url'>15. /Url</a>
             </li>
         </ul>
     </div>
