@@ -346,10 +346,10 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
                   <Disclosure.Button as="a" href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                     Mata Kuliah
                   </Disclosure.Button>
-                  <Disclosure.Button as="a" href="/laporan" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                  <Disclosure.Button as="a" href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                     Jadwal Kuliah
                   </Disclosure.Button>
-                  <Disclosure.Button as="a" href="/laporan" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                  <Disclosure.Button as="a" href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                     Deadline Tugas
                   </Disclosure.Button>
                 </>
