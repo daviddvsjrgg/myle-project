@@ -1,44 +1,46 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
 import Bottom from '../../../../components/BottomBar/Bottom';
-
-const people = [
-  {
-    number : '1',
-    nama_projek: 'Bilingual 2021',
-    nama: 'Joshua Ronaldo',
-    department: 'Ketua Kelas',
-    role: 'Researcher',
-    email: 'joshua@example.com',
-  },
-  {
-    number : '2',
-    nama_projek: 'Aplikasi Manajemen',
-    nama: 'Albert Evando',
-    department: 'QC Intern',
-    role: 'Tester',
-    email: 'john1.doe@example.com',
-  },
-  {
-    number : '3',
-    nama_projek: 'Test Automation',
-    nama: 'David Dwiyanto',
-    department: 'QC Intern',
-    role: ' Software1 Engineer',
-    email: 'veronica1.lodge@example.com',
-  },
-  {
-    number : '4',
-    nama_projek: 'Project One',
-    nama: 'Veronica',
-    department: 'Produk Manager',
-    role: ' Software2 Engineer',
-    email: 'veronica2.lodge@example.com',
-  },
-  // More people...
-];
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../../../../config/firebase/firebase';
 
 const ManajemenProjek = () => {
+  const [ data, setData ] = useState([]);
+
+  const fetchData = async () => {
+    const projectsCollection = collection(db, "projects");
+  
+    try {
+      const snapshot = await getDocs(projectsCollection);
+      const fetchedData = [];
+  
+      for (const doc of snapshot.docs) {
+        const projectData = doc.data();
+        const emailUser = projectData.picProject;
+  
+        const usersCollection = collection(db, "users");
+        const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+        const userSnapshot = await getDocs(userQuery);
+  
+        if (!userSnapshot.empty) {
+          fetchedData.push({
+            id: doc.id,
+            ...projectData,
+            userData: userSnapshot.docs[0].data(),
+          });
+        }
+      }
+  
+      setData(fetchedData);
+    } catch (error) {
+      console.log("Error fetching data: ", error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <div className="min-h-full">
       <Navbar />
@@ -132,32 +134,32 @@ const ManajemenProjek = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {people.map(person => (
-                  <tr key={person.email} className='hover:bg-gray-100'>
+                {data.map((project, index) => (
+                  <tr key={project.id} className='hover:bg-gray-100'>
                     <td className="px-2 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-5">
-                          <div className="text-sm font-medium text-gray-900">{person.number}</div>
+                          <div className="text-sm font-medium text-gray-900">{index+1}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-2 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{person.nama_projek}</div>
+                          <div className="text-sm font-medium text-gray-900">{project.nameProject}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{person.nama}</div>
-                      <div className="text-sm text-gray-500">{person.department}</div>
+                      <div className="text-sm text-gray-900">{project.userData.usernameUser}</div>
+                      <div className="text-sm text-gray-500">{project.userData.positionUser ?? 'Belum ada jabatan'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className="px-2 inline-flex text-xs leading-5
                       font-semibold rounded-full bg-green-100 text-green-800"
                       >
-                        Active
+                        {project.statusProject}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
