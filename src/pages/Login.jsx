@@ -9,12 +9,14 @@ const Login = () => {
 
   const navigate = useNavigate();
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessageEmail, setErrorMessageEmail] = useState('');
-  const [errorMessagePassword, setErrorMessagePassword] = useState('');
+  const [ email, setEmail ] = useState('');
+  const [ password, setPassword ] = useState('');
+  const [ errorMessageEmail, setErrorMessageEmail ] = useState('');
+  const [ errorMessagePassword, setErrorMessagePassword ] = useState('');
 
-  const [errorMessageLogin, setErrorMessageLogin] = useState('');
+  const [ errorMessageLogin, setErrorMessageLogin ] = useState('');
+
+  const [ clickedLogin, setClickedLogin ] = useState(false);
   
   const signInWithGoogle = async () => {
     try {
@@ -28,11 +30,12 @@ const Login = () => {
   const onLogin = async (e) => {  
     e.preventDefault();
   
-      if (email === '' || password === '') {
-        emailValidation();
-        passwordValidation();  
-      } else {
-        try {
+    if (email === '' || password === '') {
+      emailValidation();
+      passwordValidation();  
+    } else {
+      try {
+          setClickedLogin(true);
           await signInWithEmailAndPassword(auth, email, password);
           navigate("/");
 
@@ -42,6 +45,7 @@ const Login = () => {
           const errorCode = error.code;
           const errorMessage = error.message;
           console.log(errorCode, errorMessage);
+          setClickedLogin(false);
           setErrorMessageLogin('Email atau password salah')
         }
       }
@@ -155,15 +159,27 @@ const Login = () => {
             )}
           </div>
         </div>
-
-        <div>
-          <button
-            type="submit"
-            onClick={onLogin}
-            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 mt-7 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Login
-          </button>
-        </div>
+        
+        {clickedLogin ? (
+           <div>
+            <button
+              type="submit"
+              disabled
+              className="animate-pulse flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 mt-7 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              Loading...
+            </button>
+          </div>
+        ):
+          <div>
+            <button
+              type="submit"
+              onClick={onLogin}
+              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 mt-7 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              Login
+            </button>
+          </div>
+        }
+       
 
         <div className="flex items-center justify-center mt-2 mb-2">
           <div className="border-b border-slate-200 dark:border-slate-800 w-2/3"></div>
@@ -182,10 +198,10 @@ const Login = () => {
          <div className='mt-20'> 
           <p className="text-center text-sm text-gray-500">
             Belum punya akun?{' '}
-            <a href="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-              Register-(maintenance)
+            <a href="/register" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+              Register
             </a>
-        <h1>Akun admin : admin1@gmail.com || 123456 </h1>
+            <h1>Akun admin : admin1@gmail.com || 123456 </h1>
           </p>
         </div>
     </div>

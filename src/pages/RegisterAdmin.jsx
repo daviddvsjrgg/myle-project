@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'fire
 import { auth, db } from '../config/firebase/firebase';
 import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 
-const Register = () => {
+const RegisterAdmin = () => {
   const navigate = useNavigate();
 
   const [ username, setUsername ] = useState('');
@@ -55,7 +55,7 @@ const Register = () => {
                     usernameUser: username,
                     idUser: user.uid, 
                     emailUser: user.email,
-                    roleUser: "user",
+                    roleUser: "admin",
                     imageUser: "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.webp"
                   });
                   console.log("Document written with ID: ", docRef.id);
@@ -278,18 +278,12 @@ const Register = () => {
             onClick={onSubmit}
             className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 mt-7 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Register
+            Register Admin
           </button>
         </div>
-      <p className="mt-10 text-center text-sm text-gray-500">
-        Sudah punya akun?{' '}
-        <a href="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-          Login
-        </a>
-      </p>
     </div>
   </div>
   )
 }
 
-export default Register
+export default RegisterAdmin
