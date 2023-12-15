@@ -46,7 +46,7 @@ const Login = () => {
           const errorMessage = error.message;
           console.log(errorCode, errorMessage);
           setClickedLogin(false);
-          setErrorMessageLogin('Email atau password salah')
+          setErrorMessageLogin('Email atau password salah / coba beberapa saat.')
         }
       }
     

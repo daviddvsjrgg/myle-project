@@ -3,6 +3,7 @@ import Navbar from '../../../../components/Navbar/Navbar'
 import Bottom from '../../../../components/BottomBar/Bottom';
 import { db } from '../../../../config/firebase/firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
 
 const ManajemenUser = () => {
  
@@ -123,15 +124,15 @@ const ManajemenUser = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{item.title ? 'null' : 'Belum ada jabatan'}</div>
+                      <div className="text-sm text-gray-900">{item.positionUser !== "" ? item.positionUser : 'Belum ada jabatan'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {item.roleUser}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <a href="/manajemen-user" className="text-indigo-600 hover:text-indigo-900">
-                        Detail
-                      </a>
+                    <Link to="/user-profile-admin" state={{userData: item}} className="text-indigo-600 hover:text-indigo-900">
+                      Detail
+                    </Link>
                     </td>
                   </tr>
                 ))}

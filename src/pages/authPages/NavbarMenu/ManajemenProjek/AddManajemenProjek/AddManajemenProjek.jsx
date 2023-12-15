@@ -2,19 +2,19 @@ import React, { useEffect } from 'react'
 import Bottom from '../../../../../components/BottomBar/Bottom'
 import Navbar from '../../../../../components/Navbar/Navbar'
 import { PhotoIcon } from '@heroicons/react/24/solid'
-import { Fragment, useState } from 'react'
-import { Combobox, Transition } from '@headlessui/react'
+import { Fragment, useState, useRef} from 'react'
+import { Combobox, Transition, Dialog } from '@headlessui/react'
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { addDoc, collection, getDocs, where, query } from 'firebase/firestore'
 import { db } from '../../../../../config/firebase/firebase'
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage'
 import { v4 as uuidv4 } from 'uuid';
-  
+import { useNavigate } from 'react-router-dom'
 
 const AddManajemenProjek = () => {
 
   const [ data, setData ] = useState([]);
-
+  const navigate = useNavigate();
   useEffect(() =>{
     const fetchData = async () => {
       const usersCollection = collection(db, "users");
@@ -115,8 +115,10 @@ const AddManajemenProjek = () => {
                           setTimeout(async () => {
                             try {   
                               const currentDate = new Date();
-                              const options = { day: 'numeric', month: 'short', year: 'numeric' };
-                              const formattedDateString = currentDate.toLocaleDateString('id-ID', options);
+                              const options = { day: 'numeric', month: 'short' };
+                              const dayAndMonth = currentDate.toLocaleDateString('id-ID', options);
+                              const year = currentDate.getFullYear();
+                              const formattedDateString = `${dayAndMonth}, ${year}`;
                               const docRef = await addDoc(usersCollection, {
                                 nameProject: namaProjek,
                                 descriptionProject: deskripsi,
@@ -127,8 +129,8 @@ const AddManajemenProjek = () => {
                                 createdAt: formattedDateString,
                               });
                               console.log("Document written with ID: ", docRef.id);
-                              window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-                              setSuccess(true);
+                              // setSuccess(true);
+                              setOpen(true);
                             } catch (error) {
                                 console.log(error);
                             }
@@ -153,8 +155,10 @@ const AddManajemenProjek = () => {
                         setTimeout(async () => {
                           try {   
                             const currentDate = new Date();
-                            const options = { day: 'numeric', month: 'short', year: 'numeric' };
-                            const formattedDateString = currentDate.toLocaleDateString('id-ID', options);
+                            const options = { day: 'numeric', month: 'short' };
+                            const dayAndMonth = currentDate.toLocaleDateString('id-ID', options);
+                            const year = currentDate.getFullYear();
+                            const formattedDateString = `${dayAndMonth}, ${year}`;
                             const docRef = await addDoc(usersCollection, {
                               nameProject: namaProjek,
                               descriptionProject: deskripsi,
@@ -165,8 +169,8 @@ const AddManajemenProjek = () => {
                               createdAt: formattedDateString,
                             });
                             console.log("Document written with ID: ", docRef.id);
-                            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-                            setSuccess(true);
+                            // setSuccess(true);
+                            setOpen(true);
                           } catch (error) {
                               console.log(error);
                           }
@@ -181,8 +185,10 @@ const AddManajemenProjek = () => {
                 } else {
                     try {   
                       const currentDate = new Date();
-                      const options = { day: 'numeric', month: 'short', year: 'numeric' };
-                      const formattedDateString = currentDate.toLocaleDateString('id-ID', options);
+                      const options = { day: 'numeric', month: 'short' };
+                      const dayAndMonth = currentDate.toLocaleDateString('id-ID', options);
+                      const year = currentDate.getFullYear();
+                      const formattedDateString = `${dayAndMonth}, ${year}`;
                       const docRef = await addDoc(usersCollection, {
                         nameProject: namaProjek,
                         descriptionProject: deskripsi,
@@ -193,8 +199,8 @@ const AddManajemenProjek = () => {
                         createdAt: formattedDateString,
                       });
                       console.log("Document written with ID: ", docRef.id);
-                      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-                      setSuccess(true);
+                      // setSuccess(true);
+                      setOpen(true);
                     } catch (error) {
                         console.log(error);
                     }
@@ -298,13 +304,79 @@ const AddManajemenProjek = () => {
     }
   }
 
+  // Modal
+  const [open, setOpen] = useState(false)
+  const cancelButtonRef = useRef(null)
+
   return (
      <div className="min-h-full">
       <Navbar />
-      
+      {/* Modal */}
+      <Transition.Root show={open} as={Fragment}>
+        <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={setOpen}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-40 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                  <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <div
+                    className="sm:flex sm:items-start">
+                      <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-200 sm:mx-0 sm:h-10 sm:w-10 animate-pulse">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                        <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+                      </svg>
+                      </div>
+                      <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                          Data berhasil disimpan
+                        </Dialog.Title>
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-500">
+                            Data kamu berhasil tersimpan, data akan muncul di halaman "Mata Kuliah" dengan Gambar, Mata Kuliah, dan Penanggung Jawab atas Matkul tersebut.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                    <button
+                      type="button"
+                      className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto"
+                      onClick={() => navigate('/manajemen-projek')}
+                    >
+                      Kembali ke Manajemen Mata Kuliah
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+      {/* End Modal */}
       <header className="bg-white drop-shadow-md">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Tambah Projek</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Tambah Mata Kuliah</h1>
         </div>
       </header>
       {/* Start - Content */}
@@ -330,16 +402,16 @@ const AddManajemenProjek = () => {
         )}
             <div className="space-y-12">
                 <div className="border-b border-gray-900/10 pb-12">
-                <h2 className="text-base font-semibold leading-7 text-gray-900">Profil Projek</h2>
+                <h2 className="text-base font-semibold leading-7 text-gray-900">Profil Mata Kuliah</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
-                    Masukkan informasi projek kamu, pada form dibawah.
+                    Masukkan informasi Mata Kuliah kamu, pada form dibawah.
                 </p>
 
             <div className="columns-1 mt-8">
             <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-3">
               <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
-                Nama Projek *
+                Nama Mata Kuliah *
               </label>
               <div className="mt-2 sm:max-w-md">
                 <input
@@ -369,7 +441,7 @@ const AddManajemenProjek = () => {
 
                     <div className="col-span-full">
                     <label htmlFor="text-area-projek" className="block text-sm font-medium leading-6 text-gray-900">
-                        Deskripsi Projek
+                        Deskripsi Mata Kuliah
                     </label>
                     <div className="mt-2">
                         <textarea
@@ -381,7 +453,7 @@ const AddManajemenProjek = () => {
                         defaultValue={''}
                         />
                     </div>
-                    <p className="mt-3 text-sm leading-6 text-gray-600">Tulis deskripsi projek yang akan dibuat.</p>
+                    <p className="mt-3 text-sm leading-6 text-gray-600">Tulis deskripsi Mata Kuliah yang akan dibuat.</p>
                     </div>
 
 
@@ -436,7 +508,7 @@ const AddManajemenProjek = () => {
                     <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900">
                         Penanggung Jawab *
                     </label>
-                <Combobox  value={selected} onChange={setSelected}>
+                <Combobox  defaultValue={selected} onChange={setSelected}>
                   <div className="relative mt-2">
                     <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible focus-visible:ring-offset-2 focus-visible:ring-offset-1-300 sm:text-sm">
                       <Combobox.Input
@@ -510,7 +582,7 @@ const AddManajemenProjek = () => {
                           {errorPengguna}  
                       </div>
                     )}
-                    <p className="mt-3 text-sm leading-6 text-gray-600 pl-1">Pilih penanggung jawab dari users untuk mengatur projeknya.</p>
+                    <p className="mt-3 text-sm leading-6 text-gray-600 pl-1">Pilih penanggung jawab dari users untuk mengatur Mata Kuliah.</p>
                   </div>
                 </Combobox>
                 </div>
@@ -535,7 +607,7 @@ const AddManajemenProjek = () => {
                           {errorMessageLabel}  
                       </div>
                     )}
-                    <p className="mt-3 pl-1 text-sm leading-6 text-gray-600">Label akan menjadi tagline projek.</p>
+                    <p className="mt-3 pl-1 text-sm leading-6 text-gray-600">Label akan menjadi tagline Mata Kuliah.</p>
                   </div>
                 </div>
               </div>
