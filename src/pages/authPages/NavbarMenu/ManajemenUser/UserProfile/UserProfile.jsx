@@ -12,28 +12,14 @@ const text = "Hai David, sepertinya halaman ini bermasalah (url)"
 
 const UserProfile = () => {
 
-    const [ userProfile, setUserProfile ] = useState([]);
+    // const [ userProfile, setUserProfile ] = useState([]);
 
     const location = useLocation();
+   
+    const userData = location.state ? location.state.userData : null;
+
 
     const navigate = useNavigate();
-    
-    
-    useEffect(() => {
-        const getUserDetail = () => {
-            try {
-                const userData = location.state.userData;
-                setUserProfile(userData);
-            } catch (error) {
-                setUserProfile(null);
-                console.log("If you find this, i want to let u know. You are GAY ")
-            }
-        }
-      return () => {
-        getUserDetail();
-      }
-    }, [location.state.userData])
-
 
     const [ buttonLoading, setButtonLoading ] = useState(false)
 
@@ -46,7 +32,7 @@ const UserProfile = () => {
         
         const usersCollection = collection(db, "users");
         // Check ID
-        const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", userProfile.idUser)));
+        const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", userData.idUser)));
 
         if (querySnapshot.size === 0) {
         // No existing document found, add a new one
@@ -160,7 +146,7 @@ const UserProfile = () => {
             {/* Start - Content */}
             <main>
                 <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-                    {userProfile ? (
+                    {userData ? (
                         <div>
                         <div className="px-4 sm:px-0">
                             <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Pengguna</h3>
@@ -174,7 +160,7 @@ const UserProfile = () => {
                                     type="text" 
                                     name="usernameUser" 
                                     id="usernameUser"
-                                    defaultValue={userProfile.usernameUser}
+                                    defaultValue={`${userData.usernameUser}`}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
                             </div>
@@ -184,7 +170,7 @@ const UserProfile = () => {
                                     type="text" 
                                     name="positionUser" 
                                     id="positionUser"
-                                    defaultValue={userProfile.positionUser !== "" ? userProfile.positionUser : "Belum ada jabatan"}
+                                    defaultValue={`${userData.positionUser !== "" ? userData.positionUser : "Belum ada jabatan"}`}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
                             </div>
@@ -194,13 +180,13 @@ const UserProfile = () => {
                                     type="text" 
                                     name="roleUser" 
                                     id="roleUser"
-                                    defaultValue={userProfile.roleUser}
+                                    defaultValue={`${userData.roleUser}`}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Email address</dt>
-                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{userProfile.emailUser}</dd>
+                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{userData.emailUser}</dd>
                             </div>
                             
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
@@ -279,7 +265,7 @@ const UserProfile = () => {
                     :
                         <div className="px-4 sm:px-0">
                             <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Pengguna</h3>
-                            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">pengguna tidak ditemukan...</p>
+                            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">pengguna tidak ditemukan</p>
                         </div>
                     }
                     
