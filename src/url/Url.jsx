@@ -2,7 +2,7 @@ import React from 'react'
 
 const Url = () => {
   return (
-    <div className='p-48'>
+    <div className='p-14'>
         <h3>{'Urlnya ->'}</h3>
         <ul>
             <li>
@@ -27,28 +27,31 @@ const Url = () => {
                 <a href='/manajemen-user'>7. /manajemen-user</a>
             </li>
             <li>
-                <a href='/manajemen-user/user-baru'>8. /manajemen-user/user-baru</a>
+                <a href='/user-profile-admin'>8. /user-profile-admin</a>
             </li>
             <li>
-                <a href='/projek'>9. /projek</a>
+                <a href='/manajemen-user/user-baru'>9. /manajemen-user/user-baru</a>
             </li>
             <li>
-                <a href='/personal'>10. /personal</a>
+                <a href='/projek'>10. /projek</a>
             </li>
             <li>
-                <a href='/personal/projek-baru'>11. /personal/projek-baru</a>
+                <a href='/personal'>11. /personal</a>
             </li>
             <li>
-                <a href='/laporan'>12. /laporan</a>
+                <a href='/personal/projek-baru'>12. /personal/projek-baru</a>
             </li>
             <li>
-                <a href='/kalkulasi'>13. /kalkulasi</a>
+                <a href='/laporan'>13. /laporan</a>
             </li>
             <li>
-                <a href='/404'>14. /any</a>
+                <a href='/kalkulasi'>14. /kalkulasi</a>
             </li>
             <li>
-                <a href='/Url'>15. /Url</a>
+                <a href='/404'>15. /any</a>
+            </li>
+            <li>
+                <a href='/url'>16. /url</a>
             </li>
         </ul>
     </div>

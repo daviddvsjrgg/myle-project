@@ -12,10 +12,28 @@ const text = "Hai David, sepertinya halaman ini bermasalah (url)"
 
 const UserProfile = () => {
 
+    const [ userProfile, setUserProfile ] = useState([]);
+
     const location = useLocation();
-    console.log(location)
-    const userData = location.state.userData;
+
     const navigate = useNavigate();
+    
+    
+    useEffect(() => {
+        const getUserDetail = () => {
+            try {
+                const userData = location.state.userData;
+                setUserProfile(userData);
+            } catch (error) {
+                setUserProfile(null);
+                console.log("If you find this, i want to let u know. You are GAY ")
+            }
+        }
+      return () => {
+        getUserDetail();
+      }
+    }, [location.state.userData])
+
 
     const [ buttonLoading, setButtonLoading ] = useState(false)
 
@@ -25,14 +43,10 @@ const UserProfile = () => {
         const getUsername =  document.getElementById("usernameUser").value;
         const getJabatan =  document.getElementById("positionUser").value;
         const getRole =  document.getElementById("roleUser").value;
-
-        console.log("username: " + getUsername);
-        console.log("Jabatan: " + getJabatan);
-        console.log("Hak Akses: " + getRole);
-
+        
         const usersCollection = collection(db, "users");
         // Check ID
-        const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", userData.idUser)));
+        const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", userProfile.idUser)));
 
         if (querySnapshot.size === 0) {
         // No existing document found, add a new one
@@ -45,9 +59,9 @@ const UserProfile = () => {
         const doc = querySnapshot.docs[0];
         try {
             await updateDoc(doc.ref, {
-            usernameUser: getUsername,
-            positionUser: getJabatan,
-            roleUser: getRole,
+                usernameUser: getUsername,
+                positionUser: getJabatan,
+                roleUser: getRole,
             });
             setTimeout(() => {
                 navigate('/manajemen-user')
@@ -146,7 +160,8 @@ const UserProfile = () => {
             {/* Start - Content */}
             <main>
                 <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-                    <div>
+                    {userProfile ? (
+                        <div>
                         <div className="px-4 sm:px-0">
                             <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Pengguna</h3>
                             <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">Informasi personal pengguna dan mata kuliah.</p>
@@ -159,7 +174,7 @@ const UserProfile = () => {
                                     type="text" 
                                     name="usernameUser" 
                                     id="usernameUser"
-                                    defaultValue={`${userData.usernameUser}`}
+                                    defaultValue={userProfile.usernameUser}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
                             </div>
@@ -169,7 +184,7 @@ const UserProfile = () => {
                                     type="text" 
                                     name="positionUser" 
                                     id="positionUser"
-                                    defaultValue={`${userData.positionUser !== "" ? userData.positionUser : "Belum ada jabatan"}`}
+                                    defaultValue={userProfile.positionUser !== "" ? userProfile.positionUser : "Belum ada jabatan"}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
                             </div>
@@ -179,13 +194,13 @@ const UserProfile = () => {
                                     type="text" 
                                     name="roleUser" 
                                     id="roleUser"
-                                    defaultValue={`${userData.roleUser}`}
+                                    defaultValue={userProfile.roleUser}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Email address</dt>
-                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{userData.emailUser}</dd>
+                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{userProfile.emailUser}</dd>
                             </div>
                             
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
@@ -259,6 +274,15 @@ const UserProfile = () => {
                             </dl>
                         </div>
                      </div>
+                    )
+                    
+                    :
+                        <div className="px-4 sm:px-0">
+                            <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Pengguna</h3>
+                            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">pengguna tidak ditemukan...</p>
+                        </div>
+                    }
+                    
                 </div>
             </main>
             {/* End - Content */}
