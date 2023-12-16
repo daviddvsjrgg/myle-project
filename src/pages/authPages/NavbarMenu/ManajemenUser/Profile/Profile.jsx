@@ -196,13 +196,9 @@ const Profile = () => {
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Status</dt>
                                 {jabatan ? (
-                                    <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{jabatan}</dd>
+                                    <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{jabatan === "" ? "Belum ada jabatan" : jabatan}</dd>
                                     ):(
-                                        jabatan !== "" ? (
-                                            <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Proses...</dd>
-                                        ) : (    
-                                            <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Belum ada jabatan</dd>
-                                        )
+                                            <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{jabatan !== "" ? "Proses..." : "Belum ada data..."}</dd>
                                 )}
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
@@ -210,7 +206,7 @@ const Profile = () => {
                                 {role ? (
                                         <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{email}</dd>
                                     ):  
-                                        <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Proses...</dd>
+                                        <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Belum ada data</dd>
                                 }
                             </div>
                             
