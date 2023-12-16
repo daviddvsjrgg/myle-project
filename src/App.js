@@ -113,7 +113,7 @@ function App() {
                     emailUser: user.email,
                     roleUser: "user",
                     imageUser: user.photoURL,
-                    positionUser: ""
+                    positionUser: "Belum ada jabatan"
                   });
                   console.log("Document written with ID: ", docRef.id);
                 } catch (e) {

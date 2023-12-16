@@ -21,6 +21,8 @@ const Profile = () => {
     const [ role, setRole ] = useState('');
     const [ email, setEmail ] = useState('');
 
+    const [ loadingSimpan, setLoadingSimpan ] = useState('');
+
     useEffect(()=>{
 
             const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -31,6 +33,7 @@ const Profile = () => {
                 try {
                     const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
                     // Field from firestore
+                    const getId = querySnapshot.docs[0].data().idUser;
                     const getUsername = querySnapshot.docs[0].data().usernameUser;
                     const getJabatan = querySnapshot.docs[0].data().positionUser;
                     const getRole = querySnapshot.docs[0].data().roleUser;
@@ -40,6 +43,8 @@ const Profile = () => {
                     setJabatan(getJabatan);
                     setRole(getRole);
                     setEmail(getEmail);
+
+                    setLoadingSimpan(getId);
     
                 } catch (error) {
                     console.log("Error: " + error)
@@ -191,16 +196,20 @@ const Profile = () => {
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Status</dt>
                                 {jabatan ? (
-                                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{jabatan}</dd>
-                                    ):
-                                        <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Proses...</dd>
-                                    }
+                                    <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{jabatan}</dd>
+                                    ):(
+                                        jabatan !== "" ? (
+                                            <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Proses...</dd>
+                                        ) : (    
+                                            <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Belum ada jabatan</dd>
+                                        )
+                                )}
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Email address</dt>
                                 {role ? (
                                         <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{email}</dd>
-                                    ):
+                                    ):  
                                         <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Proses...</dd>
                                 }
                             </div>
@@ -214,7 +223,7 @@ const Profile = () => {
                                     </a>
                                 </dd>
                             </div>
-                            {jabatan && role && email ? (
+                            {loadingSimpan ? (
                                 buttonLoading ? (
                                     <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
                                         <button
