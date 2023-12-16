@@ -27,31 +27,34 @@ const Url = () => {
                 <a href='/manajemen-user'>7. /manajemen-user</a>
             </li>
             <li>
-                <a href='/user-profile-admin'>8. /user-profile-admin</a>
+                <a href='/user-profile'>8. /user-profile</a>
             </li>
             <li>
-                <a href='/manajemen-user/user-baru'>9. /manajemen-user/user-baru</a>
+                <a href='/user-profile-admin'>9. /user-profile-admin</a>
             </li>
             <li>
-                <a href='/projek'>10. /projek</a>
+                <a href='/manajemen-user/user-baru'>10. /manajemen-user/user-baru</a>
             </li>
             <li>
-                <a href='/personal'>11. /personal</a>
+                <a href='/projek'>11. /projek</a>
             </li>
             <li>
-                <a href='/personal/projek-baru'>12. /personal/projek-baru</a>
+                <a href='/personal'>12. /personal</a>
             </li>
             <li>
-                <a href='/laporan'>13. /laporan</a>
+                <a href='/personal/projek-baru'>13. /personal/projek-baru</a>
             </li>
             <li>
-                <a href='/kalkulasi'>14. /kalkulasi</a>
+                <a href='/laporan'>14. /laporan</a>
             </li>
             <li>
-                <a href='/404'>15. /any</a>
+                <a href='/kalkulasi'>15. /kalkulasi</a>
             </li>
             <li>
-                <a href='/url'>16. /url</a>
+                <a href='/404'>16. /any</a>
+            </li>
+            <li>
+                <a href='/url'>17. /url</a>
             </li>
         </ul>
     </div>

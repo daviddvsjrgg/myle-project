@@ -26,7 +26,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
   ]
   
   const profil = [
-    { name: 'Profil Anda', href: '/myProfile' },
+    { name: 'Profil Anda', href: '/user-profile' },
   ]
   
   const Navbar = () => {
