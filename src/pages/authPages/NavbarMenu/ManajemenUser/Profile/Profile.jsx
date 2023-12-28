@@ -206,7 +206,7 @@ const Profile = () => {
                                 {role ? (
                                         <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{email}</dd>
                                     ):  
-                                        <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Belum ada data</dd>
+                                        <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Belum ada data...</dd>
                                 }
                             </div>
                             
