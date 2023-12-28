@@ -92,7 +92,7 @@ const Projek = () => {
                               <img src={project.userData.imageUser} alt="" className="h-10 w-10 rounded-full bg-gray-50" />
                               <div className="text-sm leading-6">
                                 <p className="font-semibold text-gray-900">
-                                  <a href="/user-profile">
+                                  <a href="/user-profile-projek">
                                     <span className="absolute inset-0" />
                                     {project.userData.usernameUser}
                                   </a>
