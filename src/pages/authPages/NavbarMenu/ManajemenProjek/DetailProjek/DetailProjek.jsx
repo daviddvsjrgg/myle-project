@@ -1,74 +1,41 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react'
-import Bottom from '../../../../../components/BottomBar/Bottom'
 import Navbar from '../../../../../components/Navbar/Navbar'
-import { Dialog, Transition } from '@headlessui/react'
-import { collection, getDocs, query, updateDoc, where } from 'firebase/firestore';
-import { auth, db } from '../../../../../config/firebase/firebase';
-import { useNavigate } from 'react-router-dom';
+import Bottom from '../../../../../components/BottomBar/Bottom'
 import { BookOpenIcon } from '@heroicons/react/20/solid'
-import { onAuthStateChanged } from 'firebase/auth';
+import { useLocation, useNavigate } from 'react-router-dom'
+import { collection, getDocs, query, updateDoc, where } from 'firebase/firestore'
+import { db } from '../../../../../config/firebase/firebase'
+import { Dialog, Transition } from '@headlessui/react'
 
 const numberWa = '628990256825';
 const text = "Hai David, sepertinya halaman ini bermasalah (url)"
 
+const DetailProjek = () => {
 
-const Profile = () => {
+    // const [ userProfile, setUserProfile ] = useState([]);
+
+    const location = useLocation();
+   
+    const projectData = location.state ? location.state.projectData : null;
+
+
     const navigate = useNavigate();
+
     const [ buttonLoading, setButtonLoading ] = useState(false)
-
-    // Get Profile data
-    const [ username, setUsername ] = useState('');
-    const [ jabatan, setJabatan ] = useState('');
-    const [ role, setRole ] = useState('');
-    const [ email, setEmail ] = useState('');
-
-    const [ loadingSimpan, setLoadingSimpan ] = useState('');
-
-    useEffect(()=>{
-
-            const unsubscribe = onAuthStateChanged(auth, async (user) => {
-                // User is signed in, see docs for a list of available properties
-                // https://firebase.google.com/docs/reference/js/firebase.User
-                const usersCollection = collection(db, "users");
-        
-                try {
-                    const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
-                    // Field from firestore
-                    const getId = querySnapshot.docs[0].data().idUser;
-                    const getUsername = querySnapshot.docs[0].data().usernameUser;
-                    const getJabatan = querySnapshot.docs[0].data().positionUser;
-                    const getRole = querySnapshot.docs[0].data().roleUser;
-                    const getEmail = querySnapshot.docs[0].data().emailUser;
-
-                    setUsername(getUsername);
-                    setJabatan(getJabatan);
-                    setRole(getRole);
-                    setEmail(getEmail);
-
-                    setLoadingSimpan(getId);
-    
-                } catch (error) {
-                    console.log("Error: " + error)
-                }
-                // ...
-            
-            });
-            return () => {
-            unsubscribe();
-            }
-    }, [])
 
     const handleClickSimpan = async (e) => {
         e.preventDefault();
 
         const getUsername =  document.getElementById("usernameUser").value;
+        const getJabatan =  document.getElementById("positionUser").value;
+        const getRole =  document.getElementById("roleUser").value;
         
         const usersCollection = collection(db, "users");
         // Check ID
-        const querySnapshot = await getDocs(query(usersCollection, where("emailUser", "==", email)));
+        const querySnapshot = await getDocs(query(usersCollection, where("nameProject", "==", projectData.nameProject)));
 
         if (querySnapshot.size === 0) {
-        // No existing document found, add a new one
+        // No existing document found
             console.log("Terjadi Kesalahan")
         } else {
             setButtonLoading(true);
@@ -79,9 +46,11 @@ const Profile = () => {
         try {
             await updateDoc(doc.ref, {
                 usernameUser: getUsername,
+                positionUser: getJabatan,
+                roleUser: getRole,
             });
             setTimeout(() => {
-                navigate('/')
+                navigate('/manajemen-user')
             }, 3500);
             console.log("Document updated with ID: ", doc.id);
         } catch (e) {
@@ -170,90 +139,79 @@ const Profile = () => {
         {/* End Modal */}
             <header className="bg-white drop-shadow-md">
                 <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">User Profile</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Detail Mata Kuliah</h1>
                 </div>
             </header>
 
             {/* Start - Content */}
             <main>
                 <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+                    {projectData ? (
                         <div>
                         <div className="px-4 sm:px-0">
-                            <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Pengguna</h3>
-                            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">Informasi personal pengguna dan mata kuliah.</p>
+                            <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Mata Kuliah</h3>
+                            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">Informasi Mata Kuliah berisi gambar, pengguna terkait, dan detail lainnya.</p>
                         </div>
                         <div className="mt-6 border-t border-gray-100">
                             <dl className="divide-y divide-gray-100">
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                                <dt className="text-sm font-medium leading-6 text-gray-900">Username</dt>
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Mata Kuliah</dt>
+                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{projectData.nameProject}</dd>
+                            </div>
+                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Penanggung Jawab</dt>
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0 h-10 w-10">
+                                    <img className="h-10 w-10 rounded-full" src={projectData.userData.imageUser} alt=":/" />
+                                    </div>
+                                    <div className="ml-4">
+                                    <div className="text-sm font-medium text-gray-900">{projectData.userData.usernameUser}</div>
+                                    <div className="text-sm text-gray-500">{projectData.userData.positionUser}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Label</dt>
                                 <input 
                                     type="text" 
-                                    name="usernameUser" 
-                                    id="usernameUser"
-                                    defaultValue={`${username}`}
+                                    name="roleUser" 
+                                    id="roleUser"
+                                    defaultValue={`${projectData.labelProject}`}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                                <dt className="text-sm font-medium leading-6 text-gray-900">Status</dt>
-                                {jabatan ? (
-                                    <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{jabatan === "" ? "Belum ada jabatan" : jabatan}</dd>
-                                    ):(
-                                            <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{jabatan !== "" ? "Proses..." : "Belum ada data..."}</dd>
-                                )}
-                            </div>
-                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                                <dt className="text-sm font-medium leading-6 text-gray-900">Email address</dt>
-                                {role ? (
-                                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{email}</dd>
-                                    ):  
-                                        <dd className="animate-pulse mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">Belum ada data...</dd>
-                                }
-                            </div>
-                            
-                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Profile</dt>
                                 <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                                    Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Username" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
-                                    <a href={`https://wa.me/${numberWa}?text=${text}`} target='_blank' rel="noreferrer" className=" text-sm leading-6 text-blue-600">
+                                    Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Label" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
+                                    <a href={`https://wa.me/${numberWa}?text=${text}`} className=" text-sm leading-6 text-blue-600">
                                         developer.
                                     </a>
                                 </dd>
                             </div>
-                            {loadingSimpan ? (
-                                buttonLoading ? (
-                                    <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
-                                        <button
-                                            type="submit"
-                                            disabled
-                                            className="animate-pulse rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                                            >
-                                        Loading...
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
-                                        <button
-                                            type="submit"
-                                            onClick={handleClickSimpan}
-                                            className="rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                                            >
-                                        Simpan
-                                        </button>
-                                    </div>
-                                )
-                            ) : (
+
+                            {buttonLoading ? (
                                 <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
                                     <button
                                         type="submit"
                                         disabled
-                                        className="animate-pulse rounded-md bg-indigo-400 px-10 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                        className="animate-pulse rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                        >
+                                    Loading...
+                                    </button>
+                                </div>
+                            ):
+                                <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
+                                    <button
+                                        type="submit"
+                                        onClick={handleClickSimpan}
+                                        className="rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                         >
                                     Simpan
                                     </button>
                                 </div>
-                            )}
                             
+                            }
 
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Mata Kuliah</dt>
@@ -293,6 +251,15 @@ const Profile = () => {
                             </dl>
                         </div>
                      </div>
+                    )
+                    
+                    :
+                        <div className="px-4 sm:px-0">
+                            <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Pengguna</h3>
+                            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">pengguna tidak ditemukan</p>
+                        </div>
+                    }
+                    
                 </div>
             </main>
             {/* End - Content */}
@@ -302,4 +269,4 @@ const Profile = () => {
   )
 }
 
-export default Profile
+export default DetailProjek

@@ -202,6 +202,8 @@ const Login = () => {
               Register
             </a>
             <h1>Akun admin : admin1@gmail.com || 123456 </h1>
+            <h1>-</h1>
+            <h1>App Made By  : David Dwiyanto</h1>
           </p>
         </div>
     </div>

@@ -107,7 +107,7 @@ const AddManajemenProjek = () => {
                   if (selectedFile !== null) {
                     setDroppedFile(null);
                     const sendFile = ref(getStorage(), `ProjekFile/${uuidv4()}`);
-                    uploadBytes(sendFile, selectedFile).then(snapshot => {
+                    await uploadBytes(sendFile, selectedFile).then(snapshot => {
                       console.log('File uploaded successfully:', snapshot);
                       getDownloadURL(sendFile).then(downloadURL => {
                         console.log('File download URL:', downloadURL);
@@ -120,6 +120,7 @@ const AddManajemenProjek = () => {
                               const year = currentDate.getFullYear();
                               const formattedDateString = `${dayAndMonth}, ${year}`;
                               const docRef = await addDoc(usersCollection, {
+                                idProject: `projek-${uuidv4()}`,
                                 nameProject: namaProjek,
                                 descriptionProject: deskripsi,
                                 imageUrlProject: downloadURL,
@@ -134,7 +135,7 @@ const AddManajemenProjek = () => {
                             } catch (error) {
                                 console.log(error);
                             }
-                          }, 5000);
+                          }, 1500);
                         } catch (error) {
                           
                         }
@@ -148,10 +149,10 @@ const AddManajemenProjek = () => {
                   if (droppedFile !== null ){
                     setSelectedFile(null);
                     const sendFile = ref(getStorage(), `ProjekFile/${uuidv4()}`);
-                    uploadBytes(sendFile, droppedFile).then(snapshot => {
+                    await uploadBytes(sendFile, droppedFile).then(snapshot => {
                       console.log('File uploaded successfully:', snapshot);
-                      getDownloadURL(sendFile).then(downloadURL => {
-                        console.log('File download URL:', downloadURL);
+                    getDownloadURL(sendFile).then(downloadURL => {
+                      console.log('File download URL:', downloadURL);
                         setTimeout(async () => {
                           try {   
                             const currentDate = new Date();
@@ -160,6 +161,7 @@ const AddManajemenProjek = () => {
                             const year = currentDate.getFullYear();
                             const formattedDateString = `${dayAndMonth}, ${year}`;
                             const docRef = await addDoc(usersCollection, {
+                              idProject: `projek-${uuidv4()}`,
                               nameProject: namaProjek,
                               descriptionProject: deskripsi,
                               imageUrlProject: downloadURL,
@@ -174,7 +176,7 @@ const AddManajemenProjek = () => {
                           } catch (error) {
                               console.log(error);
                           }
-                        }, 5000);
+                        }, 1500);
                       }).catch(error => {
                         console.error('Error getting download URL:', error);
                       });
@@ -190,6 +192,7 @@ const AddManajemenProjek = () => {
                       const year = currentDate.getFullYear();
                       const formattedDateString = `${dayAndMonth}, ${year}`;
                       const docRef = await addDoc(usersCollection, {
+                        idProject: `projek-${uuidv4()}`,
                         nameProject: namaProjek,
                         descriptionProject: deskripsi,
                         imageUrlProject: "https://images.unsplash.com/photo-1635321349581-d3a6ff81a9a6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG5vJTIwaW1hZ2V8ZW58MHx8MHx8fDA%3D",
