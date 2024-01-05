@@ -4,8 +4,11 @@ import Bottom from '../../../../../components/BottomBar/Bottom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { collection, getDocs, query, updateDoc, where } from 'firebase/firestore'
 import { db } from '../../../../../config/firebase/firebase'
-import { Dialog, Transition } from '@headlessui/react'
+import { Combobox, Dialog, Transition } from '@headlessui/react'
 import { UserIcon } from '@heroicons/react/24/solid'
+import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
+import { v4 as uuidv4 } from 'uuid';
+import { deleteObject, getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage'
 
 const numberWa = '628990256825';
 const text = "Hai David, sepertinya halaman ini bermasalah (url)"
@@ -13,10 +16,135 @@ const text = "Hai David, sepertinya halaman ini bermasalah (url)"
 const DetailProjek = () => {
     
     const location = useLocation();
-    
     const projectData = location.state ? location.state.projectData : null;
     
     const [ desc, setDesc ] = useState(projectData.descriptionProject || '');
+    const [ data, setData ] = useState([]);
+
+    const [ errorMessagePIC, setErrorMessagePIC] = useState('');
+
+    const [ imageLoaded, setImageLoaded ] = useState(false);
+    const [ selectedImagePreview, setSelectedImagePreview ] = useState(null);
+
+    const handleImageLoad = () => {
+        setImageLoaded(true);
+    };
+
+    const handleFileInputChange = async (event) => {
+        const file = event.target.files[0];
+    
+        if (file) {
+            const reader = new FileReader();
+    
+            const imageUrl = URL.createObjectURL(file);
+            setSelectedImagePreview(imageUrl);
+            setImageLoaded(true);
+    
+            reader.readAsDataURL(file);
+            console.log('Selected file:', file);
+            
+            const imageName = `${uuidv4()}`
+            const storage = getStorage();
+            const storageRef = ref(storage, `ProjekFile/${imageName}`);
+    
+            try {
+                // Upload the file
+                await uploadBytes(storageRef, file);
+    
+                // Get the download URL
+                const downloadURL = await getDownloadURL(storageRef);
+                console.log('File uploaded successfully. Download URL:', downloadURL);
+    
+                try {
+                    const usersCollection = collection(db, "projects");
+    
+                    const querySnapshot = await getDocs(query(usersCollection,
+                        where("idProject", "==", projectData.idProject),
+                    ));
+    
+                    const doc = querySnapshot.docs[0];
+    
+                    // Delete the previous image if it exists
+                    const previousImageUrl = doc.data().imageUrlProject;
+                    if (previousImageUrl) {
+                        const previousImageRef = ref(storage, `ProjekFile/${projectData.imageNameProject}`);
+                        await deleteObject(previousImageRef);
+                        console.log('Previous image deleted successfully.');
+                    }
+    
+                    // Update the Firestore document with the new image URL
+                    await updateDoc(doc.ref, {
+                        imageUrlProject: downloadURL,
+                        imageNameProject: imageName,
+                    });
+                    // setButtonLoading(true);
+                    setCount(3);
+                    setOpen(true);
+                    
+                    setTimeout(() => {
+                        setOpen(false);
+                        // navigate('/manajemen-projek');
+                    }, 3500);
+                } catch (error) {
+                    console.log("Err Update Image: " + error);
+                    const usersCollection = collection(db, "projects");
+    
+                    const querySnapshot = await getDocs(query(usersCollection,
+                        where("idProject", "==", projectData.idProject),
+                    ));
+    
+                    const doc = querySnapshot.docs[0];
+                    await updateDoc(doc.ref, {
+                        imageUrlProject: downloadURL,
+                        imageNameProject: imageName,
+                    });
+                    // setButtonLoading(true);
+                    setCount(3);
+                    setOpen(true);
+                    
+                    setTimeout(() => {
+                        setOpen(false);
+                        // navigate('/manajemen-projek');
+                    }, 3500);
+                    
+                }
+            } catch (error) {
+                console.error('Error uploading file:', error);
+            }
+        }
+    };
+    
+
+    useEffect(() =>{
+        const fetchData = async () => {
+        const usersCollection = collection(db, "users");
+
+        try {
+            const snapshot = await getDocs(usersCollection);
+            const fetchedData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            }));
+            setData(fetchedData);
+        } catch (error) {
+            console.log("Error fetching data: ", error);
+        }
+        }
+        fetchData();
+    }, []);
+
+    const [selected, setSelected] = useState(data[0])
+    const [queryFilter, setQuery] = useState('')
+
+    const filteredPeople =
+    queryFilter === ''
+      ? data
+      : data.filter((person) =>
+          person.usernameUser
+            .toLowerCase()
+            .replace(/\s+/g, '')
+            .includes(queryFilter.toLowerCase().replace(/\s+/g, ''))
+        )
 
     const getDesc = (event) => {
         setDesc(event.target.value)
@@ -31,10 +159,11 @@ const DetailProjek = () => {
 
         const getLabel = document.getElementById("labelProject").value;
 
-        console.log("dead: " + getLabel + desc);
+        const getPengguna = document.getElementById('pic').value;
+        const setPengguna = getPengguna.toString();
         
         const usersCollection = collection(db, "projects");
-
+        
         // Check ID
         const querySnapshot = await getDocs(query(usersCollection,
             where("nameProject", "==", projectData.nameProject),
@@ -51,20 +180,47 @@ const DetailProjek = () => {
             // Compare existing values with new values
             const existingLabel = doc.data().labelProject;
             const existingDescription = doc.data().descriptionProject;
+            const existingPengguna = doc.data().picProject;
+
+            
         
-            if (existingLabel === getLabel && existingDescription === desc) {
-                // No changes, do not update the document
-                setButtonLoading(true);
-                setCount(3);
-                setOpen(true);
-                setTimeout(() => {
-                    navigate('/manajemen-projek');
-                }, 3500);
-                console.log("No changes.");
+            if (existingPengguna === setPengguna) {
+               // PIC sama
+                setErrorMessagePIC("Penanggung jawab tidak boleh sama.");
+                
+            } else if (existingLabel === getLabel && existingDescription === desc && (existingPengguna === null || existingPengguna === '') ) {
+                 // No changes, do not update the document
+                 setButtonLoading(true);
+                 setCount(3);
+                 setOpen(true);
+                 setTimeout(() => {
+                     navigate('/manajemen-projek');
+                 }, 3500);
+                 console.log("No changes.");
             } else {
-                try {
-                    // Document with the same nameProject and labelProject found, update the existing document
-                    await updateDoc(doc.ref, {
+                if (selected) {
+                    setErrorMessagePIC("");
+                    console.log("PIC Berubah")
+                    try {
+                        await updateDoc(doc.ref, {
+                            labelProject: getLabel,
+                            descriptionProject: desc,
+                            picProject: setPengguna
+                        });
+                         setButtonLoading(true);
+                         setCount(3);
+                         setOpen(true);
+                        
+                         setTimeout(() => {
+                             navigate('/manajemen-projek');
+                         }, 3500);
+                    } catch (error) {
+                        console.log("PIC err: " + error)
+                    }
+                } else {
+                    try {
+                        // Document with the same nameProject and labelProject found, update the existing document
+                        await updateDoc(doc.ref, {
                         labelProject: getLabel,
                         descriptionProject: desc,
                     });
@@ -72,15 +228,16 @@ const DetailProjek = () => {
                     setButtonLoading(true);
                     setCount(3);
                     setOpen(true);
-        
+                    
                     setTimeout(() => {
                         navigate('/manajemen-projek');
                     }, 3500);
         
-                    console.log("Document updated with ID: ", doc.id);
-                } catch (e) {
-                    // Handle the error during document update
-                    console.error("Error updating document: ", e);
+                    console.log("Ubah tanpa PIC: ", doc.id);
+                    } catch (e) {
+                        // Handle the error during document update
+                        console.error("Error updating document: ", e);
+                    }
                 }
             }
         }
@@ -107,11 +264,7 @@ const DetailProjek = () => {
         return () => clearInterval(countdownInterval);
     }, [count]);
 
-    const [imageLoaded, setImageLoaded] = useState(false);
-
-    const handleImageLoad = () => {
-        setImageLoaded(true);
-    };
+    
 
   return (
     <div className="min-h-full">
@@ -184,31 +337,39 @@ const DetailProjek = () => {
                              <div className="md:w-1/3 scale-100 transition-all duration-400 hover:scale-105 px-2">
                                 {projectData.imageUrlProject ? (
                                     <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md relative hover:opacity-90">
-                                        <a href="/gantiGambar" className="block w-full h-full">
-                                            {!imageLoaded && (
-                                                <div className="placeholder">
-                                                    <div role="status" className="space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center">
-                                                        <div className="flex items-center justify-center w-full h-48 bg-gray-300 rounded sm:w-96 dark:bg-gray-700">
-                                                            <svg className="w-10 h-10 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                                                            <path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z"/>
-                                                            </svg>
-                                                        </div>
-                                                        <span className="sr-only">Loading...</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            <img
-                                                className={`lg:h-auto md:h-auto w-full object-center scale-110 transition-all duration-400 ${imageLoaded ? 'visible' : 'hidden'}`}
-                                                src={projectData.imageUrlProject}
-                                                alt="blog"
-                                                loading="eager"
-                                                onLoad={handleImageLoad}
-                                            />
-                                            <div className={`absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-90 transition-opacity ${imageLoaded ? 'visible' : 'hidden'}`}>
-                                                <p className="text-white text-lg font-bold">Ganti Foto</p>
+                                    <label htmlFor="imageInput" className="block w-full h-full cursor-pointer">
+                                      {!imageLoaded && (
+                                        <div className="placeholder">
+                                          <div role="status" className="space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center">
+                                            <div className="flex items-center justify-center w-full h-48 bg-gray-300 rounded sm:w-96 dark:bg-gray-700">
+                                              <svg className="w-10 h-10 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                                                <path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z"/>
+                                              </svg>
                                             </div>
-                                        </a>
-                                    </div>
+                                            <span className="sr-only">Loading...</span>
+                                          </div>
+                                        </div>
+                                      )}
+                                      <img
+                                        className={`lg:h-auto md:h-auto w-full object-center scale-110 transition-all duration-400 ${imageLoaded ? 'visible' : 'hidden'}`}
+                                        src={selectedImagePreview || projectData.imageUrlProject}
+                                        alt="blog"
+                                        loading="eager"
+                                        onLoad={handleImageLoad}
+                                        onClick={() => document.getElementById('imageInput').click()}
+                                      />
+                                      <div className={`absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-90 transition-opacity ${imageLoaded ? 'visible' : 'hidden'}`}>
+                                        <p className="text-white text-lg font-bold">Ganti Foto</p>
+                                      </div>
+                                    </label>
+                                    <input
+                                      type="file"
+                                      id="imageInput"
+                                      accept="image/*"
+                                      style={{ display: 'none' }}
+                                      onChange={handleFileInputChange}
+                                    />
+                                  </div>
                                 ) : (
                                     <div role="status" className="space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center">
                                         <div className="flex items-center justify-center w-full h-48 bg-gray-300 rounded sm:w-96 dark:bg-gray-700">
@@ -270,12 +431,94 @@ const DetailProjek = () => {
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Mata Kuliah</dt>
                                 <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                                    Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Label" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
+                                    Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Gambar, Label, Deskripsi, Penanggung Jawab" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
                                     <a href={`https://wa.me/${numberWa}?text=${text}`} className=" text-sm leading-6 text-blue-600">
                                         developer.
                                     </a>
                                 </dd>
                             </div>
+                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Ganti Penanggung Jawab</dt>
+                                <Combobox  defaultValue={selected} onChange={setSelected}>
+                                    <div className="relative">
+                                        <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible focus-visible:ring-offset-2 focus-visible:ring-offset-1-300 sm:text-sm">
+                                        <Combobox.Input
+                                            placeholder='Cari penanggung jawab...'
+                                            id="pic"
+                                            name="pic"
+                                            autoComplete="off"
+                                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                                                errorMessagePIC ? 'ring-red-600' : 'ring-gray-300'
+                                              }`}
+                                            displayValue={(person) => person.emailUser}
+                                            onChange={(event) => setQuery(event.target.value)}
+                                        />
+                                        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                                            <ChevronDownIcon
+                                            className="h-5 w-5 text-gray-400"
+                                            aria-hidden="true"
+                                            />
+                                        </Combobox.Button>
+                                        </div>
+                                        <Transition
+                                        as={Fragment}
+                                        leave="transition ease-in duration-100"
+                                        leaveFrom="opacity-100"
+                                        leaveTo="opacity-0"
+                                        afterLeave={() => setQuery('')}
+                                        >
+                                        <Combobox.Options 
+                                        className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                            {filteredPeople.length === 0 && queryFilter !== '' ? (
+                                            <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                                                Tidak ditemukan.
+                                            </div>
+                                            ) : (
+                                            filteredPeople.map((person) => (
+                                                <Combobox.Option
+                                                key={person.idUser}
+                                                className={({ active }) =>
+                                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                                    active ? 'bg-indigo-500 text-white' : 'text-gray-900'
+                                                    }`
+                                                }
+                                                value={person}
+                                                >
+                                                {({ selected, active }) => (
+                                                    <>
+                                                    <span
+                                                        className={`block truncate ${
+                                                        selected ? 'font-medium' : 'font-normal'
+                                                        }`}
+                                                    >
+                                                        {person.usernameUser} - {person.emailUser} 
+                                                    </span>
+                                                    {selected ? (
+                                                        <span
+                                                        className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                                                            active ? 'text-white' : 'text-teal-600'
+                                                        }`}
+                                                        >
+                                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                                        </span>
+                                                    ) : null}
+                                                    </>
+                                                )}
+                                                </Combobox.Option>
+                                            ))
+                                            )}
+                                        </Combobox.Options>
+                                        </Transition>
+                                        {errorMessagePIC && (
+                                            <div className="text-red-500 text-sm mt-1 pl-1">
+                                                {errorMessagePIC}  
+                                            </div>
+                                        )}
+                                        <p className="mt-3 text-sm leading-6 text-gray-600 pl-1">Kosongkan jika tidak ingin diubah.</p>
+                                    </div>
+                                    </Combobox>
+                            </div>
+                            
 
                             {buttonLoading ? (
                                 <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
