@@ -109,7 +109,8 @@ const AddManajemenProjek = () => {
                 if (selectedFile !== null || droppedFile !== null) {
                   if (selectedFile !== null) {
                     setDroppedFile(null);
-                    const sendFile = ref(getStorage(), `ProjekFile/${uuidv4()}`);
+                    const imageName = `${uuidv4()}`
+                    const sendFile = ref(getStorage(), `ProjekFile/${imageName}`);
                     await uploadBytes(sendFile, selectedFile).then(snapshot => {
                       console.log('File uploaded successfully:', snapshot);
                       getDownloadURL(sendFile).then(downloadURL => {
@@ -127,6 +128,7 @@ const AddManajemenProjek = () => {
                                 nameProject: namaProjek,
                                 descriptionProject: deskripsi,
                                 imageUrlProject: downloadURL,
+                                imageNameProject: imageName,
                                 picProject: setPengguna,
                                 labelProject: label,
                                 statusProject: "Active",
@@ -151,7 +153,8 @@ const AddManajemenProjek = () => {
                   } 
                   if (droppedFile !== null ){
                     setSelectedFile(null);
-                    const sendFile = ref(getStorage(), `ProjekFile/${uuidv4()}`);
+                    const imageName = `${uuidv4()}`
+                    const sendFile = ref(getStorage(), `ProjekFile/${imageName}`);
                     await uploadBytes(sendFile, droppedFile).then(snapshot => {
                       console.log('File uploaded successfully:', snapshot);
                     getDownloadURL(sendFile).then(downloadURL => {
@@ -168,6 +171,7 @@ const AddManajemenProjek = () => {
                               nameProject: namaProjek,
                               descriptionProject: deskripsi,
                               imageUrlProject: downloadURL,
+                              imageNameProject: imageName,
                               picProject: setPengguna,
                               labelProject: label,
                               statusProject: "Active",
@@ -189,6 +193,7 @@ const AddManajemenProjek = () => {
                   }
                 } else {
                     try {   
+                      const imageName = `${uuidv4()}`
                       const currentDate = new Date();
                       const options = { day: 'numeric', month: 'short' };
                       const dayAndMonth = currentDate.toLocaleDateString('id-ID', options);
@@ -199,6 +204,7 @@ const AddManajemenProjek = () => {
                         nameProject: namaProjek,
                         descriptionProject: deskripsi,
                         imageUrlProject: "https://images.unsplash.com/photo-1635321349581-d3a6ff81a9a6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG5vJTIwaW1hZ2V8ZW58MHx8MHx8fDA%3D",
+                        imageNameProject: imageName,
                         picProject: setPengguna,
                         labelProject: label,
                         statusProject: "Active",
@@ -217,7 +223,7 @@ const AddManajemenProjek = () => {
               }
             } else {
               window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-              setErrorMessageNamaProjek("Nama projek sudah ada / label sama")
+              setErrorMessageNamaProjek("Nama projek sudah ada & label sama")
             }
       } catch (error) {
         console.log(error);
@@ -431,12 +437,12 @@ const AddManajemenProjek = () => {
                     errorMessageNamaProjek ? 'ring-red-600' : 'ring-gray-300'
                   }`}
                 />
-                <p className="mt-3 text-sm leading-6 text-gray-600">Nama bersifat permanen dan tidak bisa diubah.</p>
                 {errorMessageNamaProjek && (
                   <div className="text-red-500 text-sm mt-1">
                       {errorMessageNamaProjek}  
                   </div>
                 )}
+                <p className="mt-3 text-sm leading-6 text-gray-600">Nama bersifat permanen dan tidak bisa diubah.</p>
               </div>
             </div>
                 </div>
@@ -567,7 +573,7 @@ const AddManajemenProjek = () => {
                                       selected ? 'font-medium' : 'font-normal'
                                     }`}
                                   >
-                                    {person.usernameUser}
+                                    {person.usernameUser} - {person.emailUser} 
                                   </span>
                                   {selected ? (
                                     <span
