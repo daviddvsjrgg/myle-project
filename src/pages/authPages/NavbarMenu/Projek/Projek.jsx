@@ -73,12 +73,14 @@ const Projek = () => {
                     <div key={project.id} className="p-4 md:w-1/3 scale-100 transition-all duration-400 hover:scale-105">
                       <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md">
                         <a href="/toProject">
-                          <img className="lg:h-44 md:h-32 w-full object-center scale-110 transition-all duration-400 hover:scale-100  hover:opacity-75" src={project.imageUrlProject} alt="blog" />
+                          <img className="lg:h-44 md:h-32 w-screen object-center scale-110 transition-all duration-400 hover:scale-100  hover:opacity-75" src={project.imageUrlProject} alt="blog" />
                         </a>
                         <div className="p-6">
                           <div className="flex justify-between">        
                             <a href="/toProject">
-                              <h1 className="title-font text-lg font-medium text-gray-600 mb-3 scale-100 transition-all hover:scale-105">{project.nameProject}</h1>
+                              <h1 className="title-font text-lg font-medium text-gray-600 mb-3 scale-100">
+                                {project.nameProject} {project.nameProject.includes("-") ? '' : `- ${project.labelProject}`}
+                              </h1>
                             </a>
                           </div>
                           <div className="flex float-right">
@@ -135,9 +137,6 @@ const Projek = () => {
                 </div>
               </div>
             </section>
-
-
-
 
             {/* <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-3">
               {data.map((project) => (

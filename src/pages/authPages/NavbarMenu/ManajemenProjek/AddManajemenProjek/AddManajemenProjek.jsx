@@ -97,7 +97,10 @@ const AddManajemenProjek = () => {
 
         const usersCollection = collection(db, "projects");
 
-        const querySnapshot = await getDocs(query(usersCollection, where("nameProject", "==", namaProjek)));
+        const querySnapshot = await getDocs(query(usersCollection,
+           where("nameProject", "==", namaProjek),
+           where("labelProject", "==", label)
+           ));
     
         if (querySnapshot.size === 0) {
               try {
@@ -214,7 +217,7 @@ const AddManajemenProjek = () => {
               }
             } else {
               window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-              setErrorMessageNamaProjek("Nama projek sudah ada")
+              setErrorMessageNamaProjek("Nama projek sudah ada / label sama")
             }
       } catch (error) {
         console.log(error);
@@ -428,6 +431,7 @@ const AddManajemenProjek = () => {
                     errorMessageNamaProjek ? 'ring-red-600' : 'ring-gray-300'
                   }`}
                 />
+                <p className="mt-3 text-sm leading-6 text-gray-600">Nama bersifat permanen dan tidak bisa diubah.</p>
                 {errorMessageNamaProjek && (
                   <div className="text-red-500 text-sm mt-1">
                       {errorMessageNamaProjek}  
@@ -518,6 +522,7 @@ const AddManajemenProjek = () => {
                         placeholder='Cari penanggung jawab...'
                         id="pic"
                         name="pic"
+                        autoComplete="off"
                         className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                           errorPengguna ? 'ring-red-600' : 'ring-gray-300'
                         }`}
