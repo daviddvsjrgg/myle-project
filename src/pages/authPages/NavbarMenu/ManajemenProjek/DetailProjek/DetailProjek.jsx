@@ -1,24 +1,27 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 import Navbar from '../../../../../components/Navbar/Navbar'
 import Bottom from '../../../../../components/BottomBar/Bottom'
-import { BookOpenIcon } from '@heroicons/react/20/solid'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { collection, getDocs, query, updateDoc, where } from 'firebase/firestore'
 import { db } from '../../../../../config/firebase/firebase'
 import { Dialog, Transition } from '@headlessui/react'
+import { UserIcon } from '@heroicons/react/24/solid'
 
 const numberWa = '628990256825';
 const text = "Hai David, sepertinya halaman ini bermasalah (url)"
 
 const DetailProjek = () => {
-
-    // const [ userProfile, setUserProfile ] = useState([]);
-
+    
     const location = useLocation();
-   
+    
     const projectData = location.state ? location.state.projectData : null;
+    
+    const [ desc, setDesc ] = useState(projectData.descriptionProject || '');
 
-
+    const getDesc = (event) => {
+        setDesc(event.target.value)
+    }
+ 
     const navigate = useNavigate();
 
     const [ buttonLoading, setButtonLoading ] = useState(false)
@@ -26,36 +29,60 @@ const DetailProjek = () => {
     const handleClickSimpan = async (e) => {
         e.preventDefault();
 
-        const getUsername =  document.getElementById("usernameUser").value;
-        const getJabatan =  document.getElementById("positionUser").value;
-        const getRole =  document.getElementById("roleUser").value;
-        
-        const usersCollection = collection(db, "users");
-        // Check ID
-        const querySnapshot = await getDocs(query(usersCollection, where("nameProject", "==", projectData.nameProject)));
+        const getLabel = document.getElementById("labelProject").value;
 
+        console.log("dead: " + getLabel + desc);
+        
+        const usersCollection = collection(db, "projects");
+
+        // Check ID
+        const querySnapshot = await getDocs(query(usersCollection,
+            where("nameProject", "==", projectData.nameProject),
+            where("labelProject", "==", projectData.labelProject),
+            where("idProject", "==", projectData.idProject),
+        ));
+        
         if (querySnapshot.size === 0) {
-        // No existing document found
-            console.log("Terjadi Kesalahan")
+            // No existing document found
+            console.log("Terjadi Kesalahan");
         } else {
-            setButtonLoading(true);
-            setCount(3);
-            setOpen(true);
-        // Document with the same idUsers already exists, update the existing document
-        const doc = querySnapshot.docs[0];
-        try {
-            await updateDoc(doc.ref, {
-                usernameUser: getUsername,
-                positionUser: getJabatan,
-                roleUser: getRole,
-            });
-            setTimeout(() => {
-                navigate('/manajemen-user')
-            }, 3500);
-            console.log("Document updated with ID: ", doc.id);
-        } catch (e) {
-            console.error("Error updating document: ", e);
-        }
+            const doc = querySnapshot.docs[0];
+        
+            // Compare existing values with new values
+            const existingLabel = doc.data().labelProject;
+            const existingDescription = doc.data().descriptionProject;
+        
+            if (existingLabel === getLabel && existingDescription === desc) {
+                // No changes, do not update the document
+                setButtonLoading(true);
+                setCount(3);
+                setOpen(true);
+                setTimeout(() => {
+                    navigate('/manajemen-projek');
+                }, 3500);
+                console.log("No changes.");
+            } else {
+                try {
+                    // Document with the same nameProject and labelProject found, update the existing document
+                    await updateDoc(doc.ref, {
+                        labelProject: getLabel,
+                        descriptionProject: desc,
+                    });
+        
+                    setButtonLoading(true);
+                    setCount(3);
+                    setOpen(true);
+        
+                    setTimeout(() => {
+                        navigate('/manajemen-projek');
+                    }, 3500);
+        
+                    console.log("Document updated with ID: ", doc.id);
+                } catch (e) {
+                    // Handle the error during document update
+                    console.error("Error updating document: ", e);
+                }
+            }
         }
     }
 
@@ -79,6 +106,12 @@ const DetailProjek = () => {
         // Cleanup the interval when the component unmounts
         return () => clearInterval(countdownInterval);
     }, [count]);
+
+    const [imageLoaded, setImageLoaded] = useState(false);
+
+    const handleImageLoad = () => {
+        setImageLoaded(true);
+    };
 
   return (
     <div className="min-h-full">
@@ -148,8 +181,47 @@ const DetailProjek = () => {
                 <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
                     {projectData ? (
                         <div>
+                             <div className="md:w-1/3 scale-100 transition-all duration-400 hover:scale-105 px-2">
+                                {projectData.imageUrlProject ? (
+                                    <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md relative hover:opacity-90">
+                                        <a href="/gantiGambar" className="block w-full h-full">
+                                            {!imageLoaded && (
+                                                <div className="placeholder">
+                                                    <div role="status" className="space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center">
+                                                        <div className="flex items-center justify-center w-full h-48 bg-gray-300 rounded sm:w-96 dark:bg-gray-700">
+                                                            <svg className="w-10 h-10 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                                                            <path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <span className="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <img
+                                                className={`lg:h-auto md:h-auto w-full object-center scale-110 transition-all duration-400 ${imageLoaded ? 'visible' : 'hidden'}`}
+                                                src={projectData.imageUrlProject}
+                                                alt="blog"
+                                                loading="eager"
+                                                onLoad={handleImageLoad}
+                                            />
+                                            <div className={`absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-90 transition-opacity ${imageLoaded ? 'visible' : 'hidden'}`}>
+                                                <p className="text-white text-lg font-bold">Ganti Foto</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <div role="status" className="space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center">
+                                        <div className="flex items-center justify-center w-full h-48 bg-gray-300 rounded sm:w-96 dark:bg-gray-700">
+                                            <svg className="w-10 h-10 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                                            <path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z"/>
+                                            </svg>
+                                        </div>
+                                        <span className="sr-only">Loading...</span>
+                                    </div>
+                                )}
+                            </div>
                         <div className="px-4 sm:px-0">
-                            <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Mata Kuliah</h3>
+                            <h3 className="text-base font-semibold leading-7 text-gray-900 mt-4">Detail Mata Kuliah</h3>
                             <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">Informasi Mata Kuliah berisi gambar, pengguna terkait, dan detail lainnya.</p>
                         </div>
                         <div className="mt-6 border-t border-gray-100">
@@ -171,17 +243,32 @@ const DetailProjek = () => {
                                 </div>
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Email</dt>
+                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{projectData.userData.emailUser}</dd>
+                            </div>
+                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Label</dt>
                                 <input 
                                     type="text" 
-                                    name="roleUser" 
-                                    id="roleUser"
+                                    name="labelProject" 
+                                    id="labelProject"
                                     defaultValue={`${projectData.labelProject}`}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                                <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Profile</dt>
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Deskripsi</dt>
+                                <textarea 
+                                    type="text" 
+                                    name="descriptionProject" 
+                                    id="descriptionProject"
+                                    onChange={getDesc}
+                                    defaultValue={`${projectData.descriptionProject}`}
+                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                                    </textarea>
+                            </div>
+                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Mata Kuliah</dt>
                                 <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
                                     Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Label" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
                                     <a href={`https://wa.me/${numberWa}?text=${text}`} className=" text-sm leading-6 text-blue-600">
@@ -214,14 +301,14 @@ const DetailProjek = () => {
                             }
 
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                                <dt className="text-sm font-medium leading-6 text-gray-900">Mata Kuliah</dt>
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Daftar Mahasiswa</dt>
                                 <dd className="mt-2 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                                 <ul className="divide-y divide-gray-100 rounded-md border border-gray-200">
                                     <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
                                     <div className="flex w-0 flex-1 items-center">
-                                        <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                                        <UserIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                                         <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                                        <span className="truncate font-medium">Pengembangan Aplikasi Bergerak</span>
+                                        <span className="truncate font-medium">david maszzeh</span>
                                         {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
                                         </div>
                                     </div>
@@ -233,9 +320,9 @@ const DetailProjek = () => {
                                     </li>
                                     <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
                                     <div className="flex w-0 flex-1 items-center">
-                                        <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                                        <UserIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                                         <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                                        <span className="truncate font-medium">Pengolahan Citra Digital</span>
+                                        <span className="truncate font-medium">rosi maszzeh</span>
                                         {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
                                         </div>
                                     </div>
@@ -255,8 +342,8 @@ const DetailProjek = () => {
                     
                     :
                         <div className="px-4 sm:px-0">
-                            <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Pengguna</h3>
-                            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">pengguna tidak ditemukan</p>
+                            <h3 className="text-base font-semibold leading-7 text-gray-900">Detail Mata Kuliah</h3>
+                            <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">mata kuliah tidak ditemukan</p>
                         </div>
                     }
                     

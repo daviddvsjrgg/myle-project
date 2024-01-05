@@ -147,14 +147,16 @@ const ManajemenProjek = () => {
                     <td className="px-2 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{project.nameProject}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                          {project.nameProject} {project.nameProject.includes("-") ? '' : `- ${project.labelProject}`}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
-                          <img className="h-10 w-10 rounded-full" src={project.userData.imageUser} alt=":/" />
+                          <img className="h-10 w-10 rounded-full" src={project.userData.imageUser} alt="load" />
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{project.userData.usernameUser}</div>
