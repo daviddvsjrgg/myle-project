@@ -4,11 +4,18 @@ import Bottom from '../../../../../components/BottomBar/Bottom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { collection, getDocs, query, updateDoc, where } from 'firebase/firestore'
 import { db } from '../../../../../config/firebase/firebase'
-import { Combobox, Dialog, Transition } from '@headlessui/react'
+import { Combobox, Dialog, Listbox, Transition } from '@headlessui/react'
 import { UserIcon } from '@heroicons/react/24/solid'
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { v4 as uuidv4 } from 'uuid';
 import { deleteObject, getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage'
+
+const status = [
+    { name: 'Pilih status', color: 'text-gray-100' },
+    { name: 'Active', color: 'text-gray-900' },
+    { name: 'Maintenance', color: 'text-gray-900' },
+    { name: 'Deactive', color: 'text-gray-900' },
+    ]
 
 const numberWa = '628990256825';
 const text = "Hai David, sepertinya halaman ini bermasalah (url)"
@@ -25,6 +32,8 @@ const DetailProjek = () => {
 
     const [ imageLoaded, setImageLoaded ] = useState(false);
     const [ selectedImagePreview, setSelectedImagePreview ] = useState(null);
+
+    const [selectedStatus, setSelectedStatus] = useState(status[0])
 
     const handleImageLoad = () => {
         setImageLoaded(true);
@@ -157,6 +166,10 @@ const DetailProjek = () => {
     const handleClickSimpan = async (e) => {
         e.preventDefault();
 
+        const statusToString = document.getElementById("statusId");
+        const statusText = statusToString.innerText;
+        console.log("Status: " + statusText);
+
         const getLabel = document.getElementById("labelProject").value;
 
         const getPengguna = document.getElementById('pic').value;
@@ -181,12 +194,61 @@ const DetailProjek = () => {
             const existingLabel = doc.data().labelProject;
             const existingDescription = doc.data().descriptionProject;
             const existingPengguna = doc.data().picProject;
-
-            
         
             if (existingPengguna === setPengguna) {
                // PIC sama
                 setErrorMessagePIC("Penanggung jawab tidak boleh sama.");
+                
+            } else if (statusText === "Pilih status") {
+                if(selected) {
+                    try {
+                        await updateDoc(doc.ref, {
+                        labelProject: getLabel,
+                        descriptionProject: desc,
+                        picProject: setPengguna
+                    });
+        
+                    setButtonLoading(true);
+                    setCount(3);
+                    setOpen(true);
+                    
+                    setTimeout(() => {
+                        navigate('/manajemen-projek');
+                    }, 3500);
+        
+                    console.log("Ubah tanpa PIC: ", doc.id);
+                    } catch (e) {
+                        // Handle the error during document update
+                        console.error("Error updating document: ", e);
+                    }
+                } else {
+                    try {
+                        await updateDoc(doc.ref, {
+                        labelProject: getLabel,
+                        descriptionProject: desc,
+                    });
+        
+                    setButtonLoading(true);
+                    setCount(3);
+                    setOpen(true);
+                    
+                    setTimeout(() => {
+                        navigate('/manajemen-projek');
+                    }, 3500);
+        
+                    console.log("Ubah tanpa PIC: ", doc.id);
+                    } catch (e) {
+                        // Handle the error during document update
+                        console.error("Error updating document: ", e);
+                    }
+                    setButtonLoading(true);
+                     setCount(3);
+                     setOpen(true);
+                     setTimeout(() => {
+                         navigate('/manajemen-projek');
+                     }, 3500);
+                     console.log("No changes status.");
+                }
                 
             } else if (existingLabel === getLabel && existingDescription === desc && (existingPengguna === null || existingPengguna === '') ) {
                  // No changes, do not update the document
@@ -205,7 +267,8 @@ const DetailProjek = () => {
                         await updateDoc(doc.ref, {
                             labelProject: getLabel,
                             descriptionProject: desc,
-                            picProject: setPengguna
+                            picProject: setPengguna,
+                            statusProject: statusText
                         });
                          setButtonLoading(true);
                          setCount(3);
@@ -223,6 +286,7 @@ const DetailProjek = () => {
                         await updateDoc(doc.ref, {
                         labelProject: getLabel,
                         descriptionProject: desc,
+                        statusProject: statusText
                     });
         
                     setButtonLoading(true);
@@ -468,7 +532,7 @@ const DetailProjek = () => {
                                         afterLeave={() => setQuery('')}
                                         >
                                         <Combobox.Options 
-                                        className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                        className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                                             {filteredPeople.length === 0 && queryFilter !== '' ? (
                                             <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                                                 Tidak ditemukan.
@@ -517,7 +581,65 @@ const DetailProjek = () => {
                                         <p className="mt-3 text-sm leading-6 text-gray-600 pl-1">Kosongkan jika tidak ingin diubah.</p>
                                     </div>
                                     </Combobox>
-                            </div>
+                                </div>
+                                <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                    <dt className="text-sm font-medium leading-6 text-gray-900">Status</dt>
+
+                                    
+                                        <div className="">
+                                        <Listbox value={selectedStatus} onChange={setSelectedStatus}>
+                                            <div className="relative">
+                                            <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left ring-1 focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+                                                <span id='statusId' className="block truncate">{selectedStatus.name}</span>
+                                                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                                <ChevronDownIcon
+                                                    className="h-5 w-5 text-gray-400"
+                                                    aria-hidden="true"
+                                                />
+                                                </span>
+                                            </Listbox.Button>
+                                            <Transition
+                                                as={Fragment}
+                                                placeholder='Cari penanggung jawab...'
+                                                leave="transition ease-in duration-100"
+                                                leaveFrom="opacity-100"
+                                                leaveTo="opacity-0"
+                                            >
+                                                <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+                                                {status.map((status, statusId) => (
+                                                    <Listbox.Option
+                                                    key={statusId}
+                                                    className={({ active }) =>
+                                                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                                        active ? 'bg-indigo-500 text-white' : 'text-gray-900'
+                                                        }`
+                                                    }
+                                                    value={status}
+                                                    >
+                                                    {({ selected }) => (
+                                                        <>
+                                                        <span
+                                                            className={`block truncate ${
+                                                            selected ? 'font-medium' : 'font-normal'
+                                                            }`}
+                                                        >
+                                                            {status.name === "Pilih status" ? "Pilih status (Pilih ini jika batal)" : status.name}
+                                                        </span>
+                                                        {selected ? (
+                                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-teal-600">
+                                                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                                            </span>
+                                                        ) : null}
+                                                        </>
+                                                    )}
+                                                    </Listbox.Option>
+                                                ))}
+                                                </Listbox.Options>
+                                            </Transition>
+                                            </div>
+                                        </Listbox>
+                                        </div>
+                                </div>
                             
 
                             {buttonLoading ? (

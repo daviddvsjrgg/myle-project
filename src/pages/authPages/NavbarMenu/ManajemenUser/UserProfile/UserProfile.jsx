@@ -183,6 +183,10 @@ const UserProfile = () => {
                                     defaultValue={`${userData.roleUser}`}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
+
+                                <dt className="text-sm font-medium leading-6 text-gray-900"></dt>
+                                <dt className="text-sm font-medium leading-6 text-gray-900"></dt>
+                                <p className="sm:-mt-1 md:-mt-2 mx-1 max-w-2xl text-sm leading-6 text-gray-500">Tersedia user dan admin untuk hak aksesnya.</p>
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Email address</dt>
