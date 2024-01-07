@@ -2,19 +2,20 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
 import Bottom from '../../../../components/BottomBar/Bottom';
 import { db } from '../../../../config/firebase/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 
 const ManajemenUser = () => {
  
   const [ data, setData ] = useState([]);
 
-  useEffect(() =>{
+   useEffect(() => {
     const fetchData = async () => {
       const usersCollection = collection(db, "users");
+      const orderedQuery = query(usersCollection, orderBy("roleUser"));
 
       try {
-        const snapshot = await getDocs(usersCollection);
+        const snapshot = await getDocs(orderedQuery);
         const fetchedData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -23,9 +24,11 @@ const ManajemenUser = () => {
       } catch (error) {
         console.log("Error fetching data: ", error);
       }
-    }
+    };
+
     fetchData();
   }, []);
+
 
   return (
     <div className="min-h-full">

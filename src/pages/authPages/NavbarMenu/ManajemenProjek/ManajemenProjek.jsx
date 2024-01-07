@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
 import Bottom from '../../../../components/BottomBar/Bottom';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
 import { db } from '../../../../config/firebase/firebase';
 import { Link } from 'react-router-dom';
 
@@ -10,9 +10,10 @@ const ManajemenProjek = () => {
 
   const fetchData = async () => {
     const projectsCollection = collection(db, "projects");
+    const orderByStatus = query(projectsCollection, orderBy("statusProject"))
   
     try {
-      const snapshot = await getDocs(projectsCollection);
+      const snapshot = await getDocs(orderByStatus);
       const fetchedData = [];
   
       for (const doc of snapshot.docs) {
