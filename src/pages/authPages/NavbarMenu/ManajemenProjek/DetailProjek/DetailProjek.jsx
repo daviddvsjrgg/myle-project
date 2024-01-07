@@ -11,10 +11,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { deleteObject, getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage'
 
 const status = [
-    { name: 'Pilih status', color: 'text-gray-100' },
-    { name: 'Active', color: 'text-gray-900' },
-    { name: 'Maintenance', color: 'text-gray-900' },
-    { name: 'Deactive', color: 'text-gray-900' },
+        { name: 'Pilih status' },
+        { name: 'Active' },
+        { name: 'Maintenance' },
+        { name: 'Deactive' },
     ]
 
 const numberWa = '628990256825';
@@ -25,7 +25,7 @@ const DetailProjek = () => {
     const location = useLocation();
     const projectData = location.state ? location.state.projectData : null;
     
-    const [ desc, setDesc ] = useState(projectData.descriptionProject || '');
+    const [ desc, setDesc ] = useState('');
     const [ data, setData ] = useState([]);
 
     const [ errorMessagePIC, setErrorMessagePIC] = useState('');
@@ -207,7 +207,7 @@ const DetailProjek = () => {
                         descriptionProject: desc,
                         picProject: setPengguna
                     });
-        
+                    setErrorMessagePIC("");
                     setButtonLoading(true);
                     setCount(3);
                     setOpen(true);
@@ -270,6 +270,7 @@ const DetailProjek = () => {
                             picProject: setPengguna,
                             statusProject: statusText
                         });
+                        setErrorMessagePIC("");
                          setButtonLoading(true);
                          setCount(3);
                          setOpen(true);
@@ -335,7 +336,7 @@ const DetailProjek = () => {
         <Navbar />
         {/* Modal */}
         <Transition.Root show={open} as={Fragment}>
-            <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={setOpen}>
+            <Dialog as="div" className="relative" initialFocus={cancelButtonRef} onClose={setOpen}>
             <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -398,7 +399,7 @@ const DetailProjek = () => {
                 <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
                     {projectData ? (
                         <div>
-                             <div className="md:w-1/3 scale-100 transition-all duration-400 hover:scale-105 px-2">
+                             <div className="md:w-1/4 md:h-auto scale-90 md:scale-100 lg:scale-100 transition-all duration-400 hover:scale-95 md:hover:scale-105 lg:hover:scale-105 lg:px-2 md:px-2 px-2">
                                 {projectData.imageUrlProject ? (
                                     <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md relative hover:opacity-90">
                                     <label htmlFor="imageInput" className="block w-full h-full cursor-pointer">
@@ -415,7 +416,7 @@ const DetailProjek = () => {
                                         </div>
                                       )}
                                       <img
-                                        className={`lg:h-auto md:h-auto w-full object-center scale-110 transition-all duration-400 ${imageLoaded ? 'visible' : 'hidden'}`}
+                                        className={`lg:h-auto md:h-auto w-full object-contain scale-110 transition-all duration-400 ${imageLoaded ? 'visible' : 'hidden'}`}
                                         src={selectedImagePreview || projectData.imageUrlProject}
                                         alt="blog"
                                         loading="eager"
@@ -452,8 +453,20 @@ const DetailProjek = () => {
                         <div className="mt-6 border-t border-gray-100">
                             <dl className="divide-y divide-gray-100">
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                <dt className="text-sm font-medium leading-6 text-gray-900">ID Projek</dt>
+                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{projectData.idProject}</dd>
+                            </div>
+                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Mata Kuliah</dt>
-                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{projectData.nameProject}</dd>
+                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{projectData.nameProject}
+                                <span
+                                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full mx-3 ${
+                                        projectData.statusProject === "Active" ? "bg-teal-100 text-teal-800" : (projectData.statusProject === "Deactive" ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800")
+                                    }`}
+                                >
+                                    {projectData.statusProject}
+                                </span>
+                                </dd>
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Penanggung Jawab</dt>
@@ -493,99 +506,7 @@ const DetailProjek = () => {
                                     </textarea>
                             </div>
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                                <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Mata Kuliah</dt>
-                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                                    Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Gambar, Label, Deskripsi, Penanggung Jawab" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
-                                    <a href={`https://wa.me/${numberWa}?text=${text}`} className=" text-sm leading-6 text-blue-600">
-                                        developer.
-                                    </a>
-                                </dd>
-                            </div>
-                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                                <dt className="text-sm font-medium leading-6 text-gray-900">Ganti Penanggung Jawab</dt>
-                                <Combobox  defaultValue={selected} onChange={setSelected}>
-                                    <div className="relative">
-                                        <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible focus-visible:ring-offset-2 focus-visible:ring-offset-1-300 sm:text-sm">
-                                        <Combobox.Input
-                                            placeholder='Cari penanggung jawab...'
-                                            id="pic"
-                                            name="pic"
-                                            autoComplete="off"
-                                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
-                                                errorMessagePIC ? 'ring-red-600' : 'ring-gray-300'
-                                              }`}
-                                            displayValue={(person) => person.emailUser}
-                                            onChange={(event) => setQuery(event.target.value)}
-                                        />
-                                        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                                            <ChevronDownIcon
-                                            className="h-5 w-5 text-gray-400"
-                                            aria-hidden="true"
-                                            />
-                                        </Combobox.Button>
-                                        </div>
-                                        <Transition
-                                        as={Fragment}
-                                        leave="transition ease-in duration-100"
-                                        leaveFrom="opacity-100"
-                                        leaveTo="opacity-0"
-                                        afterLeave={() => setQuery('')}
-                                        >
-                                        <Combobox.Options 
-                                        className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                            {filteredPeople.length === 0 && queryFilter !== '' ? (
-                                            <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                                                Tidak ditemukan.
-                                            </div>
-                                            ) : (
-                                            filteredPeople.map((person) => (
-                                                <Combobox.Option
-                                                key={person.idUser}
-                                                className={({ active }) =>
-                                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                                    active ? 'bg-indigo-500 text-white' : 'text-gray-900'
-                                                    }`
-                                                }
-                                                value={person}
-                                                >
-                                                {({ selected, active }) => (
-                                                    <>
-                                                    <span
-                                                        className={`block truncate ${
-                                                        selected ? 'font-medium' : 'font-normal'
-                                                        }`}
-                                                    >
-                                                        {person.usernameUser} - {person.emailUser} 
-                                                    </span>
-                                                    {selected ? (
-                                                        <span
-                                                        className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                                            active ? 'text-white' : 'text-teal-600'
-                                                        }`}
-                                                        >
-                                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                                        </span>
-                                                    ) : null}
-                                                    </>
-                                                )}
-                                                </Combobox.Option>
-                                            ))
-                                            )}
-                                        </Combobox.Options>
-                                        </Transition>
-                                        {errorMessagePIC && (
-                                            <div className="text-red-500 text-sm mt-1 pl-1">
-                                                {errorMessagePIC}  
-                                            </div>
-                                        )}
-                                        <p className="mt-3 text-sm leading-6 text-gray-600 pl-1">Kosongkan jika tidak ingin diubah.</p>
-                                    </div>
-                                    </Combobox>
-                                </div>
-                                <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                     <dt className="text-sm font-medium leading-6 text-gray-900">Status</dt>
-
-                                    
                                         <div className="">
                                         <Listbox value={selectedStatus} onChange={setSelectedStatus}>
                                             <div className="relative">
@@ -638,9 +559,99 @@ const DetailProjek = () => {
                                             </Transition>
                                             </div>
                                         </Listbox>
+                                        <p className="mt-3 text-sm leading-6 text-gray-600 pl-1">Biarkan jika tidak ingin diubah.</p>
                                         </div>
                                 </div>
-                            
+                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Mata Kuliah</dt>
+                                <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+                                    Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Gambar, Label, Deskripsi, Status, dan Penanggung Jawab" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
+                                    <a href={`https://wa.me/${numberWa}?text=${text}`} className=" text-sm leading-6 text-blue-600">
+                                        developer.
+                                    </a>
+                                </dd>
+                            </div>
+                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Ganti Penanggung Jawab</dt>
+                                <Combobox  defaultValue={selected} onChange={setSelected}>
+                                    <div className="relative">
+                                        <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible focus-visible:ring-offset-2 focus-visible:ring-offset-1-300 sm:text-sm">
+                                        <Combobox.Input
+                                            placeholder='Cari penanggung jawab...'
+                                            id="pic"
+                                            name="pic"
+                                            autoComplete="off"
+                                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                                                errorMessagePIC ? 'ring-red-600' : 'ring-gray-300'
+                                              }`}
+                                            displayValue={(person) => person.emailUser}
+                                            onChange={(event) => setQuery(event.target.value)}
+                                        />
+                                        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                                            <ChevronDownIcon
+                                            className="h-5 w-5 text-gray-400"
+                                            aria-hidden="true"
+                                            />
+                                        </Combobox.Button>
+                                        </div>
+                                        <Transition
+                                        as={Fragment}
+                                        leave="transition ease-in duration-100"
+                                        leaveFrom="opacity-100"
+                                        leaveTo="opacity-0"
+                                        afterLeave={() => setQuery('')}
+                                        >
+                                        <Combobox.Options 
+                                        className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                            {filteredPeople.length === 0 && queryFilter !== '' ? (
+                                            <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                                                Tidak ditemukan.
+                                            </div>
+                                            ) : (
+                                            filteredPeople.map((person) => (
+                                                <Combobox.Option
+                                                key={person.idUser}
+                                                className={({ active }) =>
+                                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                                    active ? 'bg-indigo-500 text-white' : 'text-gray-900'
+                                                    }`
+                                                }
+                                                value={person}
+                                                >
+                                                {({ selected, active }) => (
+                                                    <>
+                                                    <span
+                                                        className={`block truncate ${
+                                                        selected ? 'font-medium' : 'font-normal'
+                                                        }`}
+                                                    >
+                                                        {person.usernameUser} - {person.emailUser} 
+                                                    </span>
+                                                    {selected ? (
+                                                        <span
+                                                        className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                                                            active ? 'text-white' : 'text-teal-600'
+                                                        }`}
+                                                        >
+                                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                                        </span>
+                                                    ) : null}
+                                                    </>
+                                                )}
+                                                </Combobox.Option>
+                                            ))
+                                            )}
+                                        </Combobox.Options>
+                                        </Transition>
+                                        {errorMessagePIC && (
+                                            <div className="text-red-500 text-sm mt-1 pl-1">
+                                                {errorMessagePIC}  
+                                            </div>
+                                        )}
+                                        <p className="mt-3 text-sm leading-6 text-gray-600 pl-1">Kosongkan jika tidak ingin diubah.</p>
+                                    </div>
+                                    </Combobox>
+                                </div>
 
                             {buttonLoading ? (
                                 <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">

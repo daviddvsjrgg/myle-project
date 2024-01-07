@@ -81,7 +81,7 @@ function App() {
     }
 
     if (allowedRoles && !allowedRoles.includes(role)) {
-      // User doesn't have the required role, redirect to an unauthorized page or show an error
+      // User doesn't have the required role, redirect to an unauthorized page
       return <NotFound404 />
     }
     
