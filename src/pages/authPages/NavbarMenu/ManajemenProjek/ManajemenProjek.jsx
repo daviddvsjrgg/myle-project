@@ -10,7 +10,7 @@ const ManajemenProjek = () => {
 
   const fetchData = async () => {
     const projectsCollection = collection(db, "projects");
-    const orderByStatus = query(projectsCollection, orderBy("statusProject"))
+    const orderByStatus = query(projectsCollection, orderBy("statusProject", "desc"))
   
     try {
       const snapshot = await getDocs(orderByStatus);
@@ -58,14 +58,14 @@ const ManajemenProjek = () => {
           
         <div className="flex flex-col ml-1 mr-1">
                         
-            <div className="flex justify-between ...">
+            <div className="flex justify-between">
               <div className="order-last">
-                <a href="/manajemen-projek/projek-baru" className="mb-3 group block max-w-sm rounded-lg p-2.5 bg-gray-50 ring-1 ring-slate-900/5 shadow-sm space-y-3 hover:bg-indigo-600 hover:ring-indigo-600">
+                <a href="/manajemen-projek/projek-baru" className="mb-3 hover:text-white group block max-w-sm rounded-lg p-2.5 bg-gray-50 ring-1 ring-slate-900/5 shadow-sm space-y-3 hover:bg-indigo-500 hover:ring-indigo-300">
                   <div className="flex items-center space-x-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                     </svg>
-                    <h3 className="text-slate-900 group-hover:text-white text-sm font-semibold">Matkul Baru</h3>
+                    <h3 className="text-slate-900 text-sm font-semibold group-hover:text-white">Matkul Baru</h3>
                   </div>
                 </a>
               </div>
@@ -79,7 +79,7 @@ const ManajemenProjek = () => {
                   type="text"
                   nama_projek="hs-table-search"
                   id="hs-table-search"
-                  className="block w-full p-3 pl-10 text-sm border-gray-200 rounded-md focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
+                  className="block w-full p-3 pl-10 text-sm border-gray-200 rounded-md focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Cari..."
                 />
                 <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
@@ -169,7 +169,7 @@ const ManajemenProjek = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          project.statusProject === "Active" ? "bg-teal-100 text-teal-800" : (project.statusProject === "Deactive" ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800")
+                          project.statusProject === "Public" ? "bg-teal-100 text-teal-800" : (project.statusProject === "Deactive" ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-800")
                         }`}
                       >
                         {project.statusProject}

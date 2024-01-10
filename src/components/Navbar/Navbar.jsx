@@ -390,7 +390,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
                               </svg>
                               </div>
                               <div>
-                                <a href="/manajemen-user" className="font-semibold text-gray-900">
+                                <a href="/projek" className="font-semibold text-gray-900">
                                   Daftar Mata Kuliah
                                   <span className="absolute inset-0" />
                                 </a>

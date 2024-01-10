@@ -55,10 +55,11 @@ const Projek = () => {
           // usersProjects table
             const querySnapshotProjects = await getDocs(query(usersProjectsCollection, where("idUser", "==", user.uid)));
             const userProjects = querySnapshotProjects.docs.map(doc => doc.data().idProject);
+
             userProjects.forEach(getUsersProjectId => {
-              console.log(getUsersProjectId);
                userProjectsArray.push(getUsersProjectId);
             });
+            
             setCheckGabung(userProjectsArray);
 
         } catch (error) {
@@ -150,6 +151,7 @@ const Projek = () => {
         setTimeout(() => {
             window.location.reload();
         }, 3500);
+
         console.log("Document written with ID: ", docRef.id);
       } catch (e) {
         console.error("Error adding document: ", e);
@@ -320,7 +322,7 @@ const Projek = () => {
                     <div key={project.id} className="p-4 md:w-1/3 scale-100 transition-all duration-400 hover:scale-105">
                       <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md">
                         {/* <a href="/toProject"> */}
-                          <img className="lg:h-44 md:h-32 w-screen object-center scale-110 transition-all duration-400 hover:opacity-90" src={project.imageUrlProject} alt="blog" />
+                          <img className="lg:h-64 md:h-32 w-screen object-cover md:object-scale scale-110 transition-all duration-400 hover:opacity-90" src={project.imageUrlProject} alt="blog" />
                         {/* </a> */}
                         <div className="p-6">
                           <div className="flex justify-between">        
@@ -333,7 +335,7 @@ const Projek = () => {
                           <div className="flex float-right">
                             <h2 className="tracking-widest text-xs title-font font-medium text-gray-400 m-1 ">{project.createdAt}</h2>
                           </div>
-                          <p className="leading-relaxed mb-3 text-gray-500">{project.descriptionProject !== "" ? project.descriptionProject : "Belum ada berita..."}</p>
+                          <p className="leading-relaxed mb-3 text-gray-500 ">{project.descriptionProject !== "" ? project.descriptionProject : "Belum ada berita..."}</p>
                             <div className="relative mt-3 flex items-center bottom-0 gap-x-4">
                               <img src={project.userData.imageUser} alt="" className="h-10 w-10 rounded-full bg-gray-50" />
                               <div className="text-sm leading-6">
@@ -355,7 +357,7 @@ const Projek = () => {
                                 <div className="ml-auto">
                                   <button
                                   disabled
-                                  className="bg-gradient-to-r from-indigo-200 to-indigo-200 text-white transition-all duration-150 hover:scale-105 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
+                                  className="bg-gradient-to-r from-indigo-200 to-indigo-200 text-white drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
                                </div>
                               ) : (
                                 <div className="ml-auto">
@@ -365,7 +367,7 @@ const Projek = () => {
                                       handleClickGabung();
                                     } 
                                   }
-                                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-105 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
+                                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
                               </div>
                               )
                                 
