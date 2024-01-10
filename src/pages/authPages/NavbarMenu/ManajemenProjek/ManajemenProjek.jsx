@@ -2,50 +2,139 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
 import Bottom from '../../../../components/BottomBar/Bottom';
 import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
-import { db } from '../../../../config/firebase/firebase';
-import { Link } from 'react-router-dom';
+import { auth, db } from '../../../../config/firebase/firebase';
+import { Link, useNavigate } from 'react-router-dom';
+import { onAuthStateChanged } from 'firebase/auth';
+import NotFound404WNavbar from '../../../../url/NotFound404WNavbar';
 
 const ManajemenProjek = () => {
   const [ data, setData ] = useState([]);
 
+  // Get Role & Check PIC 
+  const [ email, setEmail ] = useState('');
+  const [ role, setRole ] = useState('');
+  
+  const [ checkPenanggungJawab, setCheckPenanggungJawab ] = useState(false);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
   const fetchData = async () => {
     const projectsCollection = collection(db, "projects");
-    const orderByStatus = query(projectsCollection, orderBy("statusProject", "desc"))
-  
-    try {
-      const snapshot = await getDocs(orderByStatus);
-      const fetchedData = [];
-  
-      for (const doc of snapshot.docs) {
-        const projectData = doc.data();
-        const emailUser = projectData.picProject;
-  
-        const usersCollection = collection(db, "users");
-        const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
-        const userSnapshot = await getDocs(userQuery);
-  
-        if (!userSnapshot.empty) {
-          fetchedData.push({
-            id: doc.id,
-            ...projectData,
-            userData: userSnapshot.docs[0].data(),
-          });
+    if(checkPenanggungJawab && role === 'user') {
+      const orderByStatus = query(projectsCollection, where("picProject", "==", email), orderBy("statusProject", "desc"));
+      try {
+        const snapshot = await getDocs(orderByStatus);
+        const fetchedData = [];
+    
+        for (const doc of snapshot.docs) {
+          const projectData = doc.data();
+          const emailUser = projectData.picProject;
+    
+          const usersCollection = collection(db, "users");
+          const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+          const userSnapshot = await getDocs(userQuery);
+    
+          if (!userSnapshot.empty) {
+            fetchedData.push({
+              id: doc.id,
+              ...projectData,
+              userData: userSnapshot.docs[0].data(),
+            });
+          }
         }
+    
+        setData(fetchedData);
+      } catch (error) {
+        console.log("Error fetching data: ", error);
       }
-  
-      setData(fetchedData);
-    } catch (error) {
-      console.log("Error fetching data: ", error);
+    } else if (role === "admin"){
+      const orderByStatus = query(projectsCollection, orderBy("statusProject", "desc"));
+      try {
+        const snapshot = await getDocs(orderByStatus);
+        const fetchedData = [];
+    
+        for (const doc of snapshot.docs) {
+          const projectData = doc.data();
+          const emailUser = projectData.picProject;
+    
+          const usersCollection = collection(db, "users");
+          const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+          const userSnapshot = await getDocs(userQuery);
+    
+          if (!userSnapshot.empty) {
+            fetchedData.push({
+              id: doc.id,
+              ...projectData,
+              userData: userSnapshot.docs[0].data(),
+            });
+          }
+        }
+    
+        setData(fetchedData);
+      } catch (error) {
+        console.log("Error fetching data: ", error);
+      }
     }
+  
+    
   };
   
-  useEffect(() => {
     fetchData();
-  }, []);
+  }, [email, checkPenanggungJawab, role]);
+      
+  useEffect(()=>{
+      
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+      const usersCollection = collection(db, "users");
+      
+              try {
+              const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+              // Field from firestore
+              const getEmail = querySnapshot.docs[0].data().emailUser;
+              const getRole = querySnapshot.docs[0].data().roleUser;
+              setEmail(getEmail);
+              setRole(getRole);
+
+              } catch (error) {
+              console.log("Error: " + error)
+              navigate('/login')
+              }
+          
+          // ...
+          
+      });
+      return () => {
+          unsubscribe();
+      }
+  }, [navigate])
+
+  useEffect(() => {
+      const fetchData = async () => {
+        const projectsCollection = collection(db, "projects");
+  
+          try {
+            // projects table
+            const querySnapshotProjects = await getDocs(query(projectsCollection, where("picProject", "==", email)));
+            if (querySnapshotProjects.size > 0) {
+              setCheckPenanggungJawab(true)
+            }
+  
+          } catch (error) {
+            console.log("err projects:" + error)
+          }
+      };
+  
+        fetchData();
+      }, [email]);
 
   return (
     <div className="min-h-full">
       <Navbar />
+      {(role === "admin" || checkPenanggungJawab) ? (
+        <>
       <header className="bg-white drop-shadow-md">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Manajemen Mata Kuliah</h1>
@@ -57,21 +146,23 @@ const ManajemenProjek = () => {
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
           
         <div className="flex flex-col ml-1 mr-1">
-                        
+
             <div className="flex justify-between">
               <div className="order-last">
-                <a href="/manajemen-projek/projek-baru" className="mb-3 hover:text-white group block max-w-sm rounded-lg p-2.5 bg-gray-50 ring-1 ring-slate-900/5 shadow-sm space-y-3 hover:bg-indigo-500 hover:ring-indigo-300">
-                  <div className="flex items-center space-x-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                    </svg>
-                    <h3 className="text-slate-900 text-sm font-semibold group-hover:text-white">Matkul Baru</h3>
-                  </div>
-                </a>
+              {role === "admin" && (
+                  <a href="/manajemen-projek/projek-baru" className=" hover:text-white group block max-w-sm rounded-lg p-2.5 bg-gray-50 ring-1 ring-slate-900/5 shadow-sm space-y-3 hover:bg-indigo-500 hover:ring-indigo-300">
+                    <div className="flex items-center space-x-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                      </svg>
+                      <h3 className="text-slate-900 text-sm font-semibold group-hover:text-white">Matkul Baru</h3>
+                    </div>
+                  </a>
+              )}
               </div>
-              <div>
-                         
-              <div className="relative max-w-xs">
+              
+              <div>       
+              <div className="relative max-w-xs mb-3">
                 <label htmlFor="hs-table-search" className="sr-only">
                   Search
                 </label>
@@ -137,7 +228,7 @@ const ManajemenProjek = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {data.map((project, index) => (
-                  <tr key={project.id} className='hover:bg-gray-100'>
+                  <tr key={project.id} className={`${project.userData.emailUser === email && role === "admin" ? "bg-yellow-100 hover:bg-yellow-50" : "hover:bg-gray-100"}`}>
                     <td className="px-2 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-5">
@@ -193,6 +284,16 @@ const ManajemenProjek = () => {
         </div>
       </main>
       {/* End - Content */}
+        </>
+      ) : (
+        <>
+        {(role === "user" && checkPenanggungJawab === false) && (
+          <NotFound404WNavbar />
+        )}
+        </>
+        
+      )}
+      
       
       <Bottom />
     </div>

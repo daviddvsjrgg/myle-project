@@ -36,9 +36,6 @@ const NotFound404 = () => {
       }
 }, [])
 
-  const numberWa = '628990256825';
-  const text = "Hai David, sepertinya halaman ini bermasalah (url)"
-
   return (
     <div>
     <Navbar />
@@ -56,8 +53,8 @@ const NotFound404 = () => {
               >
               Kembali ke Dashboard
             </a>
-            <a href={`https://wa.me/${numberWa}?text=${text}`} className="text-sm font-semibold text-gray-900">
-              Hubungi Developer {'(via WhatsApp)'} <span aria-hidden="true">&rarr;</span>
+            <a href={`https://www.instagram.com/davidek_rl/`} target='_blank' rel="noreferrer" className="text-sm font-semibold text-gray-900">
+              Hubungi Developer {'DM Instagram'} <span aria-hidden="true">&rarr;</span>
                 </a>
               </div>
             </div>

@@ -8,10 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpenIcon } from '@heroicons/react/20/solid'
 import { onAuthStateChanged } from 'firebase/auth';
 
-const numberWa = '628990256825';
-const text = "Hai David, sepertinya halaman ini bermasalah (url)"
-
-
 const Profile = () => {
     const navigate = useNavigate();
     const [ buttonLoading, setButtonLoading ] = useState(false)
@@ -215,7 +211,7 @@ const Profile = () => {
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Profile</dt>
                                 <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
                                     Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Username" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
-                                    <a href={`https://wa.me/${numberWa}?text=${text}`} target='_blank' rel="noreferrer" className=" text-sm leading-6 text-blue-600">
+                                    <a href={`https://www.instagram.com/davidek_rl/`} target='_blank' rel="noreferrer" className=" text-sm leading-6 text-blue-600">
                                         developer.
                                     </a>
                                 </dd>

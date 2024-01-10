@@ -7,9 +7,6 @@ import { collection, getDocs, query, updateDoc, where } from 'firebase/firestore
 import { db } from '../../../../../config/firebase/firebase'
 import { Dialog, Transition } from '@headlessui/react'
 
-const numberWa = '628990256825';
-const text = "Hai David, sepertinya halaman ini bermasalah (url)"
-
 const UserProfile = () => {
 
     // const [ userProfile, setUserProfile ] = useState([]);
@@ -197,7 +194,7 @@ const UserProfile = () => {
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Profile</dt>
                                 <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
                                     Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Username" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
-                                    <a href={`https://wa.me/${numberWa}?text=${text}`} className=" text-sm leading-6 text-blue-600">
+                                    <a href={`https://www.instagram.com/davidek_rl/`} target='_blank' rel='noreferrer' className=" text-sm leading-6 text-blue-600">
                                         developer.
                                     </a>
                                 </dd>

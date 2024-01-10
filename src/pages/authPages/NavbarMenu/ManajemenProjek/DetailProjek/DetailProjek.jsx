@@ -3,12 +3,13 @@ import Navbar from '../../../../../components/Navbar/Navbar'
 import Bottom from '../../../../../components/BottomBar/Bottom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { collection, getDocs, query, updateDoc, where } from 'firebase/firestore'
-import { db } from '../../../../../config/firebase/firebase'
+import { auth, db } from '../../../../../config/firebase/firebase'
 import { Combobox, Dialog, Listbox, Transition } from '@headlessui/react'
 import { UserIcon } from '@heroicons/react/24/solid'
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { v4 as uuidv4 } from 'uuid';
 import { deleteObject, getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage'
+import { onAuthStateChanged } from 'firebase/auth'
 
 const status = [
         { name: 'Pilih status' },
@@ -16,9 +17,6 @@ const status = [
         { name: 'Private' },
         { name: 'Deactive' },
     ]
-
-const numberWa = '628990256825';
-const text = "Hai David, sepertinya halaman ini bermasalah (url)"
 
 const DetailProjek = () => {
     
@@ -28,12 +26,66 @@ const DetailProjek = () => {
     const [ desc, setDesc ] = useState('');
     const [ data, setData ] = useState([]);
 
+    // Get List User (Terdaftar)
+    const [ fetchedUsers, setFetchedUsers ] = useState([]);
+    const [ noDaftar, setStatusDaftar ] = useState(false);
+
     const [ errorMessagePIC, setErrorMessagePIC] = useState('');
 
     const [ imageLoaded, setImageLoaded ] = useState(false);
     const [ selectedImagePreview, setSelectedImagePreview ] = useState(null);
 
     const [selectedStatus, setSelectedStatus] = useState(status[0])
+
+    try {
+        useEffect(() => {
+            const fetchData = async () => {
+                const usersListCollection = collection(db, "usersProjects");
+        
+                try {
+                    const userListQuery = query(usersListCollection, where("idProject", "==", projectData.idProject));
+                    const querySnapshot = await getDocs(userListQuery);
+        
+                    if (querySnapshot.docs.length > 0) {
+                        const fetchedListUser = querySnapshot.docs.map(doc => ({
+                            idUser: doc.data().idUser,
+                        }));
+        
+                        // Fetch users based on idUser
+                        const usersCollection = collection(db, "users");
+        
+                        if (fetchedListUser.length > 0) {
+                            const usersQuery = query(usersCollection, where("idUser", "in", fetchedListUser.map(user => user.idUser)));
+                            const usersSnapshot = await getDocs(usersQuery);
+        
+                            if (usersSnapshot.docs.length > 0) {
+                                const userList = usersSnapshot.docs.map(doc => doc.data());
+                                setFetchedUsers(userList);
+                            } else {
+                                console.log("No users found for the given idUser values.");
+                            }
+                        } else {
+                            console.log("dataListUser is empty.");
+                        }
+                    } else {
+                        console.log("No documents found for the given query.");
+                        setStatusDaftar(true);
+                    }
+                } catch (error) {
+                    console.error("Error fetching data: ", error);
+                }
+            };
+        
+            // Invoke the fetch function
+            fetchData();
+        
+            // No cleanup needed in this case, so the return can be omitted or left empty.
+            }, [projectData.idProject]);
+    } catch (error) {
+        console.log(error)
+    }
+   // Get List User (Terdaftar)
+    // Empty dependency array means this effect runs once when the component mounts
 
     const handleImageLoad = () => {
         setImageLoaded(true);
@@ -329,7 +381,30 @@ const DetailProjek = () => {
         return () => clearInterval(countdownInterval);
     }, [count]);
 
-    
+    // Get Role 
+    const [ role, setRole ] = useState('');    
+    useEffect(()=>{
+        
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        const usersCollection = collection(db, "users");
+        
+                try {
+                const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+                // Field from firestore
+                const getRole = querySnapshot.docs[0].data().roleUser;
+                setRole(getRole);
+
+                } catch (error) {
+                console.log("Error: " + error)
+                }
+            
+        });
+        return () => {
+            unsubscribe();
+        }
+    }, [role])
 
   return (
     <div className="min-h-full">
@@ -401,7 +476,7 @@ const DetailProjek = () => {
                         <div>
                              <div className="md:w-1/4 md:h-auto scale-90 md:scale-100 lg:scale-100 transition-all duration-400 hover:scale-95 md:hover:scale-105 lg:hover:scale-105 lg:px-2 md:px-2 px-2">
                                 {projectData.imageUrlProject ? (
-                                    <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md relative hover:opacity-90">
+                                    <div className="h-full -ml-2 rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md relative hover:opacity-90">
                                     <label htmlFor="imageInput" className="block w-full h-full cursor-pointer">
                                       {!imageLoaded && (
                                         <div className="placeholder">
@@ -424,7 +499,7 @@ const DetailProjek = () => {
                                         onClick={() => document.getElementById('imageInput').click()}
                                       />
                                       <div className={`absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-90 transition-opacity ${imageLoaded ? 'visible' : 'hidden'}`}>
-                                        <p className="text-white text-lg font-bold">Ganti Foto</p>
+                                        <p className="text-white text-lg font-bold drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.4)]">Ganti Foto</p>
                                       </div>
                                     </label>
                                     <input
@@ -446,6 +521,7 @@ const DetailProjek = () => {
                                     </div>
                                 )}
                             </div>
+                            <p className="mt-2 max-w-2xl text-sm leading-6 ml-4 md:ml-0 text-gray-500">Tekan untuk mengubah gambar.</p>
                         <div className="px-4 sm:px-0">
                             <h3 className="text-base font-semibold leading-7 text-gray-900 mt-4">Detail Mata Kuliah</h3>
                             <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">Informasi Mata Kuliah berisi gambar, pengguna terkait, dan detail lainnya.</p>
@@ -566,11 +642,12 @@ const DetailProjek = () => {
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Mata Kuliah</dt>
                                 <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
                                     Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Gambar, Label, Deskripsi, Status, dan Penanggung Jawab" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
-                                    <a href={`https://wa.me/${numberWa}?text=${text}`} className=" text-sm leading-6 text-blue-600">
+                                    <a href={`https://www.instagram.com/davidek_rl/`} target='_blank' rel='noreferrer' className=" text-sm leading-6 text-blue-600">
                                         developer.
                                     </a>
                                 </dd>
                             </div>
+                            {role === "admin" && (
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Ganti Penanggung Jawab</dt>
                                 <Combobox  defaultValue={selected} onChange={setSelected}>
@@ -652,7 +729,7 @@ const DetailProjek = () => {
                                     </div>
                                     </Combobox>
                                 </div>
-
+                                )}
                             {buttonLoading ? (
                                 <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
                                     <button
@@ -680,34 +757,55 @@ const DetailProjek = () => {
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Daftar Mahasiswa</dt>
                                 <dd className="mt-2 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                                 <ul className="divide-y divide-gray-100 rounded-md border border-gray-200">
-                                    <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
-                                    <div className="flex w-0 flex-1 items-center">
-                                        <UserIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-                                        <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                                        <span className="truncate font-medium">david maszzeh</span>
-                                        {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
-                                        </div>
-                                    </div>
-                                    <div className="ml-4 flex-shrink-0">
-                                        <a href="/none" className="font-medium text-indigo-600 hover:text-indigo-500">
-                                        Detail
-                                        </a>
-                                    </div>
-                                    </li>
-                                    <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
-                                    <div className="flex w-0 flex-1 items-center">
-                                        <UserIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-                                        <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                                        <span className="truncate font-medium">rosi maszzeh</span>
-                                        {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
-                                        </div>
-                                    </div>
-                                    <div className="ml-4 flex-shrink-0">
-                                        <a href="/none" className="font-medium text-indigo-600 hover:text-indigo-500">
-                                        Detail
-                                        </a>
-                                    </div>
-                                    </li>
+                                    {fetchedUsers ? (
+                                        <>
+                                            {fetchedUsers.map((user) => 
+                                            <div key={user.id}>
+                                                <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6 hover:bg-gray-100">
+                                                    <div className="flex w-0 flex-1 items-center">
+                                                    <img src={user.imageUser} alt="" className="h-10 w-10 rounded-full bg-gray-50" />
+                                                        <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                                                        <span className="truncate font-medium">{user.usernameUser}</span>
+                                                        {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
+                                                        </div>
+                                                    </div>
+                                                    <div className="ml-4 flex-shrink-0">
+                                                        <a href="/none" className="font-medium text-red-500 hover:text-red-400">
+                                                        Keluarkan
+                                                        </a>
+                                                    </div>
+                                                    </li>
+                                            </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
+                                            <div className="flex w-0 flex-1 items-center">
+                                                <UserIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                                                <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                                                <span className="truncate font-medium animate-pulse">Loading Daftar Mahasiswa</span>
+                                                {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
+                                                </div>
+                                            </div>
+                                        </li>
+                                    )}
+
+                                    {noDaftar && (
+                                        <>
+                                            <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
+                                            <div className="flex w-0 flex-1 items-center">
+                                                <UserIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                                                <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                                                <span className="truncate font-medium">Belum ada mahasiswa terdaftar</span>
+                                                {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
+                                                </div>
+                                            </div>
+                                            <div className="ml-4 flex-shrink-0">
+                                            </div>
+                                        </li>
+                                        </>
+                                    )}
+                                    
                                 </ul>
                                 </dd>
                             </div>
