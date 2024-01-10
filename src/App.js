@@ -167,9 +167,9 @@ function App() {
 
           {/* Protected Routes */}
           <Route path="/" element={<ProtectedRoute element={<Dashboard />} path="/" />} />
-          <Route path="/manajemen-projek" element={<ProtectedRoute element={<ManajemenProjek />} path="/manajemen-projek" allowedRoles={['admin']} />} />
+          <Route path="/manajemen-projek" element={<ProtectedRoute element={<ManajemenProjek />} path="/manajemen-projek" allowedRoles={['admin', 'user']} />} />
           <Route path="/manajemen-projek/projek-baru" element={<ProtectedRoute element={<AddManajemenProjek />} path="/manajemen-projek/projek-baru" allowedRoles={['admin']} />} />
-          <Route path="/detail-projek" element={<ProtectedRoute element={<DetailProjek />} path="/user-profile-admin" allowedRoles={['admin']} />} />
+          <Route path="/detail-projek" element={<ProtectedRoute element={<DetailProjek />} path="/user-profile-admin" allowedRoles={['admin', 'user']} />} />
           <Route path="/manajemen-user" element={<ProtectedRoute element={<ManajemenUser />} path="/manajemen-user" allowedRoles={['admin']} />} />
           <Route path="/user-profile-admin" element={<ProtectedRoute element={<UserProfile />} path="/user-profile-admin" allowedRoles={['admin']} />} />
           <Route path="/user-profile" element={<ProtectedRoute element={<Profile />} path="/user-profile" />} />

@@ -130,7 +130,7 @@ const ManajemenUser = () => {
                       <div className="text-sm text-gray-900">{item.positionUser !== "" ? item.positionUser : 'Belum ada jabatan'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.roleUser}
+                      {item.roleUser === 'admin' ? 'Admin' : (item.roleUser === 'user' ? 'User' : 'Belum ada akses')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link to="/user-profile-admin" state={{userData: item, clicked: "true"}} className="text-indigo-600 hover:text-indigo-900">
