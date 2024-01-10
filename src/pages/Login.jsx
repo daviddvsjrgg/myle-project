@@ -190,9 +190,9 @@ const Login = () => {
         <div className='relative'>
           <button
           onClick={signInWithGoogle} 
-          className="absolute w-full bg-center top-0 right-0 px-5 py-1 border flex items-center justify-center gap-2 border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150">
+          className="absolute w-full bg-center top-0 right-0 px-5 py-1 border flex items-center justify-center gap-2 border-slate-200 dark:border-slate-400 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150">
               <img className="w-6 h-6" src="https://www.svgrepo.com/show/475656/google-color.svg" loading="lazy" alt="google logo" />
-              <span className=''>Login dengan Google</span>
+              <span className='text-gray-900'>Login dengan Google</span>
           </button>
         </div>
          <div className='mt-20'> 
