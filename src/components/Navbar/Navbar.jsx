@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 import { signOut } from "firebase/auth";
 import { auth, db } from '../../config/firebase/firebase';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
@@ -120,15 +120,15 @@ useEffect(() => {
                 <div className="ml-10 flex items-baseline space-x-4">
                   {(role === "user" || role === "admin") ? (
                     <>
-                      <a href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      <Link to="/" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Dashboard
-                      </a>
+                      </Link>
                     </>
                   ) : (
                     <>
-                      <a href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      <Link to="/" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Dashboard
-                      </a>
+                      </Link>
                     </>
                   )}
                   {(role === "user" || role === "admin") ? (
@@ -161,10 +161,10 @@ useEffect(() => {
                                           </svg>
                                         </div>
                                         <div>
-                                          <a href="/manajemen-projek" className="font-semibold text-gray-900">
+                                          <Link to="/manajemen-projek" className="font-semibold text-gray-900">
                                             Manajemen Projek
                                             <span className="absolute inset-0" />
-                                          </a>
+                                          </Link>
                                           <p className="mt-1 text-gray-600">Menampilkan list projek</p>
                                         </div>
                                     </div>
@@ -180,10 +180,10 @@ useEffect(() => {
                                       </svg>
                                       </div>
                                       <div>
-                                        <a href="/manajemen-user" className="font-semibold text-gray-900">
+                                        <Link to="/manajemen-user" className="font-semibold text-gray-900">
                                           Manajemen User
                                           <span className="absolute inset-0" />
-                                        </a>
+                                        </Link>
                                         <p className="mt-1 text-gray-600">Menampilkan list user</p>
                                       </div>
                                     </div>
@@ -197,10 +197,10 @@ useEffect(() => {
                                   </svg>
                                   </div>
                                   <div>
-                                    <a href="/projek" className="font-semibold text-gray-900">
+                                    <Link to="/projek" className="font-semibold text-gray-900">
                                       Daftar Mata Kuliah
                                       <span className="absolute inset-0" />
-                                    </a>
+                                    </Link>
                                     <p className="mt-1 text-gray-600">Menampilkan list mata kuliah</p>
                                   </div>
                                 </div>
@@ -222,27 +222,27 @@ useEffect(() => {
                   )}
                   {(role === "user" || role === "admin") ? (
                     <>
-                      <a href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      <Link to="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Mata Kuliah
-                      </a>
-                      <a href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      </Link>
+                      <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Jadwal Kuliah
-                      </a>
-                      <a href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      </Link>
+                      <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Deadline Tugas
-                      </a>
+                      </Link>
                     </>
                   ) : (
                     <>
-                      <a href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      <Link to="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Mata Kuliah
-                      </a>
-                      <a href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      </Link>
+                      <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Jadwal Kuliah
-                      </a>
-                      <a href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      </Link>
+                      <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Deadline Tugas
-                      </a>
+                      </Link>
                     </>
                   )}
 
@@ -299,15 +299,14 @@ useEffect(() => {
                     {profil.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
-                            <a
-                              href={item.href}
+                            <Link to={item.href}
                               className={classNames(
                                 active ? 'bg-gray-100' : '',
                                 'block px-4 py-2 text-sm text-gray-700'
                               )}
                             >
                               {item.name}
-                            </a>
+                            </Link>
                           )}
                         </Menu.Item>
                       ))}
@@ -379,7 +378,7 @@ useEffect(() => {
                         <div className="p-4">
                         {(role === "user" || role === "admin") && (
                                 <>
-                                  {checkPenanggungJawab ? (
+                                  {(checkPenanggungJawab || role === "admin") ? (
                                     <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                         <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
@@ -387,10 +386,10 @@ useEffect(() => {
                                           </svg>
                                         </div>
                                         <div>
-                                          <a href="/manajemen-projek" className="font-semibold text-gray-900">
+                                          <Link to="/manajemen-projek" className="font-semibold text-gray-900">
                                             Manajemen Projek
                                             <span className="absolute inset-0" />
-                                          </a>
+                                          </Link>
                                           <p className="mt-1 text-gray-600">Menampilkan list projek</p>
                                         </div>
                                     </div>
@@ -406,10 +405,10 @@ useEffect(() => {
                                       </svg>
                                       </div>
                                       <div>
-                                        <a href="/manajemen-user" className="font-semibold text-gray-900">
+                                        <Link to="/manajemen-user" className="font-semibold text-gray-900">
                                           Manajemen User
                                           <span className="absolute inset-0" />
-                                        </a>
+                                        </Link>
                                         <p className="mt-1 text-gray-600">Menampilkan list user</p>
                                       </div>
                                     </div>
@@ -423,10 +422,10 @@ useEffect(() => {
                               </svg>
                               </div>
                               <div>
-                                <a href="/projek" className="font-semibold text-gray-900">
+                                <Link to="/projek" className="font-semibold text-gray-900">
                                   Daftar Mata Kuliah
                                   <span className="absolute inset-0" />
-                                </a>
+                                </Link>
                                 <p className="mt-1 text-gray-600">Menampilkan list mata kuliah</p>
                               </div>
                             </div>
@@ -439,15 +438,21 @@ useEffect(() => {
               )}
               {(role === "user" || role === "admin") && (
                 <>
-                  <Disclosure.Button as="a" href="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                <Link to="/projek">
+                  <Disclosure.Button as="a" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                     Mata Kuliah
                   </Disclosure.Button>
-                  <Disclosure.Button as="a" href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                </Link>
+                <Link to="/none">
+                  <Disclosure.Button as="a" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                     Jadwal Kuliah
                   </Disclosure.Button>
-                  <Disclosure.Button as="a" href="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                </Link>
+                <Link to="/none">
+                  <Disclosure.Button as="a" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
                     Deadline Tugas
                   </Disclosure.Button>
+                </Link>
                 </>
               )}
           </div>
@@ -474,14 +479,15 @@ useEffect(() => {
             </div>
             <div className="mt-3 space-y-1 px-2">
               {profil.map((item) => (
-                <Disclosure.Button
-                  key={item.name}
-                  as="a"
-                  href={item.href}
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                >
-                  {item.name}
-                </Disclosure.Button>
+                <Link to={item.href}>
+                  <Disclosure.Button
+                    key={item.name}
+                    as="a"
+                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                  >
+                    {item.name}
+                  </Disclosure.Button>
+                </Link>
               ))}
               {userNavigation.map((item) => (
                 <Disclosure.Button
