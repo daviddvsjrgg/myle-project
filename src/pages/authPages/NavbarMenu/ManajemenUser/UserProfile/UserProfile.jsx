@@ -8,13 +8,9 @@ import { db } from '../../../../../config/firebase/firebase'
 import { Dialog, Transition } from '@headlessui/react'
 
 const UserProfile = () => {
-
-    // const [ userProfile, setUserProfile ] = useState([]);
-
     const location = useLocation();
    
     const userData = location.state ? location.state.userData : null;
-
 
     const navigate = useNavigate();
 
@@ -76,6 +72,96 @@ const UserProfile = () => {
         // Cleanup the interval when the component unmounts
         return () => clearInterval(countdownInterval);
     }, [count]);
+
+     // Get List User (Terdaftar)
+     const [ fetchedProjects, setFetchedProjects ] = useState([]);
+     const [ noDaftar, setStatusDaftar ] = useState(false);
+
+    // Modal Yakin
+    // const [ openHapus, setOpenHapus ] = useState(false);
+    // const [ deleteIdUser, setDeleteIdProject ] = useState('');
+
+    // List Projek
+    try {
+        useEffect(() => {
+            const fetchData = async () => {
+                const usersListCollection = collection(db, "usersProjects");
+        
+                try {
+                    const userListQuery = query(usersListCollection, where("idUser", "==", userData.idUser));
+                    const querySnapshot = await getDocs(userListQuery);
+        
+                    if (querySnapshot.docs.length > 0) {
+                        const fetchedListProject = querySnapshot.docs.map(doc => ({
+                            idProject: doc.data().idProject,
+                        }));
+                            console.log("Projek by User: " + fetchedListProject.map(project => project.idProject))
+                                
+                        const usersCollection = collection(db, "projects");
+        
+                        if (fetchedListProject.length > 0) {
+                            const usersQuery = query(usersCollection, where("idProject", "in", fetchedListProject.map(project => project.idProject)));
+                            const usersSnapshot = await getDocs(usersQuery);
+        
+                            if (usersSnapshot.docs.length > 0) {
+                                const projectList = usersSnapshot.docs.map(doc => ({
+                                    idProject: doc.data().idProject,
+                                    nameProject: doc.data().nameProject,
+                                    labelProject: doc.data().labelProject,
+                                }));
+                                setFetchedProjects(projectList);
+                            } else {
+                                console.log("No project found for the given idUser values.");
+                            }
+                        } else {
+                            console.log("dataProjectList is empty.");
+                        }
+                    } else {
+                        console.log("No documents found for the given query.");
+                        setStatusDaftar(true);
+                    }
+                } catch (error) {
+                    console.error("Error fetching data: ", error);
+                }
+            };
+        
+            // Invoke the fetch function
+            fetchData();
+        
+            // No cleanup needed in this case, so the return can be omitted or left empty.
+            }, [userData.idUser]);
+    } catch (error) {
+        console.log(error)
+    }
+
+     // List Projek (Penanggung Jawab)
+     const [ dataProject, setData ] = useState([]);
+        try {
+        
+            useEffect(() => {
+                const fetchData = async () => {
+                    const usersCollection = collection(db, "projects");
+                    const orderedQuery = query(usersCollection, where("picProject", "==", userData.emailUser));
+
+                    try {
+                        const snapshot = await getDocs(orderedQuery);
+                        const fetchedData = snapshot.docs.map(doc => ({
+                            idProject: doc.data().idProject,
+                            nameProject: doc.data().nameProject,
+                            labelProject: doc.data().labelProject
+                        }));
+                        setData(fetchedData);
+                    } catch (error) {
+                        console.log("Error fetching dataProject: ", error);
+                    }
+                };
+
+                fetchData();
+            }, [userData.emailUser]);
+        } catch (error) {
+            
+        }
+   
 
   return (
     <div className="min-h-full">
@@ -223,38 +309,107 @@ const UserProfile = () => {
                             
                             }
 
+                                {dataProject ? (
+                                <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                    <dt className="text-sm font-medium leading-6 text-gray-900">Penanggung Jawab Terdaftar</dt>
+                                    <dd className="mt-2 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                                    <ul className="divide-y divide-gray-100 rounded-md border border-gray-200">
+                                    {dataProject.length > 0 && (
+                                            <>
+                                                {dataProject.map((project) => 
+                                                <div>
+                                                    <li key={project.id} className={`flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6 hover:bg-gray-100`}>
+                                                        <div className="flex w-0 flex-1 items-center">
+                                                        <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                                                            <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                                                            <span className="truncate font-medium">
+                                                                {project.nameProject} {project.nameProject.includes("-") ? '' : `- ${project.labelProject}`}
+                                                            </span>
+                                                            {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
+                                                            </div>
+                                                        </div>
+                                                        <div className="ml-4 flex-shrink-0">
+                                                            <button className="font-medium text-indigo-500 hover:text-indigo-400">
+                                                                Buka
+                                                            </button>
+                                                        </div>
+                                                        </li>
+                                                </div>
+                                                )}
+                                            </>
+                                        ) }
+                                        {dataProject.length === 0 && (
+                                            <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
+                                                <div className="flex w-0 flex-1 items-center">
+                                                    <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                                                    <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                                                    <span className="truncate font-medium">Belum menjadi penanggung jawab</span>
+                                                    {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
+                                                    </div>
+                                                </div>
+                                                <div className="ml-4 flex-shrink-0">
+                                                </div>
+                                            </li>
+                                        )}
+                                    </ul>
+                                    </dd>
+                                </div>
+                            ) : (
+                                null
+                            )}
+
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                                <dt className="text-sm font-medium leading-6 text-gray-900">Mata Kuliah</dt>
+                                <dt className="text-sm font-medium leading-6 text-gray-900">Mata Kuliah Terdaftar</dt>
                                 <dd className="mt-2 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                                 <ul className="divide-y divide-gray-100 rounded-md border border-gray-200">
-                                    <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
-                                    <div className="flex w-0 flex-1 items-center">
-                                        <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-                                        <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                                        <span className="truncate font-medium">Pengembangan Aplikasi Bergerak</span>
-                                        {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
-                                        </div>
-                                    </div>
-                                    <div className="ml-4 flex-shrink-0">
-                                        <a href="/none" className="font-medium text-indigo-600 hover:text-indigo-500">
-                                        Detail
-                                        </a>
-                                    </div>
-                                    </li>
-                                    <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
-                                    <div className="flex w-0 flex-1 items-center">
-                                        <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-                                        <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                                        <span className="truncate font-medium">Pengolahan Citra Digital</span>
-                                        {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
-                                        </div>
-                                    </div>
-                                    <div className="ml-4 flex-shrink-0">
-                                        <a href="/none" className="font-medium text-indigo-600 hover:text-indigo-500">
-                                        Detail
-                                        </a>
-                                    </div>
-                                    </li>
+                                {fetchedProjects ? (
+                                        <>
+                                            {fetchedProjects.map((project) => 
+                                            <div>
+                                                <li key={project.id} className={`flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6 hover:bg-gray-100`}>
+                                                    <div className="flex w-0 flex-1 items-center">
+                                                    <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                                                        <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                                                        <span className="truncate font-medium">{project.nameProject}</span>
+                                                        {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
+                                                        </div>
+                                                    </div>
+                                                    <div className="ml-4 flex-shrink-0">
+                                                        <button className="font-medium text-indigo-500 hover:text-indigo-400">
+                                                            Buka
+                                                        </button>
+                                                    </div>
+                                                    </li>
+                                            </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
+                                            <div className="flex w-0 flex-1 items-center">
+                                                <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                                                <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                                                <span className="truncate font-medium animate-pulse">Loading Daftar Mahasiswa</span>
+                                                {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
+                                                </div>
+                                            </div>
+                                        </li>
+                                    )}
+
+                                    {noDaftar && (
+                                        <>
+                                            <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
+                                            <div className="flex w-0 flex-1 items-center">
+                                                <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                                                <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                                                <span className="truncate font-medium">Belum ada mahasiswa terdaftar</span>
+                                                {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
+                                                </div>
+                                            </div>
+                                             <div className="ml-4 flex-shrink-0">
+                                            </div>
+                                        </li>
+                                        </>
+                                    )}
                                 </ul>
                                 </dd>
                             </div>

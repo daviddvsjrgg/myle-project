@@ -228,7 +228,7 @@ const ManajemenProjek = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {data.map((project, index) => (
-                  <tr key={project.id} className={`${project.userData.emailUser === email && role === "admin" ? "bg-yellow-100 hover:bg-yellow-50" : "hover:bg-gray-100"}`}>
+                  <tr key={project.id} className={`${project.userData.emailUser === email && role === "admin" ? "bg-indigo-100 hover:bg-indigo-50" : "hover:bg-gray-100"}`}>
                     <td className="px-2 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-5">

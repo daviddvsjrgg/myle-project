@@ -153,7 +153,7 @@ useEffect(() => {
                             <div className="p-4">
                               {(role === "user" || role === "admin") && (
                                 <>
-                                  {checkPenanggungJawab ? (
+                                  {(checkPenanggungJawab || role === 'admin') ? (
                                     <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                         <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
