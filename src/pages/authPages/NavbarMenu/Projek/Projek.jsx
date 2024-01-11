@@ -351,7 +351,7 @@ const Projek = () => {
                                 <div className="ml-auto">
                                   <button
                                   disabled
-                                  className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-400 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Terdaftar</button>
+                                  className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-500 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Terdaftar</button>
                                 </div>
                               ) : ( disableGabung ? (
                                 <div className="ml-auto">

@@ -9,6 +9,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const Dashboard = () => {
   const [ username, setUsername ] = useState('');
+  const [ role, setRole ] = useState('');
 
   useEffect(()=>{
 
@@ -21,7 +22,9 @@ const Dashboard = () => {
               const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
               // Field from firestore
               const getUsername = querySnapshot.docs[0].data().usernameUser;
+              const getRole = querySnapshot.docs[0].data().roleUser;
               setUsername(getUsername);
+              setRole(getRole);
 
             } catch (error) {
               console.log("Error: " + error)
