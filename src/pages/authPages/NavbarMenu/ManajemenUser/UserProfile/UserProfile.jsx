@@ -370,7 +370,9 @@ const UserProfile = () => {
                                                     <div className="flex w-0 flex-1 items-center">
                                                     <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                                                         <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                                                        <span className="truncate font-medium">{project.nameProject}</span>
+                                                        <span className="truncate font-medium">
+                                                            {project.nameProject} {project.nameProject.includes("-") ? '' : `- ${project.labelProject}`}
+                                                        </span>
                                                         {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
                                                         </div>
                                                     </div>
@@ -401,7 +403,7 @@ const UserProfile = () => {
                                             <div className="flex w-0 flex-1 items-center">
                                                 <BookOpenIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                                                 <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                                                <span className="truncate font-medium">Belum ada mahasiswa terdaftar</span>
+                                                <span className="truncate font-medium">Belum ada mata kuliah terdaftar</span>
                                                 {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
                                                 </div>
                                             </div>
@@ -410,6 +412,7 @@ const UserProfile = () => {
                                         </li>
                                         </>
                                     )}
+
                                 </ul>
                                 </dd>
                             </div>

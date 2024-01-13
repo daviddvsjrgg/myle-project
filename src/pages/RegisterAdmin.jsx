@@ -29,6 +29,7 @@ const RegisterAdmin = () => {
     // Validation
     if (
       username === '' ||
+      kodeKhusus !== 'davidcode-2024' ||
        email === '' ||
         password === '' ||
          samePassword === '' ||
@@ -39,6 +40,7 @@ const RegisterAdmin = () => {
             emailValidation();
             passwordValidation();
             samePasswordValidation();
+            kodeKhususValidation();
     } else {
           try {
             setClickedRegister(true);
@@ -76,6 +78,7 @@ const RegisterAdmin = () => {
               setErrorMessageEmail('');
               setErrorMessagePassword('');
               setErrorMessageSamePassword('');
+              seterrorMessageKodeKhusus('');
             } catch (error) {
               const errorCode = error.code;
               const errorMessage = error.message;
@@ -151,6 +154,21 @@ const RegisterAdmin = () => {
         setErrorMessageSamePassword("Password tidak sama dengan input sebelumnya")
       } else if ( samePassword === password ) {
         setErrorMessageSamePassword("")
+      }
+    }
+
+    const [ kodeKhusus, setKodeKhusus ] = useState('');
+    const [ errorMessageKodeKhusus, seterrorMessageKodeKhusus ] = useState('');
+
+    const handleKodeKhusus = (e) => {
+      setKodeKhusus(e.target.value)
+    }
+
+    const kodeKhususValidation = () => {
+      if ( kodeKhusus === 'davidcode-2024') {
+        seterrorMessageKodeKhusus("")
+      } else if ( kodeKhusus !== 'davidcode-2024') {
+        seterrorMessageKodeKhusus("Kode salah!")
       }
     }
     
@@ -278,6 +296,30 @@ const RegisterAdmin = () => {
               )}
           </div>
         </div>
+        <div>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900 mt-2">
+              Masukkan Kode Khusus
+            </label>
+          </div>
+          <div className="mt-2">
+            <input
+              id="kodeKhusus"
+              name="kodeKhusus"
+              type="password"
+              onChange={handleKodeKhusus}
+              autoComplete="current-password"
+              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                errorMessageKodeKhusus ? 'ring-red-600' : 'ring-gray-300'
+              }`}
+            />
+             {errorMessageKodeKhusus && (
+                <div className="text-red-500 text-sm mt-1">
+                  {errorMessageKodeKhusus}
+                </div>
+              )}
+          </div>
+        </div>
 
         <div>
         {clickedRegister ? (
@@ -297,6 +339,12 @@ const RegisterAdmin = () => {
               Register
             </button>
           }
+          <p className="mt-10 text-center text-sm text-gray-500">
+            Sudah punya akun?{' '}
+            <a href="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+              Login
+            </a>
+          </p>
         </div>
     </div>
   </div>

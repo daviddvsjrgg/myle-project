@@ -107,7 +107,7 @@ const DetailProjek = () => {
             
             const imageName = `${uuidv4()}`
             const storage = getStorage();
-            const storageRef = ref(storage, `ProjekFile/${imageName}`);
+            const storageRef = ref(storage, `Projek/Gambar/${imageName}`);
     
             try {
                 // Upload the file
@@ -129,7 +129,7 @@ const DetailProjek = () => {
                     // Delete the previous image if it exists
                     const previousImageUrl = doc.data().imageUrlProject;
                     if (previousImageUrl) {
-                        const previousImageRef = ref(storage, `ProjekFile/${projectData.imageNameProject}`);
+                        const previousImageRef = ref(storage, `Projek/Gambar/${projectData.imageNameProject}`);
                         await deleteObject(previousImageRef);
                         console.log('Previous image deleted successfully.');
                     }

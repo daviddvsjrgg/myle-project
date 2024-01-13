@@ -110,7 +110,7 @@ const AddManajemenProjek = () => {
                   if (selectedFile !== null) {
                     setDroppedFile(null);
                     const imageName = `${uuidv4()}`
-                    const sendFile = ref(getStorage(), `ProjekFile/${imageName}`);
+                    const sendFile = ref(getStorage(), `Projek/Gambar/${imageName}`);
                     await uploadBytes(sendFile, selectedFile).then(snapshot => {
                       console.log('File uploaded successfully:', snapshot);
                       getDownloadURL(sendFile).then(downloadURL => {
@@ -131,7 +131,7 @@ const AddManajemenProjek = () => {
                                 imageNameProject: imageName,
                                 picProject: setPengguna,
                                 labelProject: label,
-                                statusProject: "Active",
+                                statusProject: "Private",
                                 createdAt: formattedDateString,
                               });
                               console.log("Document written with ID: ", docRef.id);
@@ -154,7 +154,7 @@ const AddManajemenProjek = () => {
                   if (droppedFile !== null ){
                     setSelectedFile(null);
                     const imageName = `${uuidv4()}`
-                    const sendFile = ref(getStorage(), `ProjekFile/${imageName}`);
+                    const sendFile = ref(getStorage(), `Projek/Gambar/${imageName}`);
                     await uploadBytes(sendFile, droppedFile).then(snapshot => {
                       console.log('File uploaded successfully:', snapshot);
                     getDownloadURL(sendFile).then(downloadURL => {
@@ -174,7 +174,7 @@ const AddManajemenProjek = () => {
                               imageNameProject: imageName,
                               picProject: setPengguna,
                               labelProject: label,
-                              statusProject: "Active",
+                              statusProject: "Private",
                               createdAt: formattedDateString,
                             });
                             console.log("Document written with ID: ", docRef.id);
@@ -203,11 +203,11 @@ const AddManajemenProjek = () => {
                         idProject: `projek-${uuidv4()}`,
                         nameProject: namaProjek,
                         descriptionProject: deskripsi,
-                        imageUrlProject: "https://images.unsplash.com/photo-1635321349581-d3a6ff81a9a6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG5vJTIwaW1hZ2V8ZW58MHx8MHx8fDA%3D",
+                        imageUrlProject: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3R1ZHl8ZW58MHx8MHx8fDA%3D",
                         imageNameProject: imageName,
                         picProject: setPengguna,
                         labelProject: label,
-                        statusProject: "Active",
+                        statusProject: "Private",
                         createdAt: formattedDateString,
                       });
                       console.log("Document written with ID: ", docRef.id);
