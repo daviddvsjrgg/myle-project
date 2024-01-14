@@ -1,14 +1,36 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
-import Bottom from '../../../../components/BottomBar/Bottom'
-import { addDoc, collection, getDocs, query, where } from 'firebase/firestore'
+import { addDoc, collection, getDocs, limit, query, where } from 'firebase/firestore'
 import { auth, db } from '../../../../config/firebase/firebase'
 import { Dialog, Transition } from '@headlessui/react'
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 import { onAuthStateChanged } from 'firebase/auth'
 import { v4 as uuidv4 } from 'uuid';
+import LoadingSpinnerMid from '../../../../components/Loading/LoadingSpinnerMid/LoadingSpinnerMid'
+import Bottom from '../../../../components/BottomBar/Bottom'
+
+// Item Project
+const showItem = 6;
+
+// Debounce function definition
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
 
 const Projek = () => {
+
+  // Search
+  const [search, setSearch] = useState('')
+  
+  useEffect(() => {
+    console.log(search)
+  }, [search])
 
   // Countdown
   const [count, setCount] = useState(null);
@@ -61,8 +83,8 @@ const Projek = () => {
             });
             
             setCheckGabung(userProjectsArray);
-
-        } catch (error) {
+            
+          } catch (error) {
             console.log("Error: " + error)
         }
         // ...
@@ -74,40 +96,94 @@ const Projek = () => {
 }, [])
 
   const [ data, setData ] = useState([]);
+  const [ loadSpinner, setLoadSpinner ] = useState(false)
+  const [ currentPage, setCurrentPage ] = useState(1);
 
+  const [ totalProjects, setTotalProjects ] = useState(0)
+  
+
+useEffect(() => {
   const fetchData = async () => {
     const projectsCollection = collection(db, "projects");
-  
-    try {
-      const snapshot = await getDocs(projectsCollection);
-      const fetchedData = [];
-  
-      for (const doc of snapshot.docs) {
-        const projectData = doc.data();
-        const emailUser = projectData.picProject;
-  
-        const usersCollection = collection(db, "users");
-        const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
-        const userSnapshot = await getDocs(userQuery);
-  
-        if (!userSnapshot.empty) {
-          fetchedData.push({
-            id: doc.id,
-            ...projectData,
-            userData: userSnapshot.docs[0].data(),
-          });
+
+
+    // Only Total
+    const queryTotal = query(projectsCollection);
+       const snapshotTotal = await getDocs(queryTotal);
+    setTotalProjects(snapshotTotal.size);
+    console.log("Total: " + totalProjects);
+    
+    console.log("search: " + search)
+    if (search) {
+      console.log("search dijalankan")
+      const queryStatusProjects = query(projectsCollection,
+         where("idProject", "==", search),
+         );
+      try {
+        const snapshot = await getDocs(queryStatusProjects);
+        const fetchedData = [];
+    
+        for (const doc of snapshot.docs) {
+          const projectData = doc.data();
+          const emailUser = projectData.picProject;
+    
+          const usersCollection = collection(db, "users");
+          const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+          const userSnapshot = await getDocs(userQuery);
+    
+          if (!userSnapshot.empty) {
+            fetchedData.push({
+              id: doc.id,
+              ...projectData,
+              userData: userSnapshot.docs[0].data(),
+            });
+          }
         }
+        
+        setData(fetchedData);
+      } catch (error) {
+        console.log("Error fetching data: ", error);
       }
-  
-      setData(fetchedData);
-    } catch (error) {
-      console.log("Error fetching data: ", error);
+    } else if (!search) {
+      console.log("Tidak melalui search")
+      console.log(currentPage);
+      const queryStatusProjects = query(projectsCollection,
+         where("statusProject", "==", "Public"),
+         limit(currentPage * showItem));
+     
+      try {
+        const snapshot = await getDocs(queryStatusProjects);
+        const fetchedData = [];
+    
+        for (const doc of snapshot.docs) {
+          const projectData = doc.data();
+          const emailUser = projectData.picProject;
+    
+          const usersCollection = collection(db, "users");
+          const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+          const userSnapshot = await getDocs(userQuery);
+    
+          if (!userSnapshot.empty) {
+            fetchedData.push({
+              id: doc.id,
+              ...projectData,
+              userData: userSnapshot.docs[0].data(),
+            });
+          }
+        }
+
+        setData(fetchedData);
+
+      } catch (error) {
+        console.log("Error fetching data: ", error);
+      }
     }
+
+    
   };
   
-  useEffect(() => {
     fetchData();
-  }, []);
+  }, [search, currentPage, totalProjects]);
 
   // Modal Terdaftar
   const [openTerdaftar, setOpenTerdaftar] = useState(false)
@@ -164,6 +240,29 @@ const Projek = () => {
 
   }
 
+  // Scroll
+    const handleScroll = debounce(() => {
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+
+    if (scrollTop + clientHeight >= scrollHeight - 10) {
+      // User has scrolled to the bottom      
+      const itemProjects = currentPage * showItem;
+      console.log("item: "+ itemProjects);
+      if (totalProjects < itemProjects) {
+        setLoadSpinner(false);
+      } else {
+        setLoadSpinner(true);
+        setCurrentPage((prevPage) => prevPage + 1);
+      }
+        
+    }
+  }, 200);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+  }, [loadSpinner, currentPage, totalProjects, handleScroll]);
   
 
   return (
@@ -171,11 +270,13 @@ const Projek = () => {
       <Navbar />
       <header className="bg-white drop-shadow-md">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Mata Kuliah</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Kuliah</h1>
         </div>
       </header>
 
       {/* Start - Content */}
+
+      
 
       {/* Modal Terdaftar */}
       <Transition.Root show={openTerdaftar} as={Fragment}>
@@ -306,12 +407,33 @@ const Projek = () => {
 
             <div className="bg-white">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-              <div className="mx-auto max-w-2xl lg:mx-0">
 
+              <div className="mt-5 lg:mx-0">
                   {/* Header */}
 
-                  {/* End Header */}
+                    {/* Search */}
 
+                          <label className="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
+                          <div className="relative">
+                              <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                  <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                  </svg>
+                              </div>
+                              <input
+                              type="search"
+                              id="default-search"
+                              onChange={(e) => setSearch(e.target.value)}
+                              autoComplete='off'
+                              placeholder="Cari projek (contoh:projek-xxxx)"
+                              className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500  "
+                              />
+                              {/* <button type="submit" className="text-white absolute end-2.5 bottom-2.5 bg-indigo-700 hover:bg-indigo-600 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-4 py-2 ">Search</button> */}
+                          </div>
+
+                    {/* End Search */}
+
+                  {/* End Header */}
               </div>
 
 
@@ -378,79 +500,15 @@ const Projek = () => {
                       </div>
                     </div>
                   )}
-                  {/* <div className="p-4 md:w-1/3">
-                      <div className="h-full rounded-xl shadow-cla-violate bg-gradient-to-r from-pink-50 to-red-50 overflow-hidden">
-                        <img className="lg:h-48 md:h-36 w-full object-cover object-center scale-110 transition-all duration-400 hover:scale-100" src="https://images.unsplash.com/photo-1624628639856-100bf817fd35?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8M2QlMjBpbWFnZXxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=600&q=60" alt="blog" />
-                        <div className="p-6">
-                          <h2 className="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">CATEGORY-1</h2>
-                          <h1 className="title-font text-lg font-medium text-gray-600 mb-3">The Catalyzer</h1>
-                          <p className="leading-relaxed mb-3">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
-                          <div className="flex items-center flex-wrap ">
-                            <button className="bg-gradient-to-r from-orange-300 to-amber-400 hover:scale-105 drop-shadow-md shadow-cla-violate px-4 py-1 rounded-lg">Learn more</button>
-                          
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4 md:w-1/3">
-                      <div className="h-full rounded-xl shadow-cla-pink bg-gradient-to-r from-fuchsia-50 to-pink-50 overflow-hidden">
-                        <img className="lg:h-48 md:h-36 w-full object-cover object-center scale-110 transition-all duration-400 hover:scale-100" src="https://images.unsplash.com/photo-1631700611307-37dbcb89ef7e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDIwfHx8ZW58MHx8fHw%3D&auto=format&fit=crop&w=600&q=60" alt="blog" />
-                        <div className="p-6">
-                          <h2 className="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">CATEGORY-1</h2>
-                          <h1 className="title-font text-lg font-medium text-gray-600 mb-3">The Catalyzer</h1>
-                          <p className="leading-relaxed mb-3">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
-                          <div className="flex items-center flex-wrap ">
-                            <button className="bg-gradient-to-r from-fuchsia-300 to-pink-400 hover:scale-105  shadow-cla-blue px-4 py-1 rounded-lg">Learn more</button>
-                          
-                          </div>
-                        </div>
-                      </div>
-                    </div> */}
                 </div>
               </div>
             </section>
-
-            {/* <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-3">
-              {data.map((project) => (
+            {loadSpinner && (
               <>
-              <a href='/toProject' className="group block rounded-lg p-6 bg-white ring-1 ring-slate-900/5 drop-shadow-lg space-y-3 hover:bg-gray-100 hover:ring-gray-200">
-              <div className="flex items-center space-x-3">
-                <article key={project.id} className="flex max-w-xl flex-col items-start justify-between">
-                  <div className="flex items-center gap-x-4 text-xs">
-                    <time dateTime={project.datetime} className="text-gray-500">
-                      {project.createdAt}
-                    </time>
-                    <div
-                      className="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600">
-                      {project.labelProject}
-                    </div>
-                  </div>
-                  <div className="group relative">
-                    <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900">
-                        <span className="absolute inset-0" />
-                        {project.nameProject}
-                    </h3>
-                    <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{project.descriptionProject !== "" ? project.descriptionProject : "Projek ini belum ada deskripsi..."}</p>
-                  </div>
-                  <div className="relative mt-8 flex items-center gap-x-4">
-                    <img src={project.userData.imageUser} alt="" className="h-10 w-10 rounded-full bg-gray-50" />
-                    <div className="text-sm leading-6">
-                      <p className="font-semibold text-gray-900">
-                        <a href="/user-profile">
-                          <span className="absolute inset-0" />
-                          {project.userData.usernameUser}
-                        </a>
-                      </p>
-                      <p className="text-gray-600">{project.userData.positionUser !== "" ? project.userData.positionUser : "Belum ada Jabatan"}</p>
-                    </div>
-                  </div>
-                </article>
-             </div>
-             </a>
-             </>
-              ))}
-            </div> */}
-
+                <LoadingSpinnerMid/>
+                <Bottom />
+              </>
+            )}
           </div>
         </div>
 

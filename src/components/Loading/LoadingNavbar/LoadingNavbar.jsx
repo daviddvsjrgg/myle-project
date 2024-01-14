@@ -10,13 +10,13 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
   //   { name: 'Projek', href: '/projek', current: false },
   //   { name: 'Laporan', href: '/laporan', current: false },
   // ]
-  const userNavigation = [
-    { name: 'Logout', href: '/login' },
-  ]
+  // const userNavigation = [
+  //   { name: 'Logout', href: '/login' },
+  // ]
   
-  const profil = [
-    { name: 'Profil Anda', href: '/user-profile' },
-  ]
+  // const profil = [
+  //   { name: 'Profil Anda', href: '/user-profile' },
+  // ]
   
   
 const LoadingNavbar = () => {
