@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [ role, setRole ] = useState('');
   const [ jumlahUser,  setJumlahUser ] = useState('')
   const [ jumlahProjects,  setJumlahProject ] = useState('')
+  const [ jumlahDaftar,  setJumlahDaftar ] = useState('')
 
   useEffect(()=>{
 
@@ -22,14 +23,17 @@ const Dashboard = () => {
           // https://firebase.google.com/docs/reference/js/firebase.User
             const usersCollection = collection(db, "users");
             const projectsCollection = collection(db, "projects");
+            const usersProjectsCollection = collection(db, "usersProjects");
     
             try {
               const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
               const querySnapshotAllUsers = await getDocs(query(usersCollection));
               const querySnapshotAllProjects = await getDocs(query(projectsCollection));
+              const querySnapshotAllUsersProjects = await getDocs(query(usersProjectsCollection));
 
               setJumlahUser(querySnapshotAllUsers.size.toString());
               setJumlahProject(querySnapshotAllProjects.size.toString());
+              setJumlahDaftar(querySnapshotAllUsersProjects.size.toString());
 
               // Field from firestore
               const getUsername = querySnapshot.docs[0].data().usernameUser;
@@ -79,7 +83,7 @@ const Dashboard = () => {
                     <img className="rounded-full w-10 h-10" src={image} alt="" />
                     <div className=" font-medium  text-left rtl:text-right ms-3">
                         <div>{username}</div>
-                        <div className="text-sm text-gray-500  ">{positionUser === "Belum Ada Jabatan" ? "Mahasiswa" : positionUser}</div>
+                        <div className="text-sm text-gray-500  ">{positionUser === "Belum ada jabatan" ? "Mahasiswa" : positionUser}</div>
                     </div>
                 </figcaption>    
             </figure>
@@ -91,7 +95,7 @@ const Dashboard = () => {
                     <h3 className="text-lg font-semibold text-gray-900 ">Selamat Datang</h3>
                     <p className="my-1">Semoga kuliahmu menyenangkan :{")"}</p>
                 </blockquote>
-                <figcaption className="flex items-center justify-center ">
+                <figcaption className="flex items-center justify-center animate-pulse">
                     <div className="flex items-center">
                       <svg className="w-10 h-10 me-3 text-gray-200 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
@@ -114,10 +118,10 @@ const Dashboard = () => {
         {role === "admin" &&   (
         <>
         {jumlahProjects && jumlahUser ? (
-           <div className="mx-2 rounded-lg grid mb-4 border border-gray-200 shadow-md  md:mb-4 md:grid-cols-2 bg-white ">
+           <div className="mx-2 rounded-lg grid mb-4 border border-gray-200 shadow-md  md:mb-4 md:grid-cols-3 bg-white ">
            <figure className="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e  ">
                <blockquote className="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 ">
-                   <h3 className="text-lg font-semibold text-gray-900 ">Total Mata Kuliah</h3>
+                   <h3 className="text-lg font-semibold text-gray-900 ">Total Projek</h3>
                    {/* <p className="my-4">If you care for your time, I hands down would go with this."</p> */}
                </blockquote>
                <figcaption className="flex items-center justify-center ">
@@ -125,7 +129,21 @@ const Dashboard = () => {
                  <path d="M5.566 4.657A4.505 4.505 0 0 1 6.75 4.5h10.5c.41 0 .806.055 1.183.157A3 3 0 0 0 15.75 3h-7.5a3 3 0 0 0-2.684 1.657ZM2.25 12a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3v-6ZM5.25 7.5c-.41 0-.806.055-1.184.157A3 3 0 0 1 6.75 6h10.5a3 3 0 0 1 2.683 1.657A4.505 4.505 0 0 0 18.75 7.5H5.25Z" />
                </svg>
                    <div className="space-y-0.5 font-medium  text-left rtl:text-right ms-3">
-                       <div className="text-4xl text-gray-600  ">{jumlahProjects}</div>
+                       <div className="text-4xl -mt-1 text-gray-600  ">{jumlahProjects}</div>
+                   </div>
+               </figcaption>    
+           </figure>
+           <figure className="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e  ">
+               <blockquote className="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 ">
+                   <h3 className="text-lg font-semibold text-gray-900 ">Total Daftar</h3>
+                   {/* <p className="my-4">If you care for your time, I hands down would go with this."</p> */}
+               </blockquote>
+               <figcaption className="flex items-center justify-center ">
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-indigo-600">
+                  <path fillRule="evenodd" d="M4.5 3.75a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V6.75a3 3 0 0 0-3-3h-15Zm4.125 3a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Zm-3.873 8.703a4.126 4.126 0 0 1 7.746 0 .75.75 0 0 1-.351.92 7.47 7.47 0 0 1-3.522.877 7.47 7.47 0 0 1-3.522-.877.75.75 0 0 1-.351-.92ZM15 8.25a.75.75 0 0 0 0 1.5h3.75a.75.75 0 0 0 0-1.5H15ZM14.25 12a.75.75 0 0 1 .75-.75h3.75a.75.75 0 0 1 0 1.5H15a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3.75a.75.75 0 0 0 0-1.5H15Z" clipRule="evenodd" />
+                </svg>
+                   <div className="space-y-0.5 font-medium  text-left rtl:text-right ms-3">
+                       <div className="text-4xl -mt-1 text-gray-600  ">{jumlahDaftar}</div>
                    </div>
                </figcaption>    
            </figure>
@@ -140,7 +158,7 @@ const Dashboard = () => {
                  <path d="M5.082 14.254a8.287 8.287 0 0 0-1.308 5.135 9.687 9.687 0 0 1-1.764-.44l-.115-.04a.563.563 0 0 1-.373-.487l-.01-.121a3.75 3.75 0 0 1 3.57-4.047ZM20.226 19.389a8.287 8.287 0 0 0-1.308-5.135 3.75 3.75 0 0 1 3.57 4.047l-.01.121a.563.563 0 0 1-.373.486l-.115.04c-.567.2-1.156.349-1.764.441Z" />
                </svg>
                    <div className="space-y-0.5 font-medium  text-left rtl:text-right ms-3">
-                       <div className="text-4xl text-gray-600 ">{jumlahUser}</div>
+                       <div className="text-4xl -mt-1 text-gray-600 ">{jumlahUser}</div>
                    </div>
                </figcaption>    
            </figure>
