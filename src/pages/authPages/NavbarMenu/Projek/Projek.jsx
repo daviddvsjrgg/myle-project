@@ -266,7 +266,7 @@ useEffect(() => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [loadSpinner, currentPage, totalProjects, handleScroll]);
+  }, [loadSpinner, currentPage, totalProjects]);
   
 
   return (

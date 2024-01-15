@@ -60,7 +60,9 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
 
             } catch (error) {
               console.log("Error: " + error)
-              navigate('/login')
+              setTimeout(() => {
+                navigate('/login')
+              }, 2000);
             }
           
           // ...
