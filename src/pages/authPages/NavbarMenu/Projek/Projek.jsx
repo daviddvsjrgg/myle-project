@@ -9,6 +9,15 @@ import { v4 as uuidv4 } from 'uuid';
 import LoadingSpinnerMid from '../../../../components/Loading/LoadingSpinnerMid/LoadingSpinnerMid'
 import Bottom from '../../../../components/BottomBar/Bottom'
 
+const loadDataBait = [
+    {id: "bait"},
+    {id: "bait"},
+    {id: "bait"},
+    {id: "bait"},
+    {id: "bait"},
+    {id: "bait"},
+]
+
 // Item Project
 const showItem = 6;
 
@@ -98,6 +107,7 @@ const Projek = () => {
   const [ data, setData ] = useState([]);
   const [ loadSpinner, setLoadSpinner ] = useState(false)
   const [ currentPage, setCurrentPage ] = useState(1);
+  const [ imageLoaded, setImageLoaded ] = useState(false);
 
   const [ totalProjects, setTotalProjects ] = useState(0)
   
@@ -116,6 +126,9 @@ useEffect(() => {
     console.log("search: " + search)
     if (search) {
       console.log("search dijalankan")
+      setTimeout(() => {
+        setLoadSpinner(false)
+      }, 1000);
       const queryStatusProjects = query(projectsCollection,
          where("idProject", "==", search),
          );
@@ -139,7 +152,9 @@ useEffect(() => {
             });
           }
         }
-        
+        setTimeout(() => {
+          setImageLoaded(true);
+        }, 1400);
         setData(fetchedData);
       } catch (error) {
         console.log("Error fetching data: ", error);
@@ -172,6 +187,9 @@ useEffect(() => {
           }
         }
 
+        setTimeout(() => {
+          setImageLoaded(true)
+        }, 1400);
         setData(fetchedData);
 
       } catch (error) {
@@ -208,11 +226,11 @@ useEffect(() => {
     setDisableGabung(true);
     setSuccessGabung(true);
     setOpen(false);
-
+    
     const usersCollection = collection(db, "usersProjects");
-
+    
     const querySnapshot = await getDocs(query(usersCollection, where("idUsersProjects", "==", getCurrentId)));
-
+    
     if (querySnapshot.size === 0) {
       // No existing document found, add a new one
       try {
@@ -237,15 +255,16 @@ useEffect(() => {
       console.log("Document with the same idUsers already exists");
       // You may choose to update the existing document here
     }
-
+    
   }
 
   // Scroll
-    const handleScroll = debounce(() => {
+  useEffect(() => {
+  const handleScroll = debounce(() => {
     const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
     const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
     const clientHeight = document.documentElement.clientHeight || window.innerHeight;
-
+    
     if (scrollTop + clientHeight >= scrollHeight - 10) {
       // User has scrolled to the bottom      
       const itemProjects = currentPage * showItem;
@@ -260,14 +279,13 @@ useEffect(() => {
     }
   }, 200);
 
-  useEffect(() => {
     window.addEventListener('scroll', handleScroll);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [loadSpinner, currentPage, totalProjects]);
-  
+
 
   return (
     <div className="min-h-full">
@@ -429,7 +447,7 @@ useEffect(() => {
                               id="default-search"
                               onChange={(e) => setSearch(e.target.value)}
                               autoComplete='off'
-                              placeholder="Cari projek (contoh:projek-xxxx)"
+                              placeholder="Cari projek (contoh:projek-xxxx-xx)"
                               className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500  "
                               />
                               {/* <button type="submit" className="text-white absolute end-2.5 bottom-2.5 bg-indigo-700 hover:bg-indigo-600 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-4 py-2 ">Search</button> */}
@@ -443,68 +461,117 @@ useEffect(() => {
 
             <section className="text-gray-600 body-font ">
               <div className="container py-8">
-                <div className="flex flex-wrap -m-4">
-                  {data.map((project) => 
-                    <div key={project.id} className="p-4 md:w-1/3 scale-100 transition-all duration-400 hover:scale-105">
-                      <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md">
-                        {/* <a href="/toProject"> */}
-                          <img className="lg:h-64 md:h-32 w-screen object-cover md:object-scale scale-110 transition-all duration-400 hover:opacity-90" src={project.imageUrlProject} alt="blog" />
-                        {/* </a> */}
-                        <div className="p-6">
-                          <div className="flex justify-between">        
-                            {/* <a href=""> */}
-                              <h1 className="title-font text-lg font-medium text-gray-600 mb-3 scale-100">
-                                {project.nameProject} {project.nameProject.includes("-") ? '' : `- ${project.labelProject}`}
-                              </h1>
+                  {totalProjects && data && imageLoaded ? (
+                    <>
+                    <div className="flex flex-wrap -m-4">
+                      {data.map((project) => 
+                        <div key={project.id} className="p-4 md:w-1/3 scale-100 transition-all duration-400 hover:scale-105">
+                          <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md">
+                            {/* <a href="/toProject"> */}
+                              <img className="lg:h-64 md:h-32 w-screen object-cover md:object-scale scale-110 transition-all duration-400 hover:opacity-90" src={project.imageUrlProject} alt="blog" />
                             {/* </a> */}
-                          </div>
-                          <div className="flex float-right">
-                            <h2 className="tracking-widest text-xs title-font font-medium text-gray-400 m-1 ">{project.createdAt}</h2>
-                          </div>
-                          <p className="leading-relaxed mb-3 text-gray-500 ">{project.descriptionProject !== "" ? project.descriptionProject : "Belum ada berita..."}</p>
-                            <div className="relative mt-3 flex items-center bottom-0 gap-x-4">
-                              <img src={project.userData.imageUser} alt="" className="h-10 w-10 rounded-full bg-gray-50" />
-                              <div className="text-sm leading-6">
-                                <p className="font-semibold text-gray-900">
-                                  {/* <a href="/user-profile-projek"> */}
-                                    <span className="absolute inset-0" />
-                                    {project.userData.usernameUser}
-                                  {/* </a> */}
-                                </p>
-                                <p className="text-gray-600">{project.userData.positionUser !== "" ? project.userData.positionUser : "Belum ada Jabatan"}</p>
+                            <div className="p-6">
+                              <div className="flex justify-between">        
+                                {/* <a href=""> */}
+                                  <h1 className="title-font text-lg font-medium text-gray-600 mb-3 scale-100">
+                                    {project.nameProject} {project.nameProject.includes("-") ? '' : `- ${project.labelProject}`}
+                                  </h1>
+                                {/* </a> */}
                               </div>
-                              {checkGabung.includes(project.idProject) || (successGabung && getIdProject === project.idProject) || project.userData.emailUser === getCurrentEmail ? (
-                                <div className="ml-auto">
-                                  <button
-                                  disabled
-                                  className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-500 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Terdaftar</button>
-                                </div>
-                              ) : ( disableGabung ? (
-                                <div className="ml-auto">
-                                  <button
-                                  disabled
-                                  className="bg-gradient-to-r from-indigo-200 to-indigo-200 text-white drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
-                               </div>
-                              ) : (
-                                <div className="ml-auto">
-                                  <button
-                                  onClick={ () => {
-                                      setIdProject(project.idProject);
-                                      handleClickGabung();
-                                    } 
-                                  }
-                                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
+                              <div className="flex float-right">
+                                <h2 className="tracking-widest text-xs title-font font-medium text-gray-400 m-1 ">{project.createdAt}</h2>
                               </div>
-                              )
-                                
-                              )}
-                             
+                              <p className="leading-relaxed mb-3 text-gray-500 ">{project.descriptionProject !== "" ? project.descriptionProject : "Belum ada berita..."}</p>
+                                <div className="relative mt-3 flex items-center bottom-0 gap-x-4">
+                                  <img src={project.userData.imageUser} alt="" className="h-10 w-10 rounded-full bg-gray-50" />
+                                  <div className="text-sm leading-6">
+                                    <p className="font-semibold text-gray-900">
+                                      {/* <a href="/user-profile-projek"> */}
+                                        <span className="absolute inset-0" />
+                                        {project.userData.usernameUser}
+                                      {/* </a> */}
+                                    </p>
+                                    <p className="text-gray-600">{project.userData.positionUser !== "" ? project.userData.positionUser : "Belum ada Jabatan"}</p>
+                                  </div>
+                                  {checkGabung.includes(project.idProject) || (successGabung && getIdProject === project.idProject) || project.userData.emailUser === getCurrentEmail ? (
+                                    <div className="ml-auto">
+                                      <button
+                                      disabled
+                                      className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-500 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Terdaftar</button>
+                                    </div>
+                                  ) : ( disableGabung ? (
+                                    <div className="ml-auto">
+                                      <button
+                                      disabled
+                                      className="bg-gradient-to-r from-indigo-200 to-indigo-200 text-white drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
+                                  </div>
+                                  ) : (
+                                    <div className="ml-auto">
+                                      <button
+                                      onClick={ () => {
+                                          setIdProject(project.idProject);
+                                          handleClickGabung();
+                                        } 
+                                      }
+                                      className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
+                                  </div>
+                                  )
+                                  )}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
+                      
                     </div>
+                    </>
+                  ) : (
+                    <>
+                       <div className="flex flex-wrap -m-4">
+                      {loadDataBait.map(() => 
+                        <div className="p-4 md:w-1/3 scale-100">
+                          <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden">
+                            {/* <a href="/toProject"> */}
+                            <div class="flex items-center justify-center h-48 bg-gray-300 rounded animate-pulse">
+                                <svg class="w-10 h-10 text-gray-200 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                                    <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2ZM10.5 6a1.5 1.5 0 1 1 0 2.999A1.5 1.5 0 0 1 10.5 6Zm2.221 10.515a1 1 0 0 1-.858.485h-8a1 1 0 0 1-.9-1.43L5.6 10.039a.978.978 0 0 1 .936-.57 1 1 0 0 1 .9.632l1.181 2.981.541-1a.945.945 0 0 1 .883-.522 1 1 0 0 1 .879.529l1.832 3.438a1 1 0 0 1-.031.988Z"/>
+                                    <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z"/>
+                                </svg>
+                            </div>
+                            {/* </a> */}
+                            <div className="p-6">
+                              <div className="flex justify-between">        
+                                {/* <a href=""> */}
+                                  <h1 className="title-font text-lg font-medium text-gray-600 scale-100">
+                                  </h1>
+                                {/* </a> */}
+                              </div>
+                              <div className="flex float-right">
+                              </div>
+                              <div class="h-2.5 bg-gray-200 rounded-full  w-48 mb-4 "></div>
+                                <div class="h-2 bg-gray-200 rounded-full mb-2.5"></div>
+                                <div class="h-2 bg-gray-200 rounded-full mb-2.5"></div>
+                                <div className="relative flex items-center bottom-0 gap-x-4 animate-pulse">
+                                    <svg class="w-10 h-10 me-3 text-gray-200 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
+                                    </svg>
+                                  <div className="text-sm leading-6">
+                                  <div class="flex items-center mt-4">
+                                    
+                                      <div>
+                                          <div class="h-2.5 bg-gray-200 rounded-full  w-32 mb-2"></div>
+                                          <div class="w-48 h-2 bg-gray-200 rounded-full"></div>
+                                      </div>
+                                  </div>
+                                  </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      </div>
+                    </>
                   )}
-                </div>
               </div>
             </section>
             {loadSpinner && (
