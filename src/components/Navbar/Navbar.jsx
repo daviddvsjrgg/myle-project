@@ -62,7 +62,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
               console.log("Error: " + error)
               setTimeout(() => {
                 navigate('/login')
-              }, 5000);
+              }, 2000);
             }
           
           // ...
