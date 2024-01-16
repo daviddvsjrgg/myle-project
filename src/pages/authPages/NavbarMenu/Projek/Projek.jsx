@@ -116,10 +116,10 @@ useEffect(() => {
   const fetchData = async () => {
     const projectsCollection = collection(db, "projects");
 
-
+    setCurrentPage(1)
     // Only Total
     const queryTotal = query(projectsCollection);
-       const snapshotTotal = await getDocs(queryTotal);
+    const snapshotTotal = await getDocs(queryTotal);
     setTotalProjects(snapshotTotal.size);
     console.log("Total: " + totalProjects);
     
@@ -129,14 +129,36 @@ useEffect(() => {
       setTimeout(() => {
         setLoadSpinner(false)
       }, 1000);
-      const queryStatusProjects = query(projectsCollection,
-         where("idProject", "==", search),
-         );
+
+      const capitalFirstWord = search.split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      const searchVariations = [`${search.toUpperCase()}`, `${search.toLowerCase()}`, `${capitalFirstWord}`, `${search}`]
+      
+      const searchLabel = query(projectsCollection,
+        where("labelProject", "in", searchVariations),
+      );
+
+     const searchName = query(projectsCollection,
+        where("nameProject", "in", searchVariations),
+      );
+
+      const searchId = query(projectsCollection,
+        where("idProject", "in", searchVariations),
+      );
+         
       try {
-        const snapshot = await getDocs(queryStatusProjects);
+
+        const [snapshotLabel, snapshotName, snapshotId] = await Promise.all([
+          getDocs(searchLabel),
+          getDocs(searchName),
+          getDocs(searchId)
+        ]);
+
         const fetchedData = [];
     
-        for (const doc of snapshot.docs) {
+      // first query
+        for (const doc of snapshotLabel.docs) {
           const projectData = doc.data();
           const emailUser = projectData.picProject;
     
@@ -152,6 +174,41 @@ useEffect(() => {
             });
           }
         }
+      // second query
+        for (const doc of snapshotId.docs) {
+          const projectData = doc.data();
+          const emailUser = projectData.picProject;
+    
+          const usersCollection = collection(db, "users");
+          const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+          const userSnapshot = await getDocs(userQuery);
+    
+          if (!userSnapshot.empty) {
+            fetchedData.push({
+              id: doc.id,
+              ...projectData,
+              userData: userSnapshot.docs[0].data(),
+            });
+          }
+        }
+      // third query
+        for (const doc of snapshotName.docs) {
+          const projectData = doc.data();
+          const emailUser = projectData.picProject;
+    
+          const usersCollection = collection(db, "users");
+          const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+          const userSnapshot = await getDocs(userQuery);
+    
+          if (!userSnapshot.empty) {
+            fetchedData.push({
+              id: doc.id,
+              ...projectData,
+              userData: userSnapshot.docs[0].data(),
+            });
+          }
+        }
+
         setTimeout(() => {
           setImageLoaded(true);
         }, 1400);
@@ -527,9 +584,9 @@ useEffect(() => {
                     </>
                   ) : (
                     <>
-                       <div className="flex flex-wrap -m-4">
+                       <div className="flex flex-wrap -m-2">
                       {loadDataBait.map(() => 
-                        <div className="p-4 md:w-1/3 scale-100">
+                        <div className="p-4 md:w-1/3 scale-105">
                           <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden">
                             {/* <a href="/toProject"> */}
                             <div class="flex items-center justify-center h-48 bg-gray-300 rounded animate-pulse">
