@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
-import { addDoc, collection, getDocs, limit, query, where } from 'firebase/firestore'
+import { addDoc, collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore'
 import { auth, db } from '../../../../config/firebase/firebase'
 import { Dialog, Transition } from '@headlessui/react'
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
@@ -60,7 +60,6 @@ const Projek = () => {
 
   // Get User Current ID
   const [ getCurrentId, setCurrentId ] = useState('');
-  const [ getCurrentEmail, setCurrentEmail ] = useState('');
 
   // Check Gabung
   const [ checkGabung, setCheckGabung ] = useState([]);
@@ -79,9 +78,7 @@ const Projek = () => {
           // users table
             const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
             const getId = querySnapshot.docs[0].data().idUser;
-            const getEmail = querySnapshot.docs[0].data().emailUser;
             setCurrentId(getId);
-            setCurrentEmail(getEmail);
 
           // usersProjects table
             const querySnapshotProjects = await getDocs(query(usersProjectsCollection, where("idUser", "==", user.uid)));
@@ -102,7 +99,7 @@ const Projek = () => {
     return () => {
     unsubscribe();
     }
-}, [])
+}, [checkGabung])
 
   const [ data, setData ] = useState([]);
   const [ loadSpinner, setLoadSpinner ] = useState(false)
@@ -116,7 +113,6 @@ useEffect(() => {
   const fetchData = async () => {
     const projectsCollection = collection(db, "projects");
 
-    setCurrentPage(1)
     // Only Total
     const queryTotal = query(projectsCollection);
     const snapshotTotal = await getDocs(queryTotal);
@@ -125,6 +121,8 @@ useEffect(() => {
     
     console.log("search: " + search)
     if (search) {
+      setCurrentPage(1)
+
       console.log("search dijalankan")
       setTimeout(() => {
         setLoadSpinner(false)
@@ -137,10 +135,12 @@ useEffect(() => {
       
       const searchLabel = query(projectsCollection,
         where("labelProject", "in", searchVariations),
+        where("statusProject", "==", "Public"),
       );
 
      const searchName = query(projectsCollection,
         where("nameProject", "in", searchVariations),
+        where("statusProject", "==", "Public"),
       );
 
       const searchId = query(projectsCollection,
@@ -220,7 +220,8 @@ useEffect(() => {
       console.log("Tidak melalui search")
       console.log(currentPage);
       const queryStatusProjects = query(projectsCollection,
-         where("statusProject", "==", "Public"),
+        where("statusProject", "==", "Public"),
+        orderBy("createdAt", "desc"),
          limit(currentPage * showItem));
      
       try {
@@ -276,12 +277,10 @@ useEffect(() => {
   }
 
   // Tombol Gabung to Terdaftar
-  const [ successGabung, setSuccessGabung ] = useState(false);
-  const [ disableGabung, setDisableGabung ] = useState(false);
+  const [ disableGabung ] = useState(false);
 
   const handleYakin = async () => {
-    setDisableGabung(true);
-    setSuccessGabung(true);
+    
     setOpen(false);
     
     const usersCollection = collection(db, "usersProjects");
@@ -300,7 +299,7 @@ useEffect(() => {
         setOpenTerdaftar(true);
         
         setTimeout(() => {
-            window.location.reload();
+            setOpenTerdaftar(false);
         }, 3500);
 
         console.log("Document written with ID: ", docRef.id);
@@ -550,29 +549,23 @@ useEffect(() => {
                                     </p>
                                     <p className="text-gray-600">{project.userData.positionUser !== "" ? project.userData.positionUser : "Belum ada Jabatan"}</p>
                                   </div>
-                                  {checkGabung.includes(project.idProject) || (successGabung && getIdProject === project.idProject) || project.userData.emailUser === getCurrentEmail ? (
+                                  {checkGabung.includes(project.idProject) ? (
                                     <div className="ml-auto">
                                       <button
                                       disabled
                                       className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-500 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Terdaftar</button>
                                     </div>
-                                  ) : ( disableGabung ? (
+                                  ) : ( !disableGabung && (
                                     <div className="ml-auto">
-                                      <button
-                                      disabled
-                                      className="bg-gradient-to-r from-indigo-200 to-indigo-200 text-white drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
+                                    <button
+                                    onClick={ () => {
+                                        setIdProject(project.idProject);
+                                        handleClickGabung();
+                                      } 
+                                    }
+                                    className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
                                   </div>
-                                  ) : (
-                                    <div className="ml-auto">
-                                      <button
-                                      onClick={ () => {
-                                          setIdProject(project.idProject);
-                                          handleClickGabung();
-                                        } 
-                                      }
-                                      className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Gabung</button>
-                                  </div>
-                                  )
+                                  ) 
                                   )}
                               </div>
                             </div>
