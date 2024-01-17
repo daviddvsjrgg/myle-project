@@ -8,11 +8,11 @@ import { onAuthStateChanged } from 'firebase/auth';
 import NotFound404WNavbar from '../../../../url/NotFound404WNavbar';
 
 const loadBait = [
-  {id : "bait"},
-  {id : "bait"},
-  {id : "bait"},
-  {id : "bait"},
-  {id : "bait"}
+  {id : 1},
+  {id : 2},
+  {id : 3},
+  {id : 4},
+  {id : 5}
 ]
 
 const ManajemenProjek = () => {
@@ -429,7 +429,7 @@ const ManajemenProjek = () => {
               {totalProjects !== 0 ? (
                 <tbody className="bg-white divide-y divide-gray-200">
                 {data.map((project, index) => (
-                  <tr key={project.id} className={`${project.userData.emailUser === email && role === "admin" ? "bg-indigo-100 hover:bg-indigo-50" : "hover:bg-gray-100"}`}>
+                  <tr key={project.idProject} className={`${project.userData.emailUser === email && role === "admin" ? "bg-indigo-100 hover:bg-indigo-50" : "hover:bg-gray-100"}`}>
                     <td className="px-2 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-5">
@@ -486,42 +486,41 @@ const ManajemenProjek = () => {
                 <>
                   {totalProjects === 0 && (
                     <tbody>
-                    {loadBait.map((bait, index) => (
-                    <tr className="animate-pulse">
-                      <td className="px-2 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="ml-5">
-                            <div className="text-sm font-medium text-gray-900">{index+1}</div>
+                      {loadBait.map((p, index) => (
+                      <tr key={p.id} className="animate-pulse">
+                        <td className="px-2 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="ml-5">
+                              <div className="text-sm font-medium text-gray-900">{index+1}</div>
+                            </div>
                           </div>
+                        </td>
+                        <td className="px-2 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="ml-4">
+                            <div className="h-2.5 bg-gray-200 rounded-full w-48"></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center mt-4">
+                          <svg className="w-8 h-8 me-3 text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
+                            </svg>
+                            <div>
+                                <div className="h-2 bg-gray-200 rounded-full w-32 mb-2"></div>
+                                <div className="w-48 h-1.5 bg-gray-200 rounded-full"></div>
+                            </div>
                         </div>
-                      </td>
-                      <td className="px-2 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="ml-4">
-                           <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48"></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center mt-4">
-                        <svg className="w-8 h-8 me-3 text-gray-200 dark:text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
-                          </svg>
-                          <div>
-                              <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2"></div>
-                              <div className="w-48 h-1.5 bg-gray-200 rounded-full dark:bg-gray-700"></div>
-                          </div>
-                      </div>
-                       
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                       <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48"></div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 w-10"></div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-2.5 bg-gray-200 rounded-full w-48"></div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="h-2 bg-gray-200 rounded-full w-10"></div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                   )}
                 </>

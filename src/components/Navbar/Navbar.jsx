@@ -21,13 +21,13 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
   //   { name: 'Projek', href: '/projek', current: false },
   //   { name: 'Laporan', href: '/laporan', current: false },
   // ]
-  const userNavigation = [
-    { name: 'Logout', href: '/login' },
-  ]
+  // const userNavigation = [
+  //   {id: 1, name: 'Logout', href: '/login' },
+  // ]
   
-  const profil = [
-    { name: 'Profil Anda', href: '/user-profile' },
-  ]
+  // const profil = [
+  //   {id: 1, name: 'Profil Anda', href: '/user-profile' },
+  // ]
   
   const Navbar = () => {
   const [ username, setUsername ] = useState('');
@@ -298,36 +298,32 @@ useEffect(() => {
                     leaveTo="transform opacity-0 scale-95"
                   >
                     <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    {profil.map((item) => (
-                        <Menu.Item key={item.name}>
+                        <Menu.Item>
                           {({ active }) => (
-                            <Link to={item.href}
+                            <Link to="/user-profile"
                               className={classNames(
                                 active ? 'bg-gray-100' : '',
                                 'block px-4 py-2 text-sm text-gray-700'
                               )}
                             >
-                              {item.name}
+                              Profil Anda
                             </Link>
                           )}
                         </Menu.Item>
-                      ))}
-                      {userNavigation.map((item) => (
-                        <Menu.Item key={item.name}>
+                        <Menu.Item>
                           {({ active }) => (
                             <a
-                              href={item.href}
+                              href="/login"
                               onClick={handleLogout}
                               className={classNames(
                                 active ? 'bg-gray-100' : '',
                                 'block px-4 py-2 text-sm text-gray-700'
                               )}
                             >
-                              {item.name}
+                              Logout
                             </a>
                           )}
                         </Menu.Item>
-                      ))}
                      
                     </Menu.Items>
                   </Transition>
@@ -480,28 +476,20 @@ useEffect(() => {
               </button> */}
             </div>
             <div className="mt-3 space-y-1 px-2">
-              {profil.map((item) => (
-                <Link to={item.href}>
+                <Link to="/user-profile">
                   <Disclosure.Button
-                    key={item.name}
-                    as="a"
                     className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                   >
-                    {item.name}
+                    Profil Anda
                   </Disclosure.Button>
                 </Link>
-              ))}
-              {userNavigation.map((item) => (
                 <Disclosure.Button
-                  key={item.name}
-                  as="a"
-                  href={item.href}
+                  href="/login"
                   onClick={handleLogout}
                   className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                 >
-                  {item.name}
+                  Logout
                 </Disclosure.Button>
-              ))}
             </div>
           </div>
         </Disclosure.Panel>
