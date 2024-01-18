@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../../../../components/Navbar/Navbar'
 import Bottom from '../../../../components/BottomBar/Bottom';
-import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
+import { collection, endBefore, getDocs, limit, limitToLast, orderBy, query, startAfter, where } from 'firebase/firestore';
 import { auth, db } from '../../../../config/firebase/firebase';
 import { Link, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -15,6 +15,10 @@ const loadBait = [
   {id : 5}
 ]
 
+const limitData = 5;
+let firstDocument = null;
+let lastDocument = null;
+
 const ManajemenProjek = () => {
   const [ data, setData ] = useState([]);
 
@@ -25,23 +29,49 @@ const ManajemenProjek = () => {
   const [ checkPenanggungJawab, setCheckPenanggungJawab ] = useState(false);
 
   // Search
-  const [searchQuery, setSearchQuery] = useState('');
+  const [ searchQuery, setSearchQuery ] = useState('');
 
   // Total Projek
   const [ totalProjects, setTotalProjects ] = useState(0);
+  const [ totalProjectsLoading, setTotalProjectsLoading ] = useState(0);
 
   // Loading
-
   const navigate = useNavigate();
+
+  // disabled Pagination 
+  const  [disabledPagination, setDisabledPagination ] = useState(false)
+
+  const [ addFive, setAddFive ] = useState(0)
+  const [ disabledSebelumnya, setDisabledSebelumnya ] = useState(true)
+  const [ disabledSelanjutnya, setDisabledSelanjutnya ] = useState(true)
+
 
   useEffect(() => {
   const fetchData = async () => {
+    setDisabledPagination(true);
+    if(role === "admin") {
+      setDisabledPagination(false);
+    } else if (role === "user") {
+      setDisabledPagination(true);
+    }
+
+    if (totalProjects < 6) {
+      setDisabledSelanjutnya(false)
+    } else {
+      setDisabledSelanjutnya(true)
+    }
+    setDisabledSebelumnya(false);
+    setDisabledSelanjutnya(false)
     const projectsCollection = collection(db, "projects");
     const queryTotal = query(projectsCollection);
+
+    const snapshotTotalLoading = await getDocs(queryTotal);
+    setTotalProjectsLoading(snapshotTotalLoading.size)
 
     setTimeout(async () => {
       const snapshotTotal = await getDocs(queryTotal);
       setTotalProjects(snapshotTotal.size)
+      setDisabledSelanjutnya(true)
     }, 1400);
    
 
@@ -74,11 +104,20 @@ const ManajemenProjek = () => {
         console.log("Error fetching data: ", error);
       }
     } else if (role === "admin"){
+      
       console.log("Langsung fetch")
       
       console.log("aku cari: " + searchQuery)
       if (searchQuery) {
-
+        setDisabledPagination(true);
+        setAddFive(0);
+        
+        setTimeout(() => {
+          setDariAwal(1);
+          setDariAkhir(5);
+          setDisabledSebelumnya(false);
+          setDisabledSelanjutnya(true);
+        }, 500);
         const capitalFirstWord = searchQuery.split(' ')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
@@ -86,27 +125,22 @@ const ManajemenProjek = () => {
 
         const searchLabel = query(projectsCollection,
           where("labelProject", "in", searchVariations),
-          limit(5)
          );
 
         const searchName = query(projectsCollection,
           where("nameProject", "in", searchVariations),
-          limit(5)
         );
 
         const searchId = query(projectsCollection,
           where("idProject", "in", searchVariations),
-          limit(5)
         );
 
         const searchStatus = query(projectsCollection,
           where("statusProject", "in", searchVariations),
-          limit(5)
         );
 
         const searchEmail = query(projectsCollection,
           where("picProject", "in", searchVariations),
-          limit(5)
         );
 
       try {
@@ -120,16 +154,17 @@ const ManajemenProjek = () => {
       
         const fetchedData = [];
         
-        // first query
-        for (const doc of snapshotLabel.docs) {
-          const projectData = doc.data();
-          const emailUser = projectData.picProject;
-    
-          const usersCollection = collection(db, "users");
-          const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
-          const userSnapshot = await getDocs(userQuery);
-    
-          if (!userSnapshot.empty) {
+        if (!snapshotLabel.empty) {
+          // first query
+          for (const doc of snapshotLabel.docs) {
+            const projectData = doc.data();
+            const emailUser = projectData.picProject;
+            
+            const usersCollection = collection(db, "users");
+            const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+            const userSnapshot = await getDocs(userQuery);
+            
+            if (!userSnapshot.empty) {
             fetchedData.push({
               id: doc.id,
               ...projectData,
@@ -137,6 +172,9 @@ const ManajemenProjek = () => {
             });
           }
         }
+      }
+
+      if (!snapshotName.empty) {
         // second query
           for (const doc of snapshotName.docs) {
             const projectData = doc.data();
@@ -152,6 +190,9 @@ const ManajemenProjek = () => {
               userData: userSnapshot.docs[0].data(),
             });
           }
+        }
+
+        if (!snapshotId.empty) {
         // third query
           for (const doc of snapshotId.docs) {
             const projectData = doc.data();
@@ -167,6 +208,9 @@ const ManajemenProjek = () => {
               userData: userSnapshot.docs[0].data(),
             });
           }
+        }
+
+        if (!snapshotStatus.empty) {
         // fourth query
           for (const doc of snapshotStatus.docs) {
             const projectData = doc.data();
@@ -182,6 +226,9 @@ const ManajemenProjek = () => {
               userData: userSnapshot.docs[0].data(),
             });
           }
+        }
+
+        if (!snapshotEmail.empty) {
         // fifth query
           for (const doc of snapshotEmail.docs) {
             const projectData = doc.data();
@@ -197,20 +244,21 @@ const ManajemenProjek = () => {
               userData: userSnapshot.docs[0].data(),
             });
           }
+        }
         
         setData(fetchedData);
       } catch (error) {
         console.log("Error fetching data: ", error);
       }
       } else if (!searchQuery) {
-       
+        setDisabledPagination(false)
         const orderByStatus = query(projectsCollection,
           orderBy("statusProject", "desc"),
-          limit(5),
+          limit(limitData),
           );
+          
         try {
           const snapshot = await getDocs(orderByStatus);
-          
           const fetchedData = [];
           for (const doc of snapshot.docs) {
             const projectData = doc.data();
@@ -242,6 +290,156 @@ const ManajemenProjek = () => {
   
     fetchData();
   }, [email, checkPenanggungJawab, role, searchQuery, totalProjects]);
+
+ const [ dariAwal, setDariAwal ] = useState(1)
+ const [ dariAkhir, setDariAkhir ] = useState(5)
+
+ 
+  const fetchNextData = async () => {
+    if (role === "admin" ) {
+      try {
+        const projectsCollection = collection(db, "projects");
+    
+        // If lastDocument exists, use it as the starting point for the next query
+        const orderByStatus = lastDocument
+          ? query(projectsCollection, orderBy("statusProject", "desc"), startAfter(lastDocument), limit(limitData))
+          : query(projectsCollection, orderBy("statusProject", "desc"), limit(limitData));
+    
+        const snapshot = await getDocs(orderByStatus);
+        const fetchedData = [];
+    
+        for (const doc of snapshot.docs) {
+          const projectData = doc.data();
+          const emailUser = projectData.picProject;
+    
+          const usersCollection = collection(db, "users");
+          const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+          const userSnapshot = await getDocs(userQuery);
+    
+          if (!userSnapshot.empty) {
+            fetchedData.push({
+              id: doc.id,
+              ...projectData,
+              userData: userSnapshot.docs[0].data(),
+            });
+          }
+        }
+    
+        // Update firstDocument and lastDocument for the next iteration
+        firstDocument = snapshot.docs[0];
+        lastDocument = snapshot.docs[snapshot.docs.length - 1];
+        setData(fetchedData);
+      } catch (error) {
+        console.log("Error fetching data: ", error);
+      }
+    }
+  };
+  
+  const fetchPreviousData = async () => {
+    
+      try {
+        const projectsCollection = collection(db, "projects");
+    
+        // If firstDocument exists, use it as the starting point for the previous query
+        const orderByStatus = firstDocument
+          ? query(projectsCollection, orderBy("statusProject", "desc"), endBefore(firstDocument), limitToLast(limitData))
+          : query(projectsCollection, orderBy("statusProject", "desc"), limit(limitData));
+    
+        const snapshot = await getDocs(orderByStatus);
+        const fetchedData = [];
+    
+        for (const doc of snapshot.docs) {
+          const projectData = doc.data();
+          const emailUser = projectData.picProject;
+    
+          const usersCollection = collection(db, "users");
+          const userQuery = query(usersCollection, where("emailUser", "==", emailUser));
+          const userSnapshot = await getDocs(userQuery);
+    
+          if (!userSnapshot.empty) {
+            fetchedData.push({
+              id: doc.id,
+              ...projectData,
+              userData: userSnapshot.docs[0].data(),
+            });
+          }
+        }
+    
+        // Update firstDocument and lastDocument for the next iteration
+        firstDocument = snapshot.docs[0];
+        lastDocument = snapshot.docs[snapshot.docs.length - 1];
+    
+        setData(fetchedData);
+      } catch (error) {
+        console.log("Error fetching data: ", error);
+      }
+   
+  };
+
+  const handleSelanjutnya = async () => {
+      setDisabledSebelumnya(false)
+      setDisabledSelanjutnya(false)
+      setTimeout(() => {
+        setDisabledSelanjutnya(false);
+        if (totalProjects === dariAkhir) {
+          setDisabledSelanjutnya(false);
+        }
+        setAddFive((prev) => prev + 5)
+        
+        if (dariAwal + 5 > totalProjects) {
+          setDariAwal(totalProjects)
+          setDisabledSelanjutnya(false);
+        } else {
+          setDisabledSebelumnya(true);
+          setDariAwal((prev) => prev + 5)
+        }
+
+        if (dariAkhir + 5 > totalProjects || dariAkhir + 5 === totalProjects) {
+          setDariAkhir(totalProjects)
+        } else {
+          setDisabledSelanjutnya(true);
+          setDariAkhir((prev) => prev + 5)
+        }
+      }, 1200);
+      
+      fetchNextData();
+  };
+  
+  const handleSebelumnya = () => {
+      setDisabledSebelumnya(false)
+      setDisabledSelanjutnya(false)
+      setTimeout(() => {
+        setDisabledSelanjutnya(true)
+        setDisabledSebelumnya(true)
+        setAddFive((prev) => prev - 5)
+    
+        if (dariAwal - 5 < 5) {
+          setDisabledSebelumnya(false);
+        }
+        
+        setDariAwal((prev) => prev - 5)
+    
+        if (dariAkhir - 5 < 5) {
+          setDisabledSebelumnya(false);
+          setDariAkhir(5)
+        } else {
+          setDariAkhir((prev) => prev - 5)
+        }
+      }, 1200);
+      
+      fetchPreviousData();
+  };
+  
+  useEffect(() => {
+    // Call fetchNextData initially to load the first set of data
+    // fetchNextData();
+  }, []);
+
+  useEffect(() => {
+    // Call fetchNextData initially to load the first set of data
+    fetchPreviousData();
+  }, []);
+
       
   useEffect(()=>{
       
@@ -334,14 +532,14 @@ const ManajemenProjek = () => {
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Manajemen Projek</h1>
         </div>
       </header>
-
+        
       {/* Start - Content */}
       <main>
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
           
         <div className="flex flex-col ml-1 mr-1">
 
-            <div className="flex justify-between">
+            <div className="flex justify-between -mt-2">
               {role === "admin" && (
                   <>
                 <div className="order-last">
@@ -365,7 +563,7 @@ const ManajemenProjek = () => {
                       id="hs-table-search"
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="block w-full p-3 pl-10 text-sm border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Cari..."
+                      placeholder="Cari... (ex:id, label)"
                     />
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                       <svg
@@ -390,7 +588,7 @@ const ManajemenProjek = () => {
           </div>
                        
                         
-        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 mt-1">
+        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 -mt-2">
         
         <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
           <div className="drop-shadow-md overflow-hidden border-b border-gray-200 sm:rounded-lg">
@@ -429,11 +627,11 @@ const ManajemenProjek = () => {
               {totalProjects !== 0 ? (
                 <tbody className="bg-white divide-y divide-gray-200">
                 {data.map((project, index) => (
-                  <tr key={project.idProject} className={`${project.userData.emailUser === email && role === "admin" ? "bg-indigo-100 hover:bg-indigo-50" : "hover:bg-gray-100"}`}>
+                  <tr key={project.idProject} className={`${project.userData.emailUser !== email && role === "user" ? "hidden" : 'visible'}  ${project.userData.emailUser === email && role === "admin" ? "bg-indigo-100 hover:bg-indigo-50" : "hover:bg-gray-100"}`}>
                     <td className="px-2 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-5">
-                          <div className="text-sm font-medium text-gray-900">{index+1}</div>
+                          <div className="text-sm font-medium text-gray-900">{index+ 1 + addFive}</div>
                         </div>
                       </div>
                     </td>
@@ -486,12 +684,14 @@ const ManajemenProjek = () => {
                 <>
                   {totalProjects === 0 && (
                     <tbody>
-                      {loadBait.map((p, index) => (
-                      <tr key={p.id} className="animate-pulse">
+                      {loadBait.map((p) => (
+                      <tr key={p.id} className={`animate-pulse ${totalProjectsLoading === 0 ? "hidden" : ""}`}>
                         <td className="px-2 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="ml-5">
-                              <div className="text-sm font-medium text-gray-900">{index+1}</div>
+                              <div className="text-sm font-medium text-gray-900">
+                              <div className="h-2 bg-gray-200 rounded-full w-8"></div>
+                              </div>
                             </div>
                           </div>
                         </td>
@@ -523,11 +723,46 @@ const ManajemenProjek = () => {
                     ))}
                   </tbody>
                   )}
+                  {totalProjectsLoading === 0  && (
+                    <tbody>
+                      <tr className="animate-pulse">
+                        <td className="px-2 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="ml-5">
+                              <div className="text-sm font-medium text-gray-900">Belum ada projek
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-2 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="ml-4">
+                            <div className="h-2.5 bg-gray-200 rounded-full w-48"></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                            <div>
+                            <div className="h-2.5 bg-gray-200 rounded-full w-48"></div>
+
+                            </div>
+                        </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                         <div className="h-2.5 bg-gray-200 rounded-full w-48"></div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        </td>
+                      </tr>
+                  </tbody>
+                  )}
                 </>
-                
               )}
               
             </table>
+                        
+
 
           </div>
 
@@ -535,6 +770,59 @@ const ManajemenProjek = () => {
         </div>
       </div>
     </div>
+
+            <div className={`flex flex-col items-center float-right mt-2 p-2 ${disabledPagination ? "hidden" : ""}`}>
+              <span className="text-sm text-gray-700 ">
+                  Menampilkan data ke
+                  <span className="font-semibold text-gray-900 ml-1">{dariAwal}</span> dari total,
+                  <span className="font-semibold text-gray-900 ml-1">{totalProjects ? totalProjects : '...'}</span> data
+              </span>
+              
+              <div className="flex mt-2">
+                {disabledSebelumnya ? (
+                  <button
+                  onClick={handleSebelumnya}
+                  className="flex items-center justify-center px-3 h-8 me-3 text-sm font-medium text-gray-100 bg-gray-700 border border-gray-300 rounded-lg hover:bg-gray-800 hover:text-gray-100 ">
+                    <svg className="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
+                    </svg>
+                    Sebelumnya
+                  </button>
+                ) : (
+                  <button
+                  disabled
+                  onClick={handleSebelumnya}
+                  className="flex items-center justify-center px-3 h-8 me-3 text-sm font-medium text-gray-100 bg-gray-400 border border-gray-300 rounded-lg ">
+                    <svg className="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
+                    </svg>
+                    Sebelumnya
+                  </button>
+                )}
+                {disabledSelanjutnya ? (
+                  <button 
+                  onClick={handleSelanjutnya}
+                  className="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-100 bg-gray-700 border border-gray-300 rounded-lg hover:bg-gray-800 hover:text-white">
+                    Selanjutnya
+                    <svg className="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                    </svg>
+                  </button>
+                ) : (
+                  <button 
+                  disabled
+                  onClick={handleSelanjutnya}
+                  className="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-100 bg-gray-400 border border-gray-300 rounded-lg">
+                    Selanjutnya
+                    <svg className="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+
+
 
         </div>
 
