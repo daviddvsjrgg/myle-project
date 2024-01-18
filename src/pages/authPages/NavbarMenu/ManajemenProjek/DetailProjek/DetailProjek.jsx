@@ -384,6 +384,8 @@ const DetailProjek = () => {
 
     // Get Role 
     const [ role, setRole ] = useState('');    
+    const [ email, setEmail ] = useState('');
+
     useEffect(()=>{
         
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -395,7 +397,9 @@ const DetailProjek = () => {
                     const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
                     // Field from firestore
                     const getRole = querySnapshot.docs[0].data().roleUser;
+                    const getEmail = querySnapshot.docs[0].data().emailUser;
                     setRole(getRole);
+                    setEmail(getEmail);
 
                 } catch (error) {
                     console.log("Error: " + error)
@@ -876,7 +880,8 @@ const DetailProjek = () => {
                                         <>
                                             {fetchedUsers.map((user) => 
                                             <div>
-                                                <li key={user.id} className={`flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6 hover:bg-gray-100`}>
+                                                <li key={user.id} className={`${user.emailUser === email ? "bg-indigo-100 hover:bg-indigo-50" : "hover:bg-gray-100"}
+                                                flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6`}>
                                                     <div className="flex w-0 flex-1 items-center">
                                                     <img src={user.imageUser} alt="" className="h-10 w-10 rounded-full bg-gray-50" />
                                                         <div className="ml-4 flex min-w-0 flex-1 gap-2">

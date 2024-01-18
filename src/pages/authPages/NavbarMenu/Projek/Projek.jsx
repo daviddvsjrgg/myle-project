@@ -4,7 +4,6 @@ import { addDoc, collection, getDocs, limit, orderBy, query, where } from 'fireb
 import { auth, db } from '../../../../config/firebase/firebase'
 import { Dialog, Transition } from '@headlessui/react'
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
-import { onAuthStateChanged } from 'firebase/auth'
 import { v4 as uuidv4 } from 'uuid';
 import LoadingSpinnerMid from '../../../../components/Loading/LoadingSpinnerMid/LoadingSpinnerMid'
 import Bottom from '../../../../components/BottomBar/Bottom'
@@ -58,56 +57,61 @@ const Projek = () => {
       return () => clearInterval(countdownInterval);
   }, [count]);
 
-  // Get User Current ID
+  // Get User Current
   const [ getCurrentId, setCurrentId ] = useState('');
+  const [ getCurrentEmail, setCurrentEmail ] = useState('');
 
   // Check Gabung
-  const [ checkGabung, setCheckGabung ] = useState([]);
+  const [checkGabung, setCheckGabung] = useState([]);
+  const [checkGabungChanged, setCheckGabungChanged] = useState(false);
 
-  useEffect(()=>{
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        const usersCollection = collection(db, "users");
-        const usersProjectsCollection = collection(db, "usersProjects");
-
-        const userProjectsArray = [];
-
-        try {
-          // users table
-            const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
-            const getId = querySnapshot.docs[0].data().idUser;
-            setCurrentId(getId);
-
-          // usersProjects table
-            const querySnapshotProjects = await getDocs(query(usersProjectsCollection, where("idUser", "==", user.uid)));
-            const userProjects = querySnapshotProjects.docs.map(doc => doc.data().idProject);
-
-            userProjects.forEach(getUsersProjectId => {
-               userProjectsArray.push(getUsersProjectId);
-            });
-            
-            setCheckGabung(userProjectsArray);
-            
-          } catch (error) {
-            console.log("Error: " + error)
-        }
-        // ...
-    
-    });
-    return () => {
-    unsubscribe();
-    }
-}, [checkGabung])
-
+  
   const [ data, setData ] = useState([]);
   const [ loadSpinner, setLoadSpinner ] = useState(false)
   const [ currentPage, setCurrentPage ] = useState(1);
   const [ imageLoaded, setImageLoaded ] = useState(false);
-
+  
   const [ totalProjects, setTotalProjects ] = useState(0)
   
+  useEffect(() => {
+    const fetchData = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const usersCollection = collection(db, "users");
+        const usersProjectsCollection = collection(db, "usersProjects");
+        const userProjectsArray = [];
+
+        try {
+            const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+            const getId = querySnapshot.docs[0].data().idUser;
+            const getEmail = querySnapshot.docs[0].data().emailUser;
+            setCurrentId(getId);
+            setCurrentEmail(getEmail);
+
+            const querySnapshotProjects = await getDocs(query(usersProjectsCollection, where("idUser", "==", user.uid)));
+            const userProjects = querySnapshotProjects.docs.map(doc => doc.data().idProject);
+
+            userProjects.forEach(getUsersProjectId => {
+                userProjectsArray.push(getUsersProjectId);
+            });
+
+            setCheckGabung(userProjectsArray);
+            
+
+        } catch (error) {
+            console.log("Error: " + error);
+        }
+    };
+
+    fetchData();
+}, [checkGabungChanged]); // Only trigger the effect when checkGabungChanged changes
+
+useEffect(() => {
+    // This block will run whenever checkGabung changes
+    console.log("checkGabung has changed:", checkGabung);
+}, [checkGabung]);
 
 useEffect(() => {
   const fetchData = async () => {
@@ -272,7 +276,6 @@ useEffect(() => {
   const [ getIdProject, setIdProject] = useState('');
 
   const handleClickGabung = () => {
-    // setIdProject(idProject);
     setOpen(true);
   }
 
@@ -280,7 +283,10 @@ useEffect(() => {
   const [ disableGabung ] = useState(false);
 
   const handleYakin = async () => {
-    
+    setCheckGabungChanged(true);
+    setTimeout(() => {
+      setCheckGabungChanged(false);
+    }, 500);
     setOpen(false);
     
     const usersCollection = collection(db, "usersProjects");
@@ -547,9 +553,9 @@ useEffect(() => {
                                         {project.userData.usernameUser}
                                       {/* </a> */}
                                     </p>
-                                    <p className="text-gray-600">{project.userData.positionUser !== "" ? project.userData.positionUser : "Belum ada Jabatan"}</p>
+                                    <p className="text-gray-600">{project.userData.positionUser === "Belum ada jabatan" ? "Mahasiswa" : project.userData.positionUser}</p>
                                   </div>
-                                  {checkGabung.includes(project.idProject) ? (
+                                  {checkGabung.includes(project.idProject) || project.userData.emailUser === getCurrentEmail ? (
                                     <div className="ml-auto">
                                       <button
                                       disabled
