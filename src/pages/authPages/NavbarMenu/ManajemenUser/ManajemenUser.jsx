@@ -54,7 +54,9 @@ const ManajemenUser = () => {
       setTimeout(async () => {
         const snapshotTotal = await getDocs(queryTotal);
         setTotalProjects(snapshotTotal.size)
-        setDisabledSelanjutnya(true)
+        if (totalProjects >= 6 ) {
+          setDisabledSelanjutnya(true)
+        }
       }, 1400);
      
   

@@ -228,7 +228,7 @@ useEffect(() => {
                         Mata Kuliah
                       </Link>
                       <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
-                        Jadwal Kuliah
+                        Linimasa
                       </Link>
                       <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Deadline Tugas
@@ -240,7 +240,7 @@ useEffect(() => {
                         Mata Kuliah
                       </Link>
                       <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
-                        Jadwal Kuliah
+                        Linimasa
                       </Link>
                       <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Deadline Tugas
@@ -443,7 +443,7 @@ useEffect(() => {
                 </Link>
                 <Link to="/none">
                   <Disclosure.Button as="a" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
-                    Jadwal Kuliah
+                    Linimasa
                   </Disclosure.Button>
                 </Link>
                 <Link to="/none">

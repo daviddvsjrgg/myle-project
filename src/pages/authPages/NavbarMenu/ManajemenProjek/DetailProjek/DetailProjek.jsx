@@ -38,6 +38,10 @@ const DetailProjek = () => {
 
     const [selectedStatus, setSelectedStatus] = useState(status[0])
 
+    // Get Role 
+    const [ role, setRole ] = useState('');    
+    const [ email, setEmail ] = useState('');
+
     try {
         useEffect(() => {
             const fetchData = async () => {
@@ -224,8 +228,9 @@ const DetailProjek = () => {
         console.log("Status: " + statusText);
 
         const getLabel = document.getElementById("labelProject").value;
-
+        
         const getPengguna = document.getElementById('pic').value;
+        
         const setPengguna = getPengguna.toString();
         
         const usersCollection = collection(db, "projects");
@@ -382,9 +387,7 @@ const DetailProjek = () => {
         return () => clearInterval(countdownInterval);
     }, [count]);
 
-    // Get Role 
-    const [ role, setRole ] = useState('');    
-    const [ email, setEmail ] = useState('');
+    
 
     useEffect(()=>{
         
@@ -679,16 +682,33 @@ const DetailProjek = () => {
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Email</dt>
                                 <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{projectData.userData.emailUser}</dd>
                             </div>
-                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                                <dt className="text-sm font-medium leading-6 text-gray-900">Label</dt>
-                                <input 
-                                    type="text" 
-                                    name="labelProject" 
-                                    id="labelProject"
-                                    defaultValue={`${projectData.labelProject}`}
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+
+                            {role === "admin" ? (
+                                <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                    <dt className="text-sm font-medium leading-6 text-gray-900">Label</dt>
+                                    <input 
+                                        type="text" 
+                                        name="labelProject" 
+                                        id="labelProject"
+                                        defaultValue={`${projectData.labelProject}`}
+                                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                                     </input>
-                            </div>
+                                </div>
+                            ) : (
+                                <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                    <dt className="text-sm font-medium leading-6 text-gray-900">Label</dt>
+                                    <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{projectData.labelProject}</dd>
+                                    <input 
+                                        type="text" 
+                                        name="labelProject" 
+                                        id="labelProject"
+                                        defaultValue={`${projectData.labelProject}`}
+                                        className="hidden">
+                                    </input>
+                                </div>
+                            )}
+
+
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Deskripsi</dt>
                                 <textarea 
@@ -760,14 +780,21 @@ const DetailProjek = () => {
                             <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Tentang Mata Kuliah</dt>
                                 <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                                    Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Gambar, Label, Deskripsi, Status, dan Penanggung Jawab" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
+                                    {role === "admin" ? (
+                                        <>
+                                            Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Gambar, Label, Deskripsi, Status, dan Penanggung Jawab" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
+                                        </>
+                                    ): (
+                                        <>
+                                            Semua informasi dapat diubah oleh pemilik akun. Dengan ketentuan berlaku. Hanya bisa mengubah "Gambar, Deskripsi, dan Status" untuk saat ini, jika ingin mengubah data yang lain kamu bisa menghubungi{' '}
+                                        </>
+                                    )}
                                     <a href={`https://www.instagram.com/davidek_rl/`} target='_blank' rel='noreferrer' className=" text-sm leading-6 text-blue-600">
                                         developer.
                                     </a>
                                 </dd>
                             </div>
-                            {role === "admin" && (
-                            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                            <div className={`px-4 py-6 ${role === "user" ? "hidden" : "sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0"} `}>
                                 <dt className="text-sm font-medium leading-6 text-gray-900">Ganti Penanggung Jawab</dt>
                                 <Combobox  defaultValue={selected} onChange={setSelected}>
                                     <div className="relative">
@@ -848,7 +875,6 @@ const DetailProjek = () => {
                                     </div>
                                     </Combobox>
                                 </div>
-                                )}
                             {buttonLoading ? (
                                 <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
                                     <button
