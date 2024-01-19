@@ -16,6 +16,7 @@ const Profile = () => {
     const [ role, setRole ] = useState('');
     const [ email, setEmail ] = useState('');
 
+    // Set ID also use it as loading trigger
     const [ loadingSimpan, setLoadingSimpan ] = useState('');
 
     useEffect(()=>{
@@ -105,10 +106,9 @@ const Profile = () => {
         return () => clearInterval(countdownInterval);
     }, [count]);
 
-     // Get List User (Terdaftar)
-     const [ fetchedProjects, setFetchedProjects ] = useState([]);
+     // List Projek (Terdaftar)
+    const [ fetchedProjects, setFetchedProjects ] = useState([]);
 
-    // List Projek (Terdaftar)
     try {
         useEffect(() => {
             const fetchData = async () => {
