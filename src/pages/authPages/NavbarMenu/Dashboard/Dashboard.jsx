@@ -1,4 +1,3 @@
-import Bottom from '../../../../components/BottomBar/Bottom';
 import Navbar from '../../../../components/Navbar/Navbar';
 
 import React, { useEffect, useState } from 'react';
@@ -6,13 +5,24 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from '../../../../config/firebase/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
+const loadBait = [
+  {id: 1},
+  {id: 2},
+  {id: 3},
+  {id: 4},
+  {id: 5},
+]
 
 const Dashboard = () => {
   const [ username, setUsername ] = useState('');
   const [ role, setRole ] = useState('');
+  // const [ email, setEmail ] = useState('')
   const [ jumlahUser,  setJumlahUser ] = useState('')
   const [ jumlahProjects,  setJumlahProject ] = useState('')
   const [ jumlahDaftar,  setJumlahDaftar ] = useState('')
+
+  // Set ID also use it as loading trigger
+  const [ loadingSimpan, setLoadingSimpan ] = useState('');
 
   useEffect(()=>{
 
@@ -34,10 +44,15 @@ const Dashboard = () => {
               setJumlahDaftar(querySnapshotAllUsersProjects.size.toString());
 
               // Field from firestore
+              const getId = querySnapshot.docs[0].data().idUser;
               const getUsername = querySnapshot.docs[0].data().usernameUser;
               const getRole = querySnapshot.docs[0].data().roleUser;
+              // const getEmail = querySnapshot.docs[0].data().emailUser;
               setUsername(getUsername);
               setRole(getRole);
+              // setEmail(getEmail);
+
+              setLoadingSimpan(getId);
 
             } catch (error) {
               console.log("Error: " + error)
@@ -48,7 +63,71 @@ const Dashboard = () => {
       return () => {
         unsubscribe();
       }
-}, [])
+  }, [])
+
+
+  // List Projek (Terdaftar)
+  const [ fetchedProjects, setFetchedProjects ] = useState([]);
+  const [ daftarBaru, setDaftarBaru ] = useState(false)
+  const [ daftarLoad, setDaftarLoad ] = useState(false)
+
+  try {
+      useEffect(() => {
+          const fetchData = async () => {
+              const usersListCollection = collection(db, "usersProjects");
+      
+              try {
+                  const userListQuery = query(usersListCollection, where("idUser", "==", loadingSimpan));
+                  const querySnapshot = await getDocs(userListQuery);
+
+                    setTimeout(() => {
+                      setDaftarLoad(true);
+                      setDaftarBaru(true);
+                    }, 1400);
+
+
+                  if (querySnapshot.docs.length > 0) {
+                      const fetchedListProject = querySnapshot.docs.map(doc => ({
+                          idProject: doc.data().idProject,
+                      }));
+                      // console.log("Projek by User: " + fetchedListProject.map(project => project.idProject))
+                              
+                      const usersCollection = collection(db, "projects");
+      
+                      if (fetchedListProject.length > 0) {
+                          const usersQuery = query(usersCollection, where("idProject", "in", fetchedListProject.map(project => project.idProject)));
+                          const usersSnapshot = await getDocs(usersQuery);
+      
+                          if (usersSnapshot.docs.length > 0) {
+                              const projectList = usersSnapshot.docs.map(doc => ({
+                                  idProject: doc.data().idProject,
+                                  nameProject: doc.data().nameProject,
+                                  labelProject: doc.data().labelProject,
+                              }));
+                              setFetchedProjects(projectList);
+                          } else {
+                              console.log("No project found for the given idUser values.");
+                          }
+                      } else {
+                          console.log("dataProjectList is empty.");
+                      }
+                  } else {
+                      console.log("No documents found for the given query.");
+                  }
+              } catch (error) {
+                  console.error("Error fetching data: ", error);
+              }
+          };
+      
+          // Invoke the fetch function
+          fetchData();
+          console.log("Test leak data loadingSimpan")
+          // No cleanup needed in this case, so the return can be omitted or left empty.
+          }, [loadingSimpan]);
+  } catch (error) {
+      console.log(error)
+  }
+
 
   return (
     <div className="min-h-full">
@@ -67,7 +146,7 @@ const Dashboard = () => {
                 <div className="bg-gradient-to-r from-indigo-950 to-indigo-500 bg-gray-800 p-8 md:p-12 mb-8">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                       <a href="https://www.instagram.com/davidek_rl/" target='_blank' rel="noreferrer"
-                      className="transition-all scale-100 duration-100 hover:scale-105
+                      className="transition-all scale-105 duration-100 ml-1 hover:scale-110
                        bg-indigo-300 text-indigo-900 text-xs font-medium inline-flex items-center px-2.5 py-1 rounded-md mb-2">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 me-1.5">
                         <path fillRule="evenodd" d="M12 6.75a5.25 5.25 0 0 1 6.775-5.025.75.75 0 0 1 .313 1.248l-3.32 3.319c.063.475.276.934.641 1.299.365.365.824.578 1.3.64l3.318-3.319a.75.75 0 0 1 1.248.313 5.25 5.25 0 0 1-5.472 6.756c-1.018-.086-1.87.1-2.309.634L7.344 21.3A3.298 3.298 0 1 1 2.7 16.657l8.684-7.151c.533-.44.72-1.291.634-2.309A5.342 5.342 0 0 1 12 6.75ZM4.117 19.125a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008Z" clipRule="evenodd" />
@@ -91,37 +170,131 @@ const Dashboard = () => {
 
         <section className="bg-white">
             <div className="px-4 mx-auto max-w-screen-xl">
-                <div className="grid md:grid-cols-2 gap-8">
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 md:p-12">
-                        <a href="/none" className="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md mb-2">
-                            <svg className="w-2.5 h-2.5 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-                                <path d="M17 11h-2.722L8 17.278a5.512 5.512 0 0 1-.9.722H17a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1ZM6 0H1a1 1 0 0 0-1 1v13.5a3.5 3.5 0 1 0 7 0V1a1 1 0 0 0-1-1ZM3.5 15.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2ZM16.132 4.9 12.6 1.368a1 1 0 0 0-1.414 0L9 3.55v9.9l7.132-7.132a1 1 0 0 0 0-1.418Z"/>
-                            </svg>
-                            Design
-                        </a>
-                        <h2 className="text-gray-900  text-3xl font-extrabold mb-2">Start with Flowbite Design System</h2>
-                        <p className="text-lg font-normal text-gray-500 mb-4">Static websites are now used to bootstrap lots of websites and are becoming the basis for a variety of tools that even influence both web designers and developers.</p>
-                        <a href="/none" className="text-blue-600 hover:underline font-medium text-lg inline-flex items-center">Read more
-                            <svg className="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                        </svg>
-                        </a>
+                <div className="grid md:grid-cols-2 gap-6">
+
+                  {/* Section 1 */}
+
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 md:px-6 md:py-6">
+                      <div className="inline-flex">
+                        <div className="bg-indigo-100 text-indigo-900  items-center px-2.5 py-0.5 rounded-md mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                            <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="text-xl font-medium ml-2 text-gray-700">Aktivitas Perkuliahan</div>
+                      </div>
+                      <h2 className="text-gray-900 text-md md:text-xl lg:text-3xl font-bold lg:font-extrabold mb-2">Deadline Tugas</h2>
+                      <hr className="h-0.5 bg-gray-950 border-2"></hr>
+                      <p className="text-lg font-normal mt-3 text-gray-500 mb-4">
+                                  Belum ada tugas :D !!!
+                      </p>
+                      {/* <a href="/none" className="text-blue-600  hover:underline font-medium text-lg inline-flex items-center">Read more
+                          <svg className="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                          </svg>
+                      </a> */}
                     </div>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 md:p-12">
-                        <a href="/none" className="bg-purple-100 text-purple-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md mb-2">
-                            <svg className="w-2.5 h-2.5 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4 1 8l4 4m10-8 4 4-4 4M11 1 9 15"/>
-                            </svg>
-                            Code
-                        </a>
-                        <h2 className="text-gray-900  text-3xl font-extrabold mb-2">Best react libraries around the web</h2>
-                        <p className="text-lg font-normal text-gray-500 mb-4">Static websites are now used to bootstrap lots of websites and are becoming the basis for a variety of tools that even influence both web designers and developers.</p>
-                        <a href="/none" className="text-blue-600  hover:underline font-medium text-lg inline-flex items-center">Read more
-                            <svg className="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                            </svg>
-                        </a>
+                    
+                    {/* End Section 1 */}
+
+                    {/* Section 2 */}
+
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 md:px-6 md:py-6">
+                          <div className="inline-flex">
+                            <div className="bg-red-100 text-red-800  items-center px-2.5 py-0.5 rounded-md mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                  <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
+                                  <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" />
+                                  <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
+                                </svg>
+                            </div>
+                            <div className="text-xl font-medium ml-2 text-gray-700">Mata Kuliahku</div>
+                          </div>
+                        <h2 className="text-gray-900 text-md md:text-xl lg:text-3xl font-bold lg:font-extrabold mb-2">Universitas 17 Agustus 1945 Surabaya</h2>
+                        <hr className="h-0.5 bg-gray-950 border-2"></hr>
+
+                        {/* Daftar Mata Kuliah */}
+
+                        <ul className="my-4 space-y-3">
+                          {fetchedProjects.length > 0 ? (
+                              <>
+                                {fetchedProjects.map((matkul) => 
+                                    <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200`}>
+                                      <div className="flex w-0 flex-1 items-center">
+                                          <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
+                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                            <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
+                                            <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" />
+                                            <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
+                                          </svg>
+                                          <span className="truncate font-medium">
+                                            {matkul.nameProject} - {matkul.labelProject}
+                                          </span>
+                                          {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
+                                          </div>
+                                      </div>
+                                      <div className="ml-4 flex-shrink-0">
+                                          <button className="font-medium text-indigo-500 hover:text-indigo-400">
+                                              Buka
+                                          </button>
+                                      </div>
+                                    </li>
+                                  )}
+                              </>
+                          ) : (
+                            <>
+                              {loadBait.map(() =>
+                                <li className={`${daftarBaru ? "hidden" : ""} flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200 animate-pulse`}>
+                                      <div className="flex w-0 flex-1 items-center">
+                                          <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
+                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                            <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
+                                            <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" />
+                                            <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
+                                          </svg>
+                                          <span className="truncate font-medium">
+                                            <div className="h-2.5 bg-gray-300 rounded-full mt-2 w-72"></div>
+                                          </span>
+                                          {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
+                                          </div>
+                                      </div>
+                                      <div className="ml-4 flex-shrink-0">
+                                        <div className="h-2.5 bg-gray-300 rounded-full mt-2 w-20"></div>
+                                      </div>
+                                  </li>
+                                  )}
+                                  {daftarLoad && (
+                                   <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200`}>
+                                      <div className="flex w-0 flex-1 items-center">
+                                          <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
+                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                            <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
+                                            <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" />
+                                            <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
+                                          </svg>
+                                          <span className="truncate font-medium">
+                                            Belum ada mata kuliah
+                                          </span>
+                                          {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
+                                          </div>
+                                      </div>
+                                      <div className="ml-4 flex-shrink-0">
+                                         <a href='/projek' className={`font-medium text-indigo-500 hover:text-indigo-400`}>
+                                              Daftar Baru
+                                          </a>
+                                      </div>
+                                  </li>
+                                  )}
+                            </>
+                          )}
+                        </ul>
+
+                        {/* End Daftar Mata Kuliah */}
+
                     </div>
+
+                    {/* End Section 2 */}
+
                 </div>
             </div>
         </section>
@@ -138,7 +311,7 @@ const Dashboard = () => {
         {role === "admin" &&   (
           <>
           {jumlahProjects && jumlahUser ? (
-            <div className="rounded-lg grid mb-4 border border-gray-200 shadow-md  md:mb-4 md:grid-cols-3">
+            <div className="rounded-lg grid mb-4 border border-gray-200   md:mb-4 md:grid-cols-3">
             <figure className="flex flex-col items-center justify-center p-8 text-center bg-gray-50 border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e  ">
                 <blockquote className="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 ">
                     <h3 className="text-lg font-semibold text-gray-900 ">Total Projek</h3>
@@ -228,7 +401,7 @@ const Dashboard = () => {
       </main>
       {/* End - Content */}
 
-     <Bottom />
+     {/* <Bottom /> */}
     </div>
   )
 }
