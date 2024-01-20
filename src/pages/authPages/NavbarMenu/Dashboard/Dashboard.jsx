@@ -16,10 +16,10 @@ const loadBait = [
 const Dashboard = () => {
   const [ username, setUsername ] = useState('');
   const [ role, setRole ] = useState('');
-  // const [ email, setEmail ] = useState('')
-  const [ jumlahUser,  setJumlahUser ] = useState('')
-  const [ jumlahProjects,  setJumlahProject ] = useState('')
-  const [ jumlahDaftar,  setJumlahDaftar ] = useState('')
+  const [ email, setEmail ] = useState('')
+  // const [ jumlahUser,  setJumlahUser ] = useState('')
+  // const [ jumlahProjects,  setJumlahProject ] = useState('')
+  // const [ jumlahDaftar,  setJumlahDaftar ] = useState('')
 
   // Set ID also use it as loading trigger
   const [ loadingSimpan, setLoadingSimpan ] = useState('');
@@ -30,27 +30,27 @@ const Dashboard = () => {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/firebase.User
             const usersCollection = collection(db, "users");
-            const projectsCollection = collection(db, "projects");
-            const usersProjectsCollection = collection(db, "usersProjects");
+            // const projectsCollection = collection(db, "projects");
+            // const usersProjectsCollection = collection(db, "usersProjects");
           
             try {
               const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
-              const querySnapshotAllUsers = await getDocs(query(usersCollection));
-              const querySnapshotAllProjects = await getDocs(query(projectsCollection));
-              const querySnapshotAllUsersProjects = await getDocs(query(usersProjectsCollection));
+              // const querySnapshotAllUsers = await getDocs(query(usersCollection));
+              // const querySnapshotAllProjects = await getDocs(query(projectsCollection));
+              // const querySnapshotAllUsersProjects = await getDocs(query(usersProjectsCollection));
 
-              setJumlahUser(querySnapshotAllUsers.size.toString());
-              setJumlahProject(querySnapshotAllProjects.size.toString());
-              setJumlahDaftar(querySnapshotAllUsersProjects.size.toString());
+              // setJumlahUser(querySnapshotAllUsers.size.toString());
+              // setJumlahProject(querySnapshotAllProjects.size.toString());
+              // setJumlahDaftar(querySnapshotAllUsersProjects.size.toString());
 
               // Field from firestore
               const getId = querySnapshot.docs[0].data().idUser;
               const getUsername = querySnapshot.docs[0].data().usernameUser;
               const getRole = querySnapshot.docs[0].data().roleUser;
-              // const getEmail = querySnapshot.docs[0].data().emailUser;
+              const getEmail = querySnapshot.docs[0].data().emailUser;
               setUsername(getUsername);
               setRole(getRole);
-              // setEmail(getEmail);
+              setEmail(getEmail);
 
               setLoadingSimpan(getId);
 
@@ -127,6 +127,29 @@ const Dashboard = () => {
   } catch (error) {
       console.log(error)
   }
+
+  // Check Penanggung Jawab
+  const [ checkPenanggungJawab, setCheckPenanggungJawab ] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const projectsCollection = collection(db, "projects");
+
+        try {
+          // projects table
+          const querySnapshotProjects = await getDocs(query(projectsCollection, where("picProject", "==", email)));
+          if (querySnapshotProjects.size > 0) {
+            setCheckPenanggungJawab(true)
+          }
+
+        } catch (error) {
+          console.log("err projects:" + error)
+        }
+      };
+      
+      console.log("Test Leak Data checkPJ")
+      fetchData();
+    }, [email]);
 
 
   return (
@@ -216,6 +239,52 @@ const Dashboard = () => {
                         {/* Daftar Mata Kuliah */}
 
                         <ul className="my-4 space-y-3">
+                        {(checkPenanggungJawab && role === "user") && (
+                          <>
+                              <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200`}>
+                                <div className="flex w-0 flex-1 items-center">
+                                    <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-600">
+                                      <path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
+                                    </svg>
+                                    <span className="truncate font-medium">
+                                      Kamu telah menjadi penanggung jawab!
+                                    </span>
+                                    {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
+                                    </div>
+                                </div>
+                                <div className="ml-4 flex-shrink-0">
+                                    <a href='/manajemen-projek' className={`font-medium text-indigo-500 hover:text-indigo-400`}>
+                                      Buka Manajemen
+                                    </a>
+                                </div>
+                            </li>
+                            <hr className="h-0.5 bg-gray-950 border-2"></hr>
+                          </>
+                          )}
+                        {(role === "admin") && (
+                          <>
+                              <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200`}>
+                                <div className="flex w-0 flex-1 items-center">
+                                    <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-blue-600">
+                                      <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                                    </svg>
+                                    <span className="truncate font-medium">
+                                      Kamu telah menjadi Admin!
+                                    </span>
+                                    {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
+                                    </div>
+                                </div>
+                                <div className="ml-4 flex-shrink-0">
+                                    <a href='/manajemen-projek' className={`font-medium text-indigo-500 hover:text-indigo-400`}>
+                                      Buka Manajemen
+                                    </a>
+                                </div>
+                            </li>
+                            <hr className="h-0.5 bg-gray-950 border-2"></hr>
+                          </>
+                          )}
                           {fetchedProjects.length > 0 ? (
                               <>
                                 {fetchedProjects.map((matkul) => 
@@ -307,92 +376,6 @@ const Dashboard = () => {
         <div className="mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-4">
 
         {/* Report */}
-        
-        {role === "admin" &&   (
-          <>
-          {jumlahProjects && jumlahUser ? (
-            <div className="rounded-lg grid mb-4 border border-gray-200   md:mb-4 md:grid-cols-3">
-            <figure className="flex flex-col items-center justify-center p-8 text-center bg-gray-50 border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e  ">
-                <blockquote className="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 ">
-                    <h3 className="text-lg font-semibold text-gray-900 ">Total Projek</h3>
-                    {/* <p className="my-4">If you care for your time, I hands down would go with this."</p> */}
-                </blockquote>
-                <figcaption className="flex items-center justify-center ">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-indigo-600">
-                  <path d="M5.566 4.657A4.505 4.505 0 0 1 6.75 4.5h10.5c.41 0 .806.055 1.183.157A3 3 0 0 0 15.75 3h-7.5a3 3 0 0 0-2.684 1.657ZM2.25 12a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3v-6ZM5.25 7.5c-.41 0-.806.055-1.184.157A3 3 0 0 1 6.75 6h10.5a3 3 0 0 1 2.683 1.657A4.505 4.505 0 0 0 18.75 7.5H5.25Z" />
-                </svg>
-                    <div className="space-y-0.5 font-medium  text-left rtl:text-right ms-3">
-                        <div className="text-4xl -mt-1 text-gray-600  ">{jumlahProjects}</div>
-                    </div>
-                </figcaption>    
-            </figure>
-            <figure className="flex flex-col items-center justify-center p-8 text-center bg-gray-50 border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e  ">
-                <blockquote className="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 ">
-                    <h3 className="text-lg font-semibold text-gray-900 ">Total Daftar</h3>
-                    {/* <p className="my-4">If you care for your time, I hands down would go with this."</p> */}
-                </blockquote>
-                <figcaption className="flex items-center justify-center ">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-indigo-600">
-                    <path fillRule="evenodd" d="M4.5 3.75a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V6.75a3 3 0 0 0-3-3h-15Zm4.125 3a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Zm-3.873 8.703a4.126 4.126 0 0 1 7.746 0 .75.75 0 0 1-.351.92 7.47 7.47 0 0 1-3.522.877 7.47 7.47 0 0 1-3.522-.877.75.75 0 0 1-.351-.92ZM15 8.25a.75.75 0 0 0 0 1.5h3.75a.75.75 0 0 0 0-1.5H15ZM14.25 12a.75.75 0 0 1 .75-.75h3.75a.75.75 0 0 1 0 1.5H15a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3.75a.75.75 0 0 0 0-1.5H15Z" clipRule="evenodd" />
-                  </svg>
-                    <div className="space-y-0.5 font-medium  text-left rtl:text-right ms-3">
-                        <div className="text-4xl -mt-1 text-gray-600  ">{jumlahDaftar}</div>
-                    </div>
-                </figcaption>    
-            </figure>
-            <figure className="flex flex-col items-center justify-center p-8 text-center bg-gray-50 border-b border-gray-200 md:rounded-se-lg  ">
-                <blockquote className="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 ">
-                    <h3 className="text-lg font-semibold text-gray-900 ">Total User</h3>
-                    {/* <p className="my-4">Designing with Figma components that can be easily translated to the utility classes of Tailwind CSS is a huge timesaver!"</p> */}
-                </blockquote>
-                <figcaption className="flex items-center justify-center ">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-indigo-600">
-                  <path fillRule="evenodd" d="M8.25 6.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM15.75 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM2.25 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM6.31 15.117A6.745 6.745 0 0 1 12 12a6.745 6.745 0 0 1 6.709 7.498.75.75 0 0 1-.372.568A12.696 12.696 0 0 1 12 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 0 1-.372-.568 6.787 6.787 0 0 1 1.019-4.38Z" clipRule="evenodd" />
-                  <path d="M5.082 14.254a8.287 8.287 0 0 0-1.308 5.135 9.687 9.687 0 0 1-1.764-.44l-.115-.04a.563.563 0 0 1-.373-.487l-.01-.121a3.75 3.75 0 0 1 3.57-4.047ZM20.226 19.389a8.287 8.287 0 0 0-1.308-5.135 3.75 3.75 0 0 1 3.57 4.047l-.01.121a.563.563 0 0 1-.373.486l-.115.04c-.567.2-1.156.349-1.764.441Z" />
-                </svg>
-                    <div className="space-y-0.5 font-medium  text-left rtl:text-right ms-3">
-                        <div className="text-4xl -mt-1 text-gray-600 ">{jumlahUser}</div>
-                    </div>
-                </figcaption>    
-            </figure>
-        </div>
-          ) : (
-            <>
-            <div className="mx-2 rounded-lg grid mb-4 border border-gray-200 shadow-md  md:mb-4 md:grid-cols-2 bg-white ">
-                <figure className="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e  ">
-                    <blockquote className="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 ">
-                        <h3 className="text-lg font-semibold text-gray-900 ">Total Mata Kuliah</h3>
-                        {/* <p className="my-4">If you care for your time, I hands down would go with this."</p> */}
-                    </blockquote>
-                    <figcaption className="flex items-center justify-center ">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-indigo-600">
-                      <path d="M5.566 4.657A4.505 4.505 0 0 1 6.75 4.5h10.5c.41 0 .806.055 1.183.157A3 3 0 0 0 15.75 3h-7.5a3 3 0 0 0-2.684 1.657ZM2.25 12a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3v-6ZM5.25 7.5c-.41 0-.806.055-1.184.157A3 3 0 0 1 6.75 6h10.5a3 3 0 0 1 2.683 1.657A4.505 4.505 0 0 0 18.75 7.5H5.25Z" />
-                    </svg>
-                        <div className="space-y-0.5 font-medium  text-left rtl:text-right ms-3">
-                            <div className="text-md text-gray-400 animate-pulse">Menghitung...</div>
-                        </div>
-                    </figcaption>    
-                </figure>
-                <figure className="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 md:rounded-se-lg  ">
-                    <blockquote className="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 ">
-                        <h3 className="text-lg font-semibold text-gray-900 ">Total User</h3>
-                        {/* <p className="my-4">Designing with Figma components that can be easily translated to the utility classes of Tailwind CSS is a huge timesaver!"</p> */}
-                    </blockquote>
-                    <figcaption className="flex items-center justify-center ">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-indigo-600">
-                      <path fillRule="evenodd" d="M8.25 6.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM15.75 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM2.25 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM6.31 15.117A6.745 6.745 0 0 1 12 12a6.745 6.745 0 0 1 6.709 7.498.75.75 0 0 1-.372.568A12.696 12.696 0 0 1 12 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 0 1-.372-.568 6.787 6.787 0 0 1 1.019-4.38Z" clipRule="evenodd" />
-                      <path d="M5.082 14.254a8.287 8.287 0 0 0-1.308 5.135 9.687 9.687 0 0 1-1.764-.44l-.115-.04a.563.563 0 0 1-.373-.487l-.01-.121a3.75 3.75 0 0 1 3.57-4.047ZM20.226 19.389a8.287 8.287 0 0 0-1.308-5.135 3.75 3.75 0 0 1 3.57 4.047l-.01.121a.563.563 0 0 1-.373.486l-.115.04c-.567.2-1.156.349-1.764.441Z" />
-                    </svg>
-                        <div className="space-y-0.5 font-medium  text-left rtl:text-right ms-3">
-                            <div className="text-md text-gray-400 animate-pulse">Menghitung...</div>
-                        </div>
-                    </figcaption>    
-                </figure>
-            </div>
-            </>
-          )}
-          </>
-        )}
        
         {/* End Report */}
           
