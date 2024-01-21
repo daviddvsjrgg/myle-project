@@ -6,6 +6,7 @@ import { collection, getDocs, query, updateDoc, where } from 'firebase/firestore
 import { auth, db } from '../../../../../config/firebase/firebase';
 import { BookOpenIcon } from '@heroicons/react/20/solid'
 import { onAuthStateChanged } from 'firebase/auth';
+import { Link } from 'react-router-dom';
 
 const Profile = () => {
     const [ buttonLoading, setButtonLoading ] = useState(false)
@@ -135,6 +136,7 @@ const Profile = () => {
                                     idProject: doc.data().idProject,
                                     nameProject: doc.data().nameProject,
                                     labelProject: doc.data().labelProject,
+                                    picProject: doc.data().picProject,
                                 }));
                                 setFetchedProjects(projectList);
                             } else {
@@ -173,7 +175,8 @@ const Profile = () => {
                     const fetchedData = snapshot.docs.map(doc => ({
                         idProject: doc.data().idProject,
                         nameProject: doc.data().nameProject,
-                        labelProject: doc.data().labelProject
+                        labelProject: doc.data().labelProject,
+                        picProject: doc.data().picProject
                     }));
                     setData(fetchedData);
                 } catch (error) {
@@ -347,9 +350,11 @@ const Profile = () => {
                                                             </div>
                                                         </div>
                                                         <div className="ml-4 flex-shrink-0">
-                                                            <button className="font-medium text-indigo-500 hover:text-indigo-400">
-                                                                Buka
-                                                            </button>
+                                                        <Link
+                                                            to="/personal/projekku" state={{projectData: project, clicked: "true"}}
+                                                            className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">
+                                                            Buka
+                                                        </Link>
                                                         </div>
                                                         </li>
                                                 </div>
@@ -383,9 +388,11 @@ const Profile = () => {
                                                         </div>
                                                     </div>
                                                     <div className="ml-4 flex-shrink-0">
-                                                        <button className="font-medium text-indigo-500 hover:text-indigo-400">
+                                                        <Link
+                                                            to="/personal/projekku" state={{projectData: project, clicked: "true"}}
+                                                            className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">
                                                             Buka
-                                                        </button>
+                                                        </Link>
                                                     </div>
                                                     </li>
                                             </div>
