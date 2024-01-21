@@ -176,7 +176,7 @@ const Dashboard = () => {
                         <path d="m10.076 8.64-2.201-2.2V4.874a.75.75 0 0 0-.364-.643l-3.75-2.25a.75.75 0 0 0-.916.113l-.75.75a.75.75 0 0 0-.113.916l2.25 3.75a.75.75 0 0 0 .643.364h1.564l2.062 2.062 1.575-1.297Z" />
                         <path fillRule="evenodd" d="m12.556 17.329 4.183 4.182a3.375 3.375 0 0 0 4.773-4.773l-3.306-3.305a6.803 6.803 0 0 1-1.53.043c-.394-.034-.682-.006-.867.042a.589.589 0 0 0-.167.063l-3.086 3.748Zm3.414-1.36a.75.75 0 0 1 1.06 0l1.875 1.876a.75.75 0 1 1-1.06 1.06L15.97 17.03a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
                       </svg>
-                          Developed by David Dwiyanto
+                          Developed by David Dwiyantoo
                       </a>
                       <h1 className="text-gray-200  text-2xl md:text-5xl font-extrabold mb-2 ">Selamat datang {username ? username : "Mahasiswa"}!</h1>
                       <p className="text-lg font-normal text-gray-300 mb-6">Semoga kegiatan kuliahmu berjalan menyenangkan.</p>

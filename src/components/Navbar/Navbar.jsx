@@ -224,8 +224,8 @@ useEffect(() => {
                   )}
                   {(role === "user" || role === "admin") ? (
                     <>
-                      <Link to="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
-                        Mata Kuliah
+                      <Link to="/personal" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                        Mata Kuliahku
                       </Link>
                       <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Linimasa
@@ -236,8 +236,8 @@ useEffect(() => {
                     </>
                   ) : (
                     <>
-                      <Link to="/projek" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
-                        Mata Kuliah
+                      <Link to="/personal" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                        Mata Kuliahku
                       </Link>
                       <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
                         Linimasa
@@ -436,9 +436,9 @@ useEffect(() => {
               )}
               {(role === "user" || role === "admin") && (
                 <>
-                <Link to="/projek">
+                <Link to="/personal">
                   <Disclosure.Button as="a" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
-                    Mata Kuliah
+                    Mata Kuliahku
                   </Disclosure.Button>
                 </Link>
                 <Link to="/none">

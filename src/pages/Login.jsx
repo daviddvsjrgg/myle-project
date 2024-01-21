@@ -116,8 +116,8 @@ const Login = () => {
               onChange={handleEmailChange}
               autoComplete="email"
               required
-              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inse placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
-                errorMessageEmail ? 'ring-red-600' : 'ring-gray-300'
+              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1  ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                errorMessageEmail ? 'ring-red-600' : 'ring-slate-400'
               }`}
             />
             {errorMessageEmail && (
@@ -148,8 +148,8 @@ const Login = () => {
               onChange={handlePasswordChange}
               autoComplete="current-password"
               required
-              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
-                errorMessagePassword ? 'ring-red-600' : 'ring-gray-300'
+              className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset  placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
+                errorMessagePassword ? 'ring-red-600' : 'ring-slate-400'
               }`}
             />
             {errorMessagePassword && (
@@ -190,7 +190,7 @@ const Login = () => {
         <div className='relative'>
           <button
           onClick={signInWithGoogle} 
-          className="absolute w-full bg-center top-0 right-0 px-5 py-1 border flex items-center justify-center gap-2 border-slate-200 dark:border-slate-400 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150">
+          className="absolute w-full bg-center top-0 right-0 px-5 py-1 border flex items-center justify-center gap-2 border-slate-500 dark:border-slate-400 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150">
               <img className="w-6 h-6" src="https://www.svgrepo.com/show/475656/google-color.svg" loading="lazy" alt="google logo" />
               <span className='text-gray-900'>Login dengan Google</span>
           </button>
