@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useRef, useState } from 'react'
 import Navbar from '../../../../../components/Navbar/Navbar'
 import Bottom from '../../../../../components/BottomBar/Bottom'
 import { BookOpenIcon } from '@heroicons/react/20/solid'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { collection, getDocs, query, updateDoc, where } from 'firebase/firestore'
 import { db } from '../../../../../config/firebase/firebase'
 import { Dialog, Transition } from '@headlessui/react'
@@ -108,6 +108,7 @@ const UserProfile = () => {
                                     idProject: doc.data().idProject,
                                     nameProject: doc.data().nameProject,
                                     labelProject: doc.data().labelProject,
+                                    picProject: doc.data().picProject,
                                 }));
                                 setFetchedProjects(projectList);
                             } else {
@@ -148,7 +149,8 @@ const UserProfile = () => {
                         const fetchedData = snapshot.docs.map(doc => ({
                             idProject: doc.data().idProject,
                             nameProject: doc.data().nameProject,
-                            labelProject: doc.data().labelProject
+                            labelProject: doc.data().labelProject,
+                            picProject: doc.data().picProject,
                         }));
                         setData(fetchedData);
                     } catch (error) {
@@ -329,9 +331,11 @@ const UserProfile = () => {
                                                             </div>
                                                         </div>
                                                         <div className="ml-4 flex-shrink-0">
-                                                            <button className="font-medium text-indigo-500 hover:text-indigo-400">
+                                                            <Link
+                                                                to="/personal/projekku" state={{projectData: project, clicked: "true"}}
+                                                                className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">
                                                                 Buka
-                                                            </button>
+                                                            </Link>
                                                         </div>
                                                         </li>
                                                 </div>
@@ -377,9 +381,11 @@ const UserProfile = () => {
                                                         </div>
                                                     </div>
                                                     <div className="ml-4 flex-shrink-0">
-                                                        <button className="font-medium text-indigo-500 hover:text-indigo-400">
+                                                        <Link
+                                                            to="/personal/projekku" state={{projectData: project, clicked: "true"}}
+                                                            className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">
                                                             Buka
-                                                        </button>
+                                                        </Link>
                                                     </div>
                                                     </li>
                                             </div>
