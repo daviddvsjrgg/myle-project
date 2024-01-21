@@ -11,7 +11,6 @@ import ManajemenUser from "./pages/authPages/NavbarMenu/ManajemenUser/ManajemenU
 import AddUser from "./pages/authPages/NavbarMenu/ManajemenUser/AddUser/AddUser";
 import Projek from "./pages/authPages/NavbarMenu/Projek/Projek";
 import Personal from "./pages/authPages/NavbarMenu/Personal/Personal";
-import AddPersonal from "./pages/authPages/NavbarMenu/Personal/AddPersonal/AddPersonal";
 import Laporan from "./pages/authPages/NavbarMenu/Laporan/Laporan";
 import Kalkulasi from "./pages/authPages/NavbarMenu/Kalkulasi/Kalkulasi";
 import Dashboard from "./pages/authPages/NavbarMenu/Dashboard/Dashboard";
@@ -24,6 +23,7 @@ import RegisterAdmin from "./pages/RegisterAdmin";
 import UserProfile from "./pages/authPages/NavbarMenu/ManajemenUser/UserProfile/UserProfile";
 import Profile from "./pages/authPages/NavbarMenu/ManajemenUser/Profile/Profile";
 import DetailProjek from "./pages/authPages/NavbarMenu/ManajemenProjek/DetailProjek/DetailProjek";
+import ProjekKu from "./pages/authPages/NavbarMenu/Personal/ProjekKu/ProjekKu";
 
 function LoadingSpinner() {
   return (
@@ -185,7 +185,7 @@ function App() {
           <Route path="/manajemen-user/user-baru" element={<ProtectedRoute element={<AddUser />} path="/manajemen-user/user-baru" allowedRoles={['admin']} />} />
           <Route path="/projek" element={<ProtectedRoute element={<Projek />} path="/projek" />} />
           <Route path="/personal" element={<ProtectedRoute element={<Personal />} path="/personal" />} />
-          <Route path="/personal/projek-baru" element={<ProtectedRoute element={<AddPersonal />} path="/personal/projek-baru" />} />
+          <Route path="/personal/projekku" element={<ProtectedRoute element={<ProjekKu />} path="/personal/projekku" />} />
           <Route path="/laporan" element={<ProtectedRoute element={<Laporan />} path="/laporan" />} />
           <Route path="/kalkulasi" element={<ProtectedRoute element={<Kalkulasi />} path="/kalkulasi" />} />
 

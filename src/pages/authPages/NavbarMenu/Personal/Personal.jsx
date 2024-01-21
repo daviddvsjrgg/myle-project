@@ -5,6 +5,7 @@ import { auth, db } from '../../../../config/firebase/firebase'
 import { Dialog, Transition } from '@headlessui/react'
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 import Bottom from '../../../../components/BottomBar/Bottom'
+import { Link } from 'react-router-dom'
 
 const loadDataBait = [
     {id: "bait"},
@@ -287,8 +288,11 @@ useEffect(() => {
                                         <p className="text-gray-600">{project.userData.positionUser === "Belum ada jabatan" ? "Mahasiswa" : project.userData.positionUser}</p>
                                     </div>
                                     <div className="ml-auto">
-                                        <button
-                                        className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Buka</button>
+                                        <Link
+                                          to="/personal/projekku" state={{projectData: project, clicked: "true"}}
+                                          className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">
+                                          Buka
+                                        </Link>
                                     </div>
                                 </div>
                                 </div>
@@ -402,8 +406,11 @@ useEffect(() => {
                                     <p className="text-gray-600">{project.userData.positionUser === "Belum ada jabatan" ? "Mahasiswa" : project.userData.positionUser}</p>
                                   </div>
                                   <div className="ml-auto">
-                                    <button
-                                        className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Buka</button>
+                                     <Link
+                                        to="/personal/projekku" state={{projectData: project, clicked: "true"}}
+                                        className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">
+                                        Buka
+                                     </Link>
                                   </div>
                               </div>
                             </div>
