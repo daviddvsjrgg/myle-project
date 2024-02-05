@@ -489,7 +489,7 @@ useEffect(() => {
       <main>
         <div className="mx-auto max-w-7xl">
 
-            <div className="bg-white">
+            <div className="bg-gray-50">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
 
               <div className="mt-5 lg:mx-0">
@@ -510,7 +510,7 @@ useEffect(() => {
                               onChange={(e) => setSearch(e.target.value)}
                               autoComplete='off'
                               placeholder="Cari projek (contoh:projek-xxxx-xx)"
-                              className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500  "
+                              className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300/75 rounded-lg bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500  "
                               />
                               {/* <button type="submit" className="text-white absolute end-2.5 bottom-2.5 bg-indigo-700 hover:bg-indigo-600 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-4 py-2 ">Search</button> */}
                           </div>
@@ -528,7 +528,7 @@ useEffect(() => {
                     <div className="flex flex-wrap -m-4">
                       {data.map((project) => 
                         <div key={project.id} className="p-4 md:w-1/3 scale-100 transition-all duration-400 hover:scale-105">
-                          <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md">
+                          <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden duration-300 hover:shadow-xl shadow-md">
                             {/* <a href="/toProject"> */}
                               <img className="lg:h-64 md:h-32 w-screen object-cover md:object-scale scale-110 transition-all duration-400 hover:opacity-90" src={project.imageUrlProject} alt="blog" />
                             {/* </a> */}

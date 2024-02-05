@@ -564,7 +564,7 @@ const ManajemenProjek = () => {
                       nama_projek="hs-table-search"
                       id="hs-table-search"
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="block w-full p-3 pl-10 text-sm border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
+                      className="block w-full p-3 pl-10 text-sm border-gray-300/75 rounded-md focus:border-blue-500 focus:ring-blue-500"
                       placeholder="Cari... (ex:label, email)"
                     />
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
@@ -693,8 +693,8 @@ const ManajemenProjek = () => {
                   {totalProjects === 0 && (
                     <tbody>
                       {loadBait.map((p) => (
-                      <tr key={p.id} className={`animate-pulse ${totalProjectsLoading === 0 ? "hidden" : ""}`}>
-                        <td className="px-2 py-4 whitespace-nowrap">
+                      <tr key={p.id} className={`${totalProjectsLoading === 0 ? "hidden" : ""} bg-white`}>
+                        <td className="px-2 py-4 whitespace-nowrap animate-pulse ">
                           <div className="flex items-center">
                             <div className="ml-5">
                               <div className="text-sm font-medium text-gray-900">
@@ -703,15 +703,15 @@ const ManajemenProjek = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap">
+                        <td className="px-2 py-4 whitespace-nowrap animate-pulse ">
                           <div className="flex items-center">
                             <div className="ml-4">
                             <div className="h-2.5 bg-gray-200 rounded-full w-48"></div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center mt-4">
+                        <td className="px-6 py-4 whitespace-nowrap animate-pulse ">
+                        <div className="flex items-center mt-4 animate-pulse ">
                           <svg className="w-8 h-8 me-3 text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
                             </svg>
@@ -721,10 +721,10 @@ const ManajemenProjek = () => {
                             </div>
                         </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap animate-pulse ">
                         <div className="h-2.5 bg-gray-200 rounded-full w-48"></div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium animate-pulse ">
                         <div className="h-2 bg-gray-200 rounded-full w-10"></div>
                         </td>
                       </tr>

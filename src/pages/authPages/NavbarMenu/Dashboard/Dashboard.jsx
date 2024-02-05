@@ -194,13 +194,13 @@ const Dashboard = () => {
             </div>
         </section>
 
-        <section className="bg-white">
+        <section className="bg-gray-50">
             <div className="px-4 mx-auto max-w-screen-xl">
                 <div className="grid md:grid-cols-2 gap-6">
 
                   {/* Section 1 */}
 
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 md:px-6 md:py-6">
+                    <div className="bg-white border border-gray-200 rounded-lg p-6 md:px-6 md:py-6 shadow-xl">
                       <div className="inline-flex">
                         <div className="bg-indigo-100 text-indigo-900  items-center px-2.5 py-0.5 rounded-md mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -225,7 +225,7 @@ const Dashboard = () => {
 
                     {/* Section 2 */}
 
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 md:px-6 md:py-6">
+                    <div className="bg-white border border-gray-200 rounded-lg p-6 md:px-6 md:py-6 shadow-xl">
                           <div className="inline-flex">
                             <div className="bg-red-100 text-red-800  items-center px-2.5 py-0.5 rounded-md mb-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -244,7 +244,7 @@ const Dashboard = () => {
                         <ul className="my-4 space-y-3">
                         {(checkPenanggungJawab && role === "user") && (
                           <>
-                              <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200`}>
+                              <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200/50`}>
                                 <div className="flex w-0 flex-1 items-center">
                                     <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-600">
@@ -257,7 +257,7 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                                 <div className="ml-4 flex-shrink-0">
-                                    <a href='/manajemen-projek' className={`font-medium text-indigo-500 hover:text-indigo-400`}>
+                                    <a href='/manajemen-projek' className={`font-medium text-indigo-500 hover:underline`}>
                                       Buka Manajemen
                                     </a>
                                 </div>
@@ -267,7 +267,7 @@ const Dashboard = () => {
                           )}
                         {(role === "admin") && (
                           <>
-                              <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200`}>
+                              <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200/50`}>
                                 <div className="flex w-0 flex-1 items-center">
                                     <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-blue-600">
@@ -280,7 +280,7 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                                 <div className="ml-4 flex-shrink-0">
-                                    <a href='/manajemen-projek' className={`font-medium text-indigo-500 hover:text-indigo-400`}>
+                                    <a href='/manajemen-projek' className={`font-medium text-indigo-500 hover:hover:underline`}>
                                       Buka Manajemen
                                     </a>
                                 </div>
@@ -291,7 +291,7 @@ const Dashboard = () => {
                           {fetchedProjects.length > 0 ? (
                               <>
                                 {fetchedProjects.map((matkul) => 
-                                    <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200`}>
+                                    <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200/50`}>
                                       <div className="flex w-0 flex-1 items-center">
                                           <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
                                           <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
@@ -314,12 +314,12 @@ const Dashboard = () => {
                           ) : (
                             <>
                               {loadBait.map(() =>
-                                <li className={`${daftarBaru ? "hidden" : ""} flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200 animate-pulse`}>
+                                <li className={`${daftarBaru ? "hidden" : ""} flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200/50 animate-pulse`}>
                                       <div className="flex w-0 flex-1 items-center">
                                           <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
                                           <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
                                           <span className="truncate font-medium">
-                                            <div className="h-2.5 bg-gray-300 rounded-full mt-2 w-72"></div>
+                                            <div className="h-2.5 bg-gray-300/50 rounded-full mt-2 w-72"></div>
                                           </span>
                                           {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
                                           </div>
@@ -330,7 +330,7 @@ const Dashboard = () => {
                                   </li>
                                   )}
                                   {daftarLoad && (
-                                   <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200`}>
+                                   <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200/50`}>
                                       <div className="flex w-0 flex-1 items-center">
                                           <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
                                           <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
