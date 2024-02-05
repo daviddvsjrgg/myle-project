@@ -17,7 +17,7 @@ const ProjekKu = () => {
     const [ buttonEdit, setButtonEdit ] = useState(false)
 
     // Simpan Cliced 
-    const [buttonClicked, setButtonClicked] = useState(false)
+    const [ buttonClicked, setButtonClicked ] = useState(false)
 
     // Get Informasi Mata Kuliah
     const [ fetchedInfoMatkul, setFetchedInfoMatkul ] = useState([])
@@ -79,7 +79,6 @@ const ProjekKu = () => {
                 }));
 
                 setFetchedInfoMatkul(lecturersList);
-                console.log(fetchedInfoMatkul);
 
                 // Seperate Day and Time
                 const jadwal1 = queryLecturers.docs[0].data().scheduleLecturers.firstLecturers;
@@ -106,7 +105,8 @@ const ProjekKu = () => {
         
         console.log("Test Leak Data checkPJ")
         fetchData();
-        }, []);
+        
+        }, [projectData]);
 
     // Handle Simpan
     const handleSimpanClick = async() => {
@@ -259,7 +259,7 @@ const ProjekKu = () => {
 
         <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
             {/* Section 1 */}
-            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} col-span-7 md:col-span-1 bg-gray-100 border-2 border-gray-300/40 shadow-md rounded-md`}>
+            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} col-span-7 md:col-span-1 bg-gray-50 border-2 border-gray-300/40 shadow-md rounded-md`}>
                 <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                     <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                         <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
@@ -395,7 +395,7 @@ const ProjekKu = () => {
                         <div className="px-4 grid -mt-1">
                             <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
                             {dosen.groupLinkLecturers === "null" || dosen.groupLinkLecturers === "" ? (
-                                <a
+                                <a href='/#'
                                 className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
                                     Belum ada link group
                                 </a>
@@ -504,7 +504,7 @@ const ProjekKu = () => {
                         </div>
                         <div className="px-4 grid -mt-1">
                             <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
-                                <a
+                                <a href='/#'
                                   className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
                                     Belum ada link group
                                 </a>
@@ -546,10 +546,11 @@ const ProjekKu = () => {
                   
                 </div>
             </div>
+            {/* End Section 1 */}
 
 
             {/* Section 2 */}
-            <div className="col-span-7 row-span-3 bg-gray-100 border-2 border-gray-300/40 shadow-md rounded-t-md">
+            <div className="col-span-7 row-span-3 bg-gray-50 border-2 border-gray-300/40 shadow-md rounded-t-md">
                 <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                     <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 mt-0.5">
@@ -561,6 +562,7 @@ const ProjekKu = () => {
                     <div className="text-xl font-medium ml-1.5 text-gray-700">Kegiatan Perkuliahan</div>
                 </div>
             </div>
+            {/* End Section 2 */}
         </div>
 
          </div>

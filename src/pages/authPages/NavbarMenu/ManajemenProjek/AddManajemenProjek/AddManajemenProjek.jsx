@@ -479,7 +479,7 @@ const AddManajemenProjek = () => {
                          onDragLeave={handleDragLeave}
                          onDragOver={(e) => e.preventDefault()}
                          onDrop={handleDrop}
-                        className={`mt-2 flex justify-center rounded-lg border ${isDragOver ? 'border-indigo-600 border-dashed' : 'border-dashed'} border-gray-900/25 px-6 py-10`}>
+                        className={`mt-2 flex justify-center rounded-lg border ${isDragOver ? 'border-indigo-600 border-dashed' : 'border-dashed'} bg-white border-gray-900/25 px-6 py-10`}>
                           <div className="text-center">
                           {filePreview ? (
                             <>
