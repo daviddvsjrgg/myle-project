@@ -6,6 +6,7 @@ import { auth, db } from '../../../../config/firebase/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { BookOpenIcon } from '@heroicons/react/20/solid';
 import { Link } from 'react-router-dom';
+import Bottom from '../../../../components/BottomBar/Bottom';
 
 const loadBait = [
   {id: 1},
@@ -106,6 +107,7 @@ const Dashboard = () => {
                                   nameProject: doc.data().nameProject,
                                   labelProject: doc.data().labelProject,
                                   picProject: doc.data().picProject,
+                                  imageUrlProject: doc.data().imageUrlProject,
                               }));
                               setFetchedProjects(projectList);
                           } else {
@@ -377,7 +379,7 @@ const Dashboard = () => {
       </main>
       {/* End - Content */}
 
-     {/* <Bottom /> */}
+     <Bottom />
     </div>
   )
 }

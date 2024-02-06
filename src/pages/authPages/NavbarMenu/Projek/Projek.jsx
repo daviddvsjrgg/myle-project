@@ -638,7 +638,6 @@ useEffect(() => {
             {loadSpinner && (
               <>
                 <LoadingSpinnerMid/>
-                <Bottom />
               </>
             )}
           </div>

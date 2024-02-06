@@ -137,6 +137,7 @@ const Profile = () => {
                                     nameProject: doc.data().nameProject,
                                     labelProject: doc.data().labelProject,
                                     picProject: doc.data().picProject,
+                                    imageUrlProject: doc.data().imageUrlProject,
                                 }));
                                 setFetchedProjects(projectList);
                             } else {
@@ -176,7 +177,8 @@ const Profile = () => {
                         idProject: doc.data().idProject,
                         nameProject: doc.data().nameProject,
                         labelProject: doc.data().labelProject,
-                        picProject: doc.data().picProject
+                        picProject: doc.data().picProject,
+                        imageUrlProject: doc.data().imageUrlProject,
                     }));
                     setData(fetchedData);
                 } catch (error) {
