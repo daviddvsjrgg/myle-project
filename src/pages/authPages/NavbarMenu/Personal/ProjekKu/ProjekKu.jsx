@@ -223,7 +223,85 @@ const ProjekKu = () => {
         };
     }
 
+
+    // Form Deadline
+    const [ namaTugas, setNamaTugas ] = useState('')
+    const [ tanggalTugas, setTanggalTugas ] = useState('')
+    const [ jamTugas, setJamTugas ] = useState('')
+    const [ menitTugas, setMenitTugas ] = useState('')
+
+    const [ errorMessageNamaTugas, setErrorMessageNamaTugas ] = useState('')
+    const [ errorMessageTanggalTugas, setErrorMessageTanggalTugas ] = useState('')
+
+    const handleNamaTugas = (e) => {
+        setNamaTugas(e.target.value)
+        setErrorMessageNamaTugas('')
+    }
+
+    const namaTugasValidation = () => {
+        if (namaTugas === '') {
+            setErrorMessageNamaTugas("Nama tugas harus diisi.")
+        }
+    }
     
+    const handleTanggalDeadline = (e) => {
+        setTanggalTugas(e.target.value)
+        setErrorMessageTanggalTugas('')
+    }
+
+    const tanggalTugasValidation = () => {
+        if (tanggalTugas === '') {
+            setErrorMessageTanggalTugas("Tanggal tugas harus diisi.")
+        }
+    }
+
+    const handleJamDeadline = (e) => {
+        setJamTugas(e.target.value)
+    }
+    
+    const handleMenitDeadline = (e) => {
+        setMenitTugas(e.target.value)
+    }
+
+    const handleBuatDeadline = async () => {
+        console.log("Nama: " + namaTugas);
+        console.log("Tanggal: " + tanggalTugas);
+        console.log("Jam: " + jamTugas);
+        console.log("Menit: " + menitTugas);
+        if (namaTugas === '' || tanggalTugas === '') {
+            namaTugasValidation();
+            tanggalTugasValidation();
+        } else {
+            try {
+                const deadlineCollection = collection(db, "deadlines");
+    
+                    const setIdDeadlines = `${uuidv4()}`
+                    try {
+                      const docRef = await addDoc(deadlineCollection, {
+                        idDeadline: `deadline-${setIdDeadlines}`, 
+                        idProject: projectData.idProject,
+                        nameDeadline: namaTugas ? namaTugas : "null",
+                        dateDeadline: tanggalTugas ? tanggalTugas : "null",
+                        hourDeadline: jamTugas  ? jamTugas : "00",
+                        minuteDeadline: menitTugas ? menitTugas : "00",
+                      });
+                        setCount(3);
+                        setTersimpan(true);
+                        deadlineSetIsOpen(false)
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3500);
+    
+                      console.log("Document written with ID: ", docRef.id);
+                    } catch (e) {
+                      console.error("Error adding document: ", e);
+                    }
+                    
+            } catch (error) {
+                console.log("Error semua maszzeh: " + error)
+            }
+        }
+    }
 
     return (
     <>
@@ -269,13 +347,20 @@ const ProjekKu = () => {
                             <div className="mt-2 sm:max-w-md">
                                 <input
                                     autoFocus
+                                    onChange={handleNamaTugas}
                                     type="text"
                                     name="first-name"
                                     id="first-name"
                                     autoComplete="off"
-                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ring-gray-300`}
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageNamaTugas ? 'ring-red-600' : 'ring-gray-300'}`}
                                     />
-                                <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan nama tugas yang akan diberikan.</p>
+                                    {errorMessageNamaTugas ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageNamaTugas}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan nama tugas yang akan diberikan.</p>
+                                    )}
                             </div>
                        </div>
                   </div>
@@ -285,17 +370,47 @@ const ProjekKu = () => {
                             Tanggal Deadline
                         </label>
                             <div className="mt-2 sm:max-w-md">
-                               
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                        <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                                        </svg>
+                                <input
+                                    autoFocus
+                                    onChange={handleTanggalDeadline}
+                                    type="date"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageTanggalTugas ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                {errorMessageTanggalTugas ? (
+                                    <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageTanggalTugas}
                                     </div>
-                                    <input datepicker datepicker-format="mm/dd/yyyy" type="text" class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" placeholder="Pilih tanggal"/>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan tanggal deadline tugas.</p>
+                                    )}
+                            </div>
+                       </div>
+                  </div>
+                  <div className="mt-4">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Jam Deadline
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                            <div className="flex mb-2 space-x-2 rtl:space-x-reverse">
+                                <div>
+                                    <label for="code-1" className="sr-only"></label>
+                                    <input
+                                    onChange={handleJamDeadline}
+                                     autoComplete='off' type="text" maxlength="2" id="code-1" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
                                 </div>
-
-                                <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan tanggal deadline tugas.</p>
+                                <div>
+                                    <label for="code-2" className="sr-only"></label>
+                                    <input
+                                    onChange={handleMenitDeadline}
+                                     autoComplete='off' type="text" maxlength="2" id="code-2" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                </div>
+                                <div  className="mt-1.5">WIB</div>
+                            </div>
+                                <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan jam, format waktu 00:00 - 24:00.</p>
                             </div>
                        </div>
                   </div>
@@ -303,7 +418,7 @@ const ProjekKu = () => {
                   <div className="mt-4">
                     <button
                         type="submit"
-                        onClick={deadlineCloseModal}
+                        onClick={handleBuatDeadline}
                         className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
                         text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
                         >
@@ -388,7 +503,7 @@ const ProjekKu = () => {
 
         <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
             {/* Section 1 */}
-            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} col-span-7 md:col-span-1 bg-gray-50 border-2 border-gray-300/40 shadow-md rounded-md`}>
+            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
                 <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                     <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                         <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
@@ -686,7 +801,7 @@ const ProjekKu = () => {
 
 
             {/* Section 2 */}
-            <div className="col-span-7 row-span-3 bg-gray-50 border-2 border-gray-300/40 shadow-md rounded-t-md">
+            <div className="col-span-7 row-span-3 bg-white border-2 border-gray-300/40 shadow-md rounded-t-md">
                 <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                     <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 mt-0.5">
@@ -738,12 +853,45 @@ const ProjekKu = () => {
                         </div>
                     </div>
                         {/* Content */}
-                        <span className="countdown text-2xl space-x-2">
-                            <span style={{"--value":timeRemaining.days}}></span>h
-                            <span style={{"--value":timeRemaining.hours}}></span>j
-                            <span style={{"--value":timeRemaining.minutes}}></span>m
-                            <span style={{"--value":timeRemaining.seconds}}></span>d
-                        </span>
+                        <div className="card rounded-none w-auto border-2 border-gray-200">
+                            <div className="card-body -mx-2">
+                            <div className="card rounded-md w-auto bg-base-100 shadow-xl">
+                                <figure><img className='lg:h-64 md:h-32 w-full object-cover' src={projectData.imageUrlProject} alt="Shoes" /></figure>
+                                <div className="card-body">
+                                    <h2 className="card-title">Berita Mata Kuliah</h2>
+                                    <p>Belum ada berita...</p>
+                                </div>
+                            </div>
+                                <div className='divider'></div>
+                                <ul className="menu w-auto rounded-box -my-5">
+                                <li>
+                                    <details close>
+                                    <summary className='font-bold text-lg'>Deadline Tugas Mahasiswa</summary>
+                                    <ul>
+                                        <li>
+                                            <summary className='font-medium'>Assignment 1</summary>
+                                            <ul>
+                                                <li>Sisa Waktu: {timeRemaining.days} hari {timeRemaining.hours} jam 
+                                                    <br className='visible lg:hidden' />
+                                                       {" "}{timeRemaining.minutes} menit {timeRemaining.seconds} detik
+                                                </li>
+                                            </ul>
+                                            <summary className='font-medium'>Assignment 2</summary>
+                                            <ul>
+                                                <li>Sisa Waktu: {timeRemaining.days} hari {timeRemaining.hours} jam 
+                                                    <br className='visible lg:hidden' />
+                                                       {" "}{timeRemaining.minutes} menit {timeRemaining.seconds} detik
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    </details>
+                                </li>
+                                </ul>
+                                <div className='divider'></div>
+
+                            </div>
+                        </div>
                         {/* End Content */}
                 </div>
             {/* End Section 2 */}
