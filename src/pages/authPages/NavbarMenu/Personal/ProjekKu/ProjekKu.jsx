@@ -184,10 +184,139 @@ const ProjekKu = () => {
 
     }
 
+    // Modal Deadline
+    let [deadlineIsOpen, deadlineSetIsOpen] = useState(false)
+
+    function deadlineCloseModal() {
+      deadlineSetIsOpen(false)
+    }
+  
+    function deadlineOpenModal() {
+      deadlineSetIsOpen(true)
+    }
+
+    // WIB Indonesia Time
+    const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+        setTimeRemaining(getTimeRemaining());
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    function getTimeRemaining() {
+        const now = new Date();
+        const targetDate = new Date('2024-03-06T09:00:00+07:00');
+        const timeDifference = targetDate - now;
+        const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+        return {
+        days,
+        hours,
+        minutes,
+        seconds,
+        };
+    }
+
     
 
     return (
     <>
+    {/* Modal Deadline */}
+      <Transition appear show={deadlineIsOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={deadlineCloseModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Buat Deadline Mata Kuliah - {projectData.nameProject} {projectData.nameProject.includes("-") ? '' : `(${projectData.labelProject})`}
+                  </Dialog.Title>
+                  <div className="divider"></div> 
+                  <div className="-mt-3">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Nama Tugas
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ring-gray-300`}
+                                    />
+                                <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan nama tugas yang akan diberikan.</p>
+                            </div>
+                       </div>
+                  </div>
+                  <div className="mt-4">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Tanggal Deadline
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                               
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                                        </svg>
+                                    </div>
+                                    <input datepicker datepicker-format="mm/dd/yyyy" type="text" class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" placeholder="Pilih tanggal"/>
+                                </div>
+
+                                <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan tanggal deadline tugas.</p>
+                            </div>
+                       </div>
+                  </div>
+                  <div className="divider"></div> 
+                  <div className="mt-4">
+                    <button
+                        type="submit"
+                        onClick={deadlineCloseModal}
+                        className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
+                        text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                        >
+                         Buat
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
     {/* Modal Tersimpan */}
     <Transition.Root show={tersimpan} as={Fragment}>
             <Dialog as="div" className="relative" initialFocus={cancelButtonRefTersimpan} onClose={setTersimpan}>
@@ -267,14 +396,17 @@ const ProjekKu = () => {
                     <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkul</div>
                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                     <>
-                        <button
-                            onClick={() => setButtonEdit(true)}
-                            className={`${buttonEdit ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-105 hover:-translate-y-0.5 ml-auto`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
-                                <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                            </svg>
-                        </button>
+                        <div className={`${buttonEdit ? "hidden" : ""} tooltip ml-auto`} data-tip='Ubah'>
+                            <button
+                                onClick={() => setButtonEdit(true)}
+                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
+                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                </svg>
+                            </button>
+                        </div>
+
                         <button
                             onClick={() => setButtonEdit(false)}
                             className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
@@ -287,14 +419,18 @@ const ProjekKu = () => {
 
                     {getCurrentRole === "admin" && (
                     <>
-                        <button
-                            onClick={() => setButtonEdit(true)}
-                            className={`${buttonEdit ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-105 hover:-translate-y-0.5 ml-auto`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
-                                <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                            </svg>
-                        </button>
+                        <div className={`${buttonEdit ? "hidden" : ""} tooltip ml-auto`} data-tip='Ubah'>
+                            <button
+                                onClick={() => setButtonEdit(true)}
+                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
+                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                </svg>
+                            </button>
+                        </div>
+
+
                         <button
                             onClick={() => setButtonEdit(false)}
                             className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
@@ -395,12 +531,12 @@ const ProjekKu = () => {
                         <div className="px-4 grid -mt-1">
                             <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
                             {dosen.groupLinkLecturers === "null" || dosen.groupLinkLecturers === "" ? (
-                                <a href='/#'
+                                <div
                                 className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
                                     Belum ada link group
-                                </a>
+                                </div>
                             ) : (
-                                <a href={`${dosen.groupLinkLecturers}`} target='_blank' rel="noreferrer" className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
+                                <a href={`${dosen.groupLinkLecturers}`} target='_blank' rel="noreferrer" className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700 hover:underline`}>
                                     Link Group WhatsApp
                                 </a>
                             )}
@@ -504,10 +640,10 @@ const ProjekKu = () => {
                         </div>
                         <div className="px-4 grid -mt-1">
                             <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
-                                <a href='/#'
+                                <div
                                   className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
                                     Belum ada link group
-                                </a>
+                                </div>
                             <input
                                 defaultValue={``}
                                 placeholder="Masukkan link"
@@ -559,57 +695,56 @@ const ProjekKu = () => {
                             <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
                         </svg>
                     </div>
-                        <div className="text-xl font-medium ml-1.5 text-gray-700">Kegiatan Perkuliahan</div>
+                        <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">Kegiatan Perkuliahan</div>
                         
                         <div data-dial-init className="flex ml-auto">
-                            <div id="speed-dial-menu-horizontal" className="flex me-4 space-x-1 rtl:space-x-reverse items-center">
-                                <button type="button" data-tooltip-target="tooltip-share" data-tooltip-placement="top" className="flex justify-center items-center w-[32px] h-[32px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400">
-                                    <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-                                        <path d="M14.419 10.581a3.564 3.564 0 0 0-2.574 1.1l-4.756-2.49a3.54 3.54 0 0 0 .072-.71 3.55 3.55 0 0 0-.043-.428L11.67 6.1a3.56 3.56 0 1 0-.831-2.265c.006.143.02.286.043.428L6.33 6.218a3.573 3.573 0 1 0-.175 4.743l4.756 2.491a3.58 3.58 0 1 0 3.508-2.871Z"/>
-                                    </svg>
-                                    <span className="sr-only">Share</span>
-                                </button>
-                                <div id="tooltip-share" role="tooltip" className="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                                    Share
-                                    <div className="tooltip-arrow" data-popper-arrow></div>
+                            <div id="speed-dial-menu-horizontal" className="flex me-1 space-x-1 items-center">
+                                <div className="tooltip scale-100 hover:scale-110 transition-all duration-200">
+                                    <button type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
+                                           <path fillRule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V3a.75.75 0 0 1 .75-.75Zm-9 13.5a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
                                 </div>
-                                <button type="button" data-tooltip-target="tooltip-print" data-tooltip-placement="top" className="flex justify-center items-center w-[32px] h-[32px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400">
-                                    <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M5 20h10a1 1 0 0 0 1-1v-5H4v5a1 1 0 0 0 1 1Z"/>
-                                        <path d="M18 7H2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-1-2V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3h14Z"/>
-                                    </svg>
-                                    <span className="sr-only">Print</span>
-                                </button>
-                                <div id="tooltip-print" role="tooltip" className="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                                    Print
-                                    <div className="tooltip-arrow" data-popper-arrow></div>
-                                </div>
-                                <button type="button" data-tooltip-target="tooltip-download" data-tooltip-placement="top" className="flex justify-center items-center w-[32px] h-[32px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400">
-                                    <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z"/>
-                                        <path d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
-                                    </svg>
-                                    <span className="sr-only">Download</span>
-                                </button>
-                                <div id="tooltip-download" role="tooltip" className="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                                    Download
-                                    <div className="tooltip-arrow" data-popper-arrow></div>
-                                </div>
-                                <button type="button" data-tooltip-target="tooltip-copy" data-tooltip-placement="top" className="flex justify-center items-center w-[32px] h-[32px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 dark:hover:text-white shadow-sm dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400">
-                                    <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
-                                        <path d="M5 9V4.13a2.96 2.96 0 0 0-1.293.749L.879 7.707A2.96 2.96 0 0 0 .13 9H5Zm11.066-9H9.829a2.98 2.98 0 0 0-2.122.879L7 1.584A.987.987 0 0 0 6.766 2h4.3A3.972 3.972 0 0 1 15 6v10h1.066A1.97 1.97 0 0 0 18 14V2a1.97 1.97 0 0 0-1.934-2Z"/>
-                                        <path d="M11.066 4H7v5a2 2 0 0 1-2 2H0v7a1.969 1.969 0 0 0 1.933 2h9.133A1.97 1.97 0 0 0 13 18V6a1.97 1.97 0 0 0-1.934-2Z"/>
-                                    </svg>
-                                    <span className="sr-only">Copy</span>
-                                </button>
-                                <div id="tooltip-copy" role="tooltip" className="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                                    Copy
-                                    <div className="tooltip-arrow" data-popper-arrow></div>
-                                </div>
+                                {(getCurrentRole === "admin" || (projectData.picProject === getCurrentEmail && getCurrentRole === "user")) && (
+                                    <>
+                                        <div className="tooltip scale-100 hover:scale-110 transition-all duration-200" data-tip="Berita">
+                                            <button type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
+                                                    <path fillRule="evenodd" d="M4.125 3C3.089 3 2.25 3.84 2.25 4.875V18a3 3 0 0 0 3 3h15a3 3 0 0 1-3-3V4.875C17.25 3.839 16.41 3 15.375 3H4.125ZM12 9.75a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5H12Zm-.75-2.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H12a.75.75 0 0 1-.75-.75ZM6 12.75a.75.75 0 0 0 0 1.5h7.5a.75.75 0 0 0 0-1.5H6Zm-.75 3.75a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5H6a.75.75 0 0 1-.75-.75ZM6 6.75a.75.75 0 0 0-.75.75v3c0 .414.336.75.75.75h3a.75.75 0 0 0 .75-.75v-3A.75.75 0 0 0 9 6.75H6Z" clipRule="evenodd" />
+                                                    <path d="M18.75 6.75h1.875c.621 0 1.125.504 1.125 1.125V18a1.5 1.5 0 0 1-3 0V6.75Z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div 
+                                        onClick={deadlineOpenModal}
+                                        className="tooltip scale-100 hover:scale-110 transition-all duration-200" data-tip="Deadline">
+                                            <button type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
+                                                    <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div className="tooltip scale-100 hover:scale-110 transition-all duration-200">
+                                            <button type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
+                                                    <path fillRule="evenodd" d="M19.5 21a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3h-5.379a.75.75 0 0 1-.53-.22L11.47 3.66A2.25 2.25 0 0 0 9.879 3H4.5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h15Zm-6.75-10.5a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V10.5Z" clipRule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
-
                     </div>
+                        {/* Content */}
+                        <span className="countdown text-2xl space-x-2">
+                            <span style={{"--value":timeRemaining.days}}></span>h
+                            <span style={{"--value":timeRemaining.hours}}></span>j
+                            <span style={{"--value":timeRemaining.minutes}}></span>m
+                            <span style={{"--value":timeRemaining.seconds}}></span>d
+                        </span>
+                        {/* End Content */}
                 </div>
             {/* End Section 2 */}
         </div>
