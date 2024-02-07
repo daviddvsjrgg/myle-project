@@ -4,9 +4,10 @@ import { useLocation } from 'react-router-dom';
 import NotFound404 from '../../../../../url/NotFound404';
 import { BookOpenIcon } from '@heroicons/react/20/solid';
 import { auth, db } from '../../../../../config/firebase/firebase';
-import { addDoc, collection, getDocs, query, updateDoc, where } from 'firebase/firestore';
+import { addDoc, collection, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { Dialog, Transition } from '@headlessui/react';
+import Bottom from '../../../../../components/BottomBar/Bottom';
 
 const ProjekKu = () => {
 
@@ -195,35 +196,6 @@ const ProjekKu = () => {
       deadlineSetIsOpen(true)
     }
 
-    // WIB Indonesia Time
-    const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining());
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-        setTimeRemaining(getTimeRemaining());
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    function getTimeRemaining() {
-        const now = new Date();
-        const targetDate = new Date('2024-03-06T09:00:00+07:00');
-        const timeDifference = targetDate - now;
-        const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
-
-        return {
-        days,
-        hours,
-        minutes,
-        seconds,
-        };
-    }
-
-
     // Form Deadline
     const [ namaTugas, setNamaTugas ] = useState('')
     const [ tanggalTugas, setTanggalTugas ] = useState('')
@@ -302,6 +274,66 @@ const ProjekKu = () => {
             }
         }
     }
+
+    const [fetchedDeadlines, setFetchedDeadlines] = useState([]);
+  const [fetchedDeadlinesTime, setFetchedDeadlinesTime] = useState([]);
+
+try {
+    useEffect(() => {
+        const fetchDataDeadline = async () => {
+          try {
+            const deadlinesCollection = collection(db, "deadlines");
+            const orderedQuery = query(deadlinesCollection, where("idProject", "==", projectData.idProject), orderBy("dateDeadline", "asc")); // Assuming projectData is available
+            
+            const snapshot = await getDocs(orderedQuery);
+            const fetchedDataDeadlines = snapshot.docs.map(doc => ({
+              nameDeadline: doc.data().nameDeadline,
+              dateDeadline: doc.data().dateDeadline,
+              hourDeadline: doc.data().hourDeadline,
+              minuteDeadline: doc.data().minuteDeadline,
+            }));
+            const fetchedDataDeadlinesTime = snapshot.docs.map(doc => ({
+              targetDate: new Date(`${doc.data().dateDeadline}T${doc.data().hourDeadline}:${doc.data().minuteDeadline}:00+07:00`),
+            }));
+            setFetchedDeadlines(fetchedDataDeadlines);
+            setFetchedDeadlinesTime(fetchedDataDeadlinesTime);
+            console.log("test leak data");
+          } catch (error) {
+            console.log("Error fetching data: ", error);
+          }
+        };
+    
+        // Invoke the fetch function
+        console.log("test leak data");
+        fetchDataDeadline();
+    }, [projectData.idProject]);
+} catch (error) {
+    console.log(error);
+}
+  
+
+const [timeRemaining, setTimeRemaining] = useState([]);
+
+useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeRemaining(getTimeRemaining());
+        }, 1000);
+    return () => clearInterval(interval);
+  }, );
+
+  function getTimeRemaining() {
+    const now = new Date();
+    const remainingTimes = fetchedDeadlinesTime.map(deadlineTime => {
+      const timeDifference = deadlineTime.targetDate - now;
+      const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+      return { days, hours, minutes, seconds };
+    });
+
+    return remainingTimes;
+  }
 
     return (
     <>
@@ -503,7 +535,7 @@ const ProjekKu = () => {
 
         <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
             {/* Section 1 */}
-            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
+            <div className={`row-span-3 ${!buttonEdit ? "h-96" : "lg:h-3/4"} col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
                 <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                     <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                         <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
@@ -865,24 +897,52 @@ const ProjekKu = () => {
                                 <div className='divider'></div>
                                 <ul className="menu w-auto rounded-box -my-5">
                                 <li>
-                                    <details close>
+                                    <details closed>
                                     <summary className='font-bold text-lg'>Deadline Tugas Mahasiswa</summary>
                                     <ul>
                                         <li>
-                                            <summary className='font-medium'>Assignment 1</summary>
-                                            <ul>
-                                                <li>Sisa Waktu: {timeRemaining.days} hari {timeRemaining.hours} jam 
-                                                    <br className='visible lg:hidden' />
-                                                       {" "}{timeRemaining.minutes} menit {timeRemaining.seconds} detik
-                                                </li>
-                                            </ul>
-                                            <summary className='font-medium'>Assignment 2</summary>
-                                            <ul>
-                                                <li>Sisa Waktu: {timeRemaining.days} hari {timeRemaining.hours} jam 
-                                                    <br className='visible lg:hidden' />
-                                                       {" "}{timeRemaining.minutes} menit {timeRemaining.seconds} detik
-                                                </li>
-                                            </ul>
+                                        {fetchedDeadlines.length > 0 ?(
+                                            <>
+                                                {fetchedDeadlines.map((deadline, index) => (
+                                                    <div key={index}>
+                                                        <ul>
+                                                            {timeRemaining[index + 0] && (
+                                                                <>
+                                                                {timeRemaining[index].days < 0 &&
+                                                                 timeRemaining[index].hours < 0 &&
+                                                                 timeRemaining[index].minutes < 0 &&
+                                                                 timeRemaining[index].seconds < 0 ? (
+                                                                    <>
+                                                                    <summary className={`font-medium mb-0.5`}>{deadline.nameDeadline}</summary>
+                                                                    <li className={`text-indigo-700`}>
+                                                                        Selesai pada:{" "}
+                                                                        <br className='visible lg:hidden' />
+                                                                        Jam  {deadline.hourDeadline}:{deadline.minuteDeadline} WIB,{" "}
+                                                                        <br className='visible lg:hidden' />
+                                                                        {deadline.dateDeadline}
+                                                                    </li>
+                                                                    </>
+                                                                ) : (
+                                                                    <>  
+                                                                    <summary className={`${timeRemaining[index].minutes === -1 ? 'hidden' : ""} font-medium mb-0.5`}>{deadline.nameDeadline}</summary>
+                                                                        <li className={`${timeRemaining[index].days === 0 ? 'text-red-600' : ""}`}>
+                                                                            Sisa Waktu: {timeRemaining[index].days} hari {timeRemaining[index].hours} jam{" "}
+                                                                            <br className='visible lg:hidden' />
+                                                                            {timeRemaining[index].minutes} menit {timeRemaining[index].seconds} detik
+                                                                        </li>
+                                                                    </>
+                                                                )}
+                                                                </>
+                                                            )}
+                                                        </ul>
+                                                    </div>
+                                                ))}
+                                            </>
+                                        ) : (
+                                            <>
+                                              <summary className='font-medium'>Belum ada tugas :D !!!</summary>
+                                            </>
+                                        )}
                                         </li>
                                     </ul>
                                     </details>
@@ -906,6 +966,7 @@ const ProjekKu = () => {
         <NotFound404 />
     )}
        
+    <Bottom />
     </>
     )
 }
