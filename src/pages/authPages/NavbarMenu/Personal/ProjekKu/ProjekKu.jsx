@@ -275,68 +275,430 @@ const ProjekKu = () => {
         }
     }
 
-    const [fetchedDeadlines, setFetchedDeadlines] = useState([]);
-  const [fetchedDeadlinesTime, setFetchedDeadlinesTime] = useState([]);
+    const [ fetchedDeadlines, setFetchedDeadlines ] = useState([]);
+    const [ fetchedDeadlinesTime, setFetchedDeadlinesTime ] = useState([]);
 
-try {
-    useEffect(() => {
-        const fetchDataDeadline = async () => {
-          try {
-            const deadlinesCollection = collection(db, "deadlines");
-            const orderedQuery = query(deadlinesCollection, where("idProject", "==", projectData.idProject), orderBy("dateDeadline", "asc")); // Assuming projectData is available
-            
-            const snapshot = await getDocs(orderedQuery);
-            const fetchedDataDeadlines = snapshot.docs.map(doc => ({
-              nameDeadline: doc.data().nameDeadline,
-              dateDeadline: doc.data().dateDeadline,
-              hourDeadline: doc.data().hourDeadline,
-              minuteDeadline: doc.data().minuteDeadline,
-            }));
-            const fetchedDataDeadlinesTime = snapshot.docs.map(doc => ({
-              targetDate: new Date(`${doc.data().dateDeadline}T${doc.data().hourDeadline}:${doc.data().minuteDeadline}:00+07:00`),
-            }));
-            setFetchedDeadlines(fetchedDataDeadlines);
-            setFetchedDeadlinesTime(fetchedDataDeadlinesTime);
+    try {
+        useEffect(() => {
+            const fetchDataDeadline = async () => {
+            try {
+                const deadlinesCollection = collection(db, "deadlines");
+                const orderedQuery = query(deadlinesCollection, where("idProject", "==", projectData.idProject), orderBy("dateDeadline", "asc")); // Assuming projectData is available
+                
+                const snapshot = await getDocs(orderedQuery);
+                const fetchedDataDeadlines = snapshot.docs.map(doc => ({
+                idDeadline: doc.data().idDeadline,
+                nameDeadline: doc.data().nameDeadline,
+                dateDeadline: doc.data().dateDeadline,
+                hourDeadline: doc.data().hourDeadline,
+                minuteDeadline: doc.data().minuteDeadline,
+                }));
+                const fetchedDataDeadlinesTime = snapshot.docs.map(doc => ({
+                targetDate: new Date(`${doc.data().dateDeadline}T${doc.data().hourDeadline}:${doc.data().minuteDeadline}:00+07:00`),
+                }));
+                setFetchedDeadlines(fetchedDataDeadlines);
+                setFetchedDeadlinesTime(fetchedDataDeadlinesTime);
+                console.log("test leak data");
+            } catch (error) {
+                console.log("Error fetching data: ", error);
+            }
+            };
+        
+            // Invoke the fetch function
             console.log("test leak data");
-          } catch (error) {
-            console.log("Error fetching data: ", error);
-          }
-        };
+            fetchDataDeadline();
+        }, [projectData.idProject]);
+    } catch (error) {
+        console.log(error);
+    }
     
-        // Invoke the fetch function
-        console.log("test leak data");
-        fetchDataDeadline();
-    }, [projectData.idProject]);
-} catch (error) {
-    console.log(error);
-}
-  
 
-const [timeRemaining, setTimeRemaining] = useState([]);
+    const [ timeRemaining, setTimeRemaining ] = useState([]);
 
-useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeRemaining(getTimeRemaining());
-        }, 1000);
-    return () => clearInterval(interval);
-  }, );
+    useEffect(() => {
+        const interval = setInterval(() => {
+        setTimeRemaining(getTimeRemaining());
+            }, 1000);
+        return () => clearInterval(interval);
+    }, );
 
-  function getTimeRemaining() {
-    const now = new Date();
-    const remainingTimes = fetchedDeadlinesTime.map(deadlineTime => {
-      const timeDifference = deadlineTime.targetDate - now;
-      const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
-      return { days, hours, minutes, seconds };
-    });
+    function getTimeRemaining() {
+        const now = new Date();
+        const remainingTimes = fetchedDeadlinesTime.map(deadlineTime => {
+        const timeDifference = deadlineTime.targetDate - now;
+        const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+        return { days, hours, minutes, seconds };
+        });
 
-    return remainingTimes;
-  }
+        return remainingTimes;
+    }
+
+    
+    // Handle Detail Deadline
+    const [ indexDetailDeadline, setIndexDetailDeadline ] = useState(0);
+    const [ idDeadline, setIdDeadline ] = useState('');
+    const [ nameDeadline, setNameDeadline ] = useState('');
+    const [ dateDeadline, setDateDeadline ] = useState('');
+    const [ hourDeadline, setHourDeadline ] = useState('');
+    const [ minuteDeadline, setMinuteDeadline ] = useState('');
+
+    const handleDetailDeadline = (deadlineValue, index) => {
+        document.getElementById('my_modal_2').showModal();
+        setIndexDetailDeadline(index);
+        setIdDeadline(deadlineValue.idDeadline);
+        setNameDeadline(deadlineValue.nameDeadline);
+        setDateDeadline(deadlineValue.dateDeadline);
+        setHourDeadline(deadlineValue.hourDeadline);
+        setMinuteDeadline(deadlineValue.minuteDeadline);
+        console.log("Detail Clicked:" + nameDeadline);
+       
+        setDeskripsiDeadline("")
+        setEditNameDeadline(false);
+        setEditDetailDeadline(false);
+        setDetailSaved(false);
+    }
+
+    // Set Edit Detail Deadline
+    const [ editDetailDeadline, setEditDetailDeadline ] = useState(false)
+    const [ detailSaved, setDetailSaved ] = useState(false)
+    const [ deadlineDescription, setDeskripsiDeadline ] = useState('')
+
+    const handleDeskripsiDeadline = (e) => {
+        setDeskripsiDeadline(e.target.value);
+        setDetailSaved(false);
+    }
+
+    // Fetch data description deadline
+    const [ fetchedDescriptionDeadlines, setFetchedDescriptionDeadlines ] = useState([]);
+    const [ finalDescription, setfinalDescription ] = useState([]);
+
+    try {
+        useEffect(() => {
+            if(idDeadline) {
+            const fetchDataDeadline = async () => {
+            try {
+                const deadlineDescriptionsCollection = collection(db, "deadlineDescriptions");
+                const orderedQuery = query(deadlineDescriptionsCollection, where("idDeadline", "==", idDeadline)); // Assuming projectData is available
+                
+                const snapshot = await getDocs(orderedQuery);
+                const fetchedDescriptionDeadlines = snapshot.docs.map(doc => ({
+                    description: doc.data().description,
+                }));
+
+                setFetchedDescriptionDeadlines(fetchedDescriptionDeadlines);
+                setfinalDescription(fetchedDescriptionDeadlines.map(desc => desc.description))
+                console.log("Open after deadline clicked :D");
+            } catch (error) {
+                console.log("Error fetching data: ", error);
+            }
+            };
+            console.log("test leak data");
+            fetchDataDeadline();
+         }
+        }, [idDeadline, dateDeadline, hourDeadline, minuteDeadline]);
+    } catch (error) {
+        console.log(error);
+    }
+    
+ 
+    const handleSimpanEditDetailDeadline = async () => {
+        console.log("edit detail deadline tersimpan")
+        console.log("Deskripsi Deadline: " + deadlineDescription)
+
+        try {
+            const deadlineDescriptionsCollection = collection(db, "deadlineDescriptions");
+            const querySnapshot = query(deadlineDescriptionsCollection, where("idDeadline", "==", idDeadline));
+            const deadlineDescriptionsSnapshot = await getDocs(querySnapshot);
+
+            if (deadlineDescriptionsSnapshot.size === 0) {
+                // No existing document found, add a new one
+                const setIdDeadlineDescriptions = `${uuidv4()}`
+                try {
+                  const docRef = await addDoc(deadlineDescriptionsCollection, {
+                    idDeadlineDescriptions: `deadlineDescriptions-${setIdDeadlineDescriptions}`, 
+                    idDeadline: idDeadline,
+                    description: deadlineDescription,
+                  });
+                    setDetailSaved(true);
+
+                  console.log("Document written with ID: ", docRef.id);
+                } catch (e) {
+                  console.error("Error adding document: ", e);
+                }
+              } else {
+                // Document with the same idUsers already exists, handle accordingly
+                console.log("Document with the same idProject already exists (jalankan update)");
+                const doc = deadlineDescriptionsSnapshot.docs[0];
+                try {
+                    await updateDoc(doc.ref, {
+                      description: deadlineDescription ? deadlineDescription : "Belum ada deskripsi",
+                    });
+                    setDetailSaved(true);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                    
+                    console.log("Updated Data Completed!!!");
+                  } catch (e) {
+                    console.error("Error updating document ERROR: ", e);
+                  }
+              }
+        } catch (error) {
+            console.log("Error semua maszzeh: " + error)
+        }
+    }
+
+    // Set Edit Name Deadline
+    const [ editNameDeadline, setEditNameDeadline ] = useState(false)
+    const [ nameDeadlineSaved, setNameDeadlineSaved ] = useState(false)
+
+    const handleSimpanNameDeadline = async () => {
+        console.log("Simpan name deadline !!")
+        try {
+            const deadlinesCollection = collection(db, "deadlines");
+            const querySnapshot = query(deadlinesCollection, where("idDeadline", "==", idDeadline));
+            const deadlineSnapshot = await getDocs(querySnapshot);
+
+            const editNameDeadline = document.getElementById("editNameDeadline").value;
+            const editDateDeadline = document.getElementById("editDateDeadline").value;
+            const editHourDeadline = document.getElementById("editHourDeadline").value;
+            const editMinuteDeadline = document.getElementById("editMinuteDeadline").value;
+
+            if (deadlineSnapshot.size === 0) {
+                // No existing document found, add a new one
+                console.log("error");
+              } else {
+                // Document with the same idUsers already exists, handle accordingly
+                console.log("Document with the same idProject already exists (jalankan update)");
+                const doc = deadlineSnapshot.docs[0];
+                try {
+                    await updateDoc(doc.ref, {
+                        nameDeadline: editNameDeadline ? editNameDeadline : "Tidak ada nama tugas",
+                        dateDeadline: editDateDeadline ? editDateDeadline : "2050/12/12",
+                        hourDeadline: editHourDeadline ? editHourDeadline : "00",
+                        minuteDeadline: editMinuteDeadline ? editMinuteDeadline : "00",
+                    });
+                    setNameDeadlineSaved(true);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                    
+                    console.log("Updated Data Completed!!!");
+                  } catch (e) {
+                    console.error("Error updating document ERROR: ", e);
+                  }
+              }
+        } catch (error) {
+            console.log("Error semua maszzeh: " + error)
+        }
+    }
 
     return (
     <>
+    {/* Modal Detail Deadline */}
+    <dialog id="my_modal_2" className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box">
+            <div className='inline-flex'>
+                <h3 className="font-bold text-lg mr-2">{nameDeadline}</h3>
+                <div className={`lg:tooltip lg:tooltip-right ml-auto`} data-tip='Ubah deadline'>
+                    {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
+                        <>
+                        <button
+                            onClick={() => setEditNameDeadline(true)}
+                            className={`${editNameDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110s`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setEditNameDeadline(false)}
+                            className={`${editNameDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        </>
+                    )}
+                    {getCurrentRole === "admin" && (
+                        <>
+                        <button
+                            onClick={() => setEditNameDeadline(true)}
+                            className={`${editNameDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setEditNameDeadline(false)}
+                            className={`${editNameDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        </>
+                    )}
+                </div>
+            </div>
+                <label className={`${editNameDeadline ? "" : "hidden"} form-control w-full max-w-xs`}>
+                    <div className="label">
+                        <span className="label-text">Nama Tugas</span>
+                    </div>
+                    <input defaultValue={`${nameDeadline}`} type="text" id='editNameDeadline' name='editNameDeadline' placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                    <div className="label">
+                        <span className="label-text">Tanggal Deadline</span>
+                    </div>
+                    <input type="date" defaultValue={`${dateDeadline}`} id='editDateDeadline' name='editDateDeadline' placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                    <div className="mt-1">
+                       <span className="label-text">Jam Deadline</span>
+                            <div className="mt-2 sm:max-w-md">
+                            <div className="flex mb-2 space-x-2 rtl:space-x-reverse">
+                                <div>
+                                    <label for="code-1" className="sr-only"></label>
+                                    <input
+                                    onChange={handleJamDeadline}
+                                     autoComplete='off' defaultValue={`${hourDeadline}`} type="text" maxlength="2" id="editHourDeadline" name="editHourDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                </div>
+                                <div>
+                                    <label for="code-2" className="sr-only"></label>
+                                    <input
+                                    onChange={handleMenitDeadline}
+                                     autoComplete='off' defaultValue={`${minuteDeadline}`} type="text" maxlength="2" id="editMinuteDeadline" name="editMinuteDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                </div>
+                                <div  className="mt-1.5">WIB</div>
+                            </div>
+                                <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan jam, format waktu 00:00 - 24:00.</p>
+                            </div>
+                       </div>
+                </label>
+                {nameDeadlineSaved ? (
+                <>
+                <div className={`${editNameDeadline ? "" : "hidden"} label justify-end`}>
+                    <span className="label-text-alt bg-indigo-300 text-white px-4 py-2 rounded-md">Saved</span>
+                </div>
+                </>
+            ) : (
+                <>
+                <div className={`${editNameDeadline ? "" : "hidden"} label justify-end`}>
+                    <span onClick={handleSimpanNameDeadline} className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Simpan</span>
+                </div>
+                </>
+            )}
+            <div className='-mt-4'></div>
+            <div className='divider'></div>
+            {timeRemaining[indexDetailDeadline + 0] && (
+                <>
+            {timeRemaining[indexDetailDeadline].days < 0 &&
+                timeRemaining[indexDetailDeadline].hours < 0 &&
+                timeRemaining[indexDetailDeadline].minutes < 0 &&
+                timeRemaining[indexDetailDeadline].seconds < 0 ? (
+                <>
+                <div className='-mt-2 font-medium'>Selesai pada: </div>
+                <div className={`text-indigo-700`}>
+                    Jam  {hourDeadline}:{minuteDeadline} WIB,{" "}
+                    {dateDeadline}
+                </div>
+                </>
+            ) : (
+                <>  
+                    <div className='-mt-2 font-medium'>Sisa Waktu: </div>
+                    <div className={`${timeRemaining[indexDetailDeadline].days === 0 ? 'text-red-600' : ""}`}>
+                        {timeRemaining[indexDetailDeadline].days} hari {timeRemaining[indexDetailDeadline].hours} jam{" "}
+                        {timeRemaining[indexDetailDeadline].minutes} menit {timeRemaining[indexDetailDeadline].seconds} detik
+                    </div>
+                </>
+            )}
+            </>
+            )}
+            <div className="divider divider-start font-medium">Deskripsi Tugas</div>
+            <div className='inline-flex'>
+                {fetchedDescriptionDeadlines.length > 0 ? (
+                    <>
+                        <div className='mr-2'>{finalDescription}</div>
+                    </>
+                ) : (
+                    <>
+                        <div className='mr-2'>Belum ada deskripsi</div>
+                    </>
+                )}
+                <div className={`tooltip lg:tooltip-right ml-auto `} data-tip='Ubah deskripsi'>
+                    {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
+                        <>
+                        <button
+                            onClick={() => setEditDetailDeadline(true)}
+                            className={`${editDetailDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setEditDetailDeadline(false)}
+                            className={`${editDetailDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        </>
+                    )}
+                    {getCurrentRole === "admin" && (
+                        <>
+                        <button
+                            onClick={() => setEditDetailDeadline(true)}
+                            className={`${editDetailDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setEditDetailDeadline(false)}
+                            className={`${editDetailDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        </>
+                    )}
+                </div>
+            </div>
+            <label className={`${editDetailDeadline ? "" : "hidden"} form-control`}>
+            <div className="label">
+                <span className="label-text">Tuliskan deskripsi</span>
+            </div>
+            <textarea onChange={handleDeskripsiDeadline} defaultValue={`${finalDescription}`} className="textarea textarea-bordered h-24" placeholder="ex: Dikerjakan individu, Tidak boleh chat gpt"></textarea>
+            </label>
+            {detailSaved ? (
+                <>
+                <div className={`${editDetailDeadline ? "" : "hidden"} label justify-end`}>
+                    <span className="label-text-alt bg-indigo-300 text-white px-4 py-2 rounded-md">Saved</span>
+                </div>
+                </>
+            ) : (
+                <>
+                <div className={`${editDetailDeadline ? "" : "hidden"} label justify-end`}>
+                    <span onClick={handleSimpanEditDetailDeadline} className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Simpan</span>
+                </div>
+                </>
+            )}
+            <div className="divider divider-start font-medium">Lampiran</div>
+            <div className='inline-flex'>
+                <div className='mr-2'>Belum ada lampiran</div>
+                <div className={`tooltip lg:tooltip-right ml-auto `} data-tip='Tambah lampiran'>
+                    <button
+                        className={`transition-all duration-100 sclae-100 hover:scale-110`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
     {/* Modal Deadline */}
       <Transition appear show={deadlineIsOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={deadlineCloseModal}>
@@ -535,7 +897,7 @@ useEffect(() => {
 
         <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
             {/* Section 1 */}
-            <div className={`row-span-3 ${!buttonEdit ? "h-96" : "lg:h-3/4"} col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
+            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
                 <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                     <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                         <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
@@ -905,7 +1267,7 @@ useEffect(() => {
                                             <>
                                                 {fetchedDeadlines.map((deadline, index) => (
                                                     <div key={index}>
-                                                        <ul>
+                                                        <ul onClick={() => handleDetailDeadline(deadline, index)}>
                                                             {timeRemaining[index + 0] && (
                                                                 <>
                                                                 {timeRemaining[index].days < 0 &&
