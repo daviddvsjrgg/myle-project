@@ -552,8 +552,9 @@ const ProjekKu = () => {
       const setIdDeadlineAttachment = `${uuidv4()}`
       const nameAttachment = selectedDeadlineAttachmentFile.name;
       const sizeAttachment = parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3));
+      const fileNameAttachment = `${selectedDeadlineAttachmentFile.name}-${setIdDeadlineAttachment}`
       
-      const storageRef = ref(storage, `Semester-6/${projectData.nameProject}-${projectData.labelProject}/${nameDeadline}/${selectedDeadlineAttachmentFile.name}-${setIdDeadlineAttachment}`);
+      const storageRef = ref(storage, `Semester-6/${projectData.nameProject}-${projectData.labelProject}/${nameDeadline}/${fileNameAttachment}`);
       
       setDeadlinneAttachmentUpload(true);
       uploadBytes(storageRef, selectedDeadlineAttachmentFile)
@@ -570,6 +571,7 @@ const ProjekKu = () => {
                 nameAttachment: nameAttachment,
                 sizeAttachment: `${sizeAttachment} mb`,
                 urlAttachment: urlDeadlineAttachment,
+                fileNameAttachment: `${fileNameAttachment}`,
             });
             setEndingDeadlinneAttachmentUpload(true);
             setTimeout(() => {
@@ -782,7 +784,9 @@ const ProjekKu = () => {
                         </svg>
                             <a href={attachment.urlAttachment} target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-blue-900'>{attachment.nameAttachment}</a>
                     </div>
-                    <div className='font-extralight -mt-2 ml-0.5'>Ukuran: {attachment.sizeAttachment}</div>
+                    <div className='flex justify-start'>
+                        <div className='font-extralight -mt-2 ml-0.5'>Ukuran: {attachment.sizeAttachment}</div>
+                    </div>
                     </>
                 )}
             
