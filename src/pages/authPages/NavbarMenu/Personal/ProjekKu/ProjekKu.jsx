@@ -3,11 +3,12 @@ import Navbar from '../../../../../components/Navbar/Navbar'
 import { useLocation } from 'react-router-dom';
 import NotFound404 from '../../../../../url/NotFound404';
 import { BookOpenIcon } from '@heroicons/react/20/solid';
-import { auth, db } from '../../../../../config/firebase/firebase';
+import { auth, db, storage } from '../../../../../config/firebase/firebase';
 import { addDoc, collection, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { Dialog, Transition } from '@headlessui/react';
 import Bottom from '../../../../../components/BottomBar/Bottom';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 
 const ProjekKu = () => {
 
@@ -402,6 +403,38 @@ const ProjekKu = () => {
     } catch (error) {
         console.log(error);
     }
+
+    // Fetch data attachment deadline
+    const [ fetchedAttachmentDeadlines, setFetchedAttachmentDeadlines ] = useState([]);
+
+    try {
+        useEffect(() => {
+            if(idDeadline) {
+            const fetchDataDeadline = async () => {
+            try {
+                const deadlineAttachmentCollection = collection(db, "deadlineAttachments");
+                const orderedQuery = query(deadlineAttachmentCollection, where("idDeadline", "==", idDeadline)); // Assuming projectData is available
+                
+                const snapshot = await getDocs(orderedQuery);
+                const fetchedAttachmentDeadlines = snapshot.docs.map(doc => ({
+                    nameAttachment: doc.data().nameAttachment,
+                    sizeAttachment: doc.data().sizeAttachment,
+                    urlAttachment: doc.data().urlAttachment,
+                }));
+
+                setFetchedAttachmentDeadlines(fetchedAttachmentDeadlines);
+                console.log("Open after deadline clicked :D");
+            } catch (error) {
+                console.log("Error fetching data: ", error);
+            }
+            };
+            console.log("test leak data");
+            fetchDataDeadline();
+         }
+        }, [idDeadline]);
+    } catch (error) {
+        console.log(error);
+    }
     
  
     const handleSimpanEditDetailDeadline = async () => {
@@ -423,6 +456,9 @@ const ProjekKu = () => {
                     description: deadlineDescription,
                   });
                     setDetailSaved(true);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
 
                   console.log("Document written with ID: ", docRef.id);
                 } catch (e) {
@@ -495,6 +531,61 @@ const ProjekKu = () => {
             console.log("Error semua maszzeh: " + error)
         }
     }
+
+    // Handle Detail Attachment
+    const [ selectedDeadlineAttachmentFile, setSelectedDeadlineAttachmentFile ] = useState(null);
+    const [ deadlinneAttachmentUpload, setDeadlinneAttachmentUpload ] = useState(false);
+    const [ endingDeadlinneAttachmentUpload, setEndingDeadlinneAttachmentUpload ] = useState(false);
+    
+    
+    const handleDeadlineAttachment = (event) => {
+        setSelectedDeadlineAttachmentFile(event.target.files[0]);
+    };
+    
+    // Handle Upload Deadline Attachment
+    const handleUploadDeadlineAttachment = () => {
+      if (!selectedDeadlineAttachmentFile) {
+        console.error('No file selected.');
+        return;
+      }
+      
+      const setIdDeadlineAttachment = `${uuidv4()}`
+      const nameAttachment = selectedDeadlineAttachmentFile.name;
+      const sizeAttachment = parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3));
+      
+      const storageRef = ref(storage, `Semester-6/${projectData.nameProject}-${projectData.labelProject}/${nameDeadline}/${selectedDeadlineAttachmentFile.name}-${setIdDeadlineAttachment}`);
+      
+      setDeadlinneAttachmentUpload(true);
+      uploadBytes(storageRef, selectedDeadlineAttachmentFile)
+        .then(async (snapshot) => {
+          console.log('File uploaded successfully!', snapshot);
+          try {
+            const urlDeadlineAttachment = await getDownloadURL(storageRef);
+            console.log('Download URL:', urlDeadlineAttachment);
+            // You can use this URL to open the PDF in a browser or PDF viewer
+            const deadlineAttachmentsRef = collection(db, 'deadlineAttachments');
+            await addDoc(deadlineAttachmentsRef, {
+                idDeadline: idDeadline,
+                idDeadlineAttachment: `deadlineAttachments-${setIdDeadlineAttachment}`,
+                nameAttachment: nameAttachment,
+                sizeAttachment: `${sizeAttachment} mb`,
+                urlAttachment: urlDeadlineAttachment,
+            });
+            setEndingDeadlinneAttachmentUpload(true);
+            setTimeout(() => {
+                window.location.reload()
+            }, 1250);
+            console.log("ednding upload...")
+          } catch (error) {
+            console.error('Error getting download URL:', error);
+          }
+        })
+        .catch((error) => {
+          console.error('Error uploading file:', error);
+        });
+    };
+    
+
 
     return (
     <>
@@ -682,17 +773,103 @@ const ProjekKu = () => {
                 </>
             )}
             <div className="divider divider-start font-medium">Lampiran</div>
-            <div className='inline-flex'>
-                <div className='mr-2'>Belum ada lampiran</div>
-                <div className={`tooltip lg:tooltip-right ml-auto `} data-tip='Tambah lampiran'>
-                    <button
-                        className={`transition-all duration-100 sclae-100 hover:scale-110`}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-500 hover:text-gray-900">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+                {fetchedAttachmentDeadlines.map((attachment) =>
+                    <>
+                    <div className='inline-flex'>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                            <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                            <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
                         </svg>
-                    </button>
-                </div>
-            </div>
+                            <a href={attachment.urlAttachment} target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-blue-900'>{attachment.nameAttachment}</a>
+                    </div>
+                    <div className='font-extralight -mt-2 ml-0.5'>Ukuran: {attachment.sizeAttachment}</div>
+                    </>
+                )}
+            
+            {getCurrentRole === "admin" && (
+                <>
+                    <input 
+                    onChange={handleDeadlineAttachment}
+                    type="file" 
+                    className="file-input file-input-bordered file-input-sm w-full mt-2" 
+                    accept="application/pdf"/>
+                    {selectedDeadlineAttachmentFile && (
+                        <div>
+                            <p>Ukuran file: {parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3))} mb</p>
+                        </div>
+                    )}
+                    <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p>
+                    {deadlinneAttachmentUpload ? (
+                        <>
+                        {endingDeadlinneAttachmentUpload ? (
+                            <>
+                            <div 
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md">Uploaded</span>
+                            </div>
+                            </>
+                        ) : (
+                            <>
+                            <div 
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Uploading...</span>
+                            </div>
+                            </>
+                        )}
+                        </>
+                    ) : (
+                        <>
+                            <div 
+                            onClick={handleUploadDeadlineAttachment}
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Upload</span>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
+            {getCurrentRole === "user" && getCurrentEmail === projectData.picProject && (
+                <>
+                    <input 
+                    onChange={handleDeadlineAttachment}
+                    type="file" 
+                    className="file-input file-input-bordered file-input-sm w-full mt-2" 
+                    accept="application/pdf"/>
+                    {selectedDeadlineAttachmentFile && (
+                        <div>
+                            <p>Ukuran file: {parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3))} mb</p>
+                        </div>
+                    )}
+                    <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p>
+                    {deadlinneAttachmentUpload ? (
+                        <>
+                        {endingDeadlinneAttachmentUpload ? (
+                            <>
+                            <div 
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md">Uploaded</span>
+                            </div>
+                            </>
+                        ) : (
+                            <>
+                            <div 
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Uploading...</span>
+                            </div>
+                            </>
+                        )}
+                        </>
+                    ) : (
+                        <>
+                            <div 
+                            onClick={handleUploadDeadlineAttachment}
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Upload</span>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
         </div>
         <form method="dialog" className="modal-backdrop">
             <button>close</button>
