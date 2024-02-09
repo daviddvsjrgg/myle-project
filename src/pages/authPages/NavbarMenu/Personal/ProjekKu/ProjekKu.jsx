@@ -4,11 +4,12 @@ import { useLocation } from 'react-router-dom';
 import NotFound404 from '../../../../../url/NotFound404';
 import { BookOpenIcon } from '@heroicons/react/20/solid';
 import { auth, db, storage } from '../../../../../config/firebase/firebase';
-import { addDoc, collection, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
+import { Timestamp, addDoc, collection, deleteDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { Dialog, Transition } from '@headlessui/react';
 import Bottom from '../../../../../components/BottomBar/Bottom';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
 const ProjekKu = () => {
 
@@ -68,6 +69,9 @@ const ProjekKu = () => {
 
             setGetCurrentEmail(getEmail);
             setGetCurrentRole(getRole);
+            setTimeout(() => {
+                window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+            }, 150);
         } catch (error) {
             console.log("user error: " + error)
         }
@@ -186,8 +190,182 @@ const ProjekKu = () => {
 
     }
 
+     // Modal Berita
+     let [ newsIsOpen, setNewsIsOpen ] = useState(false)
+
+     const [ judulBerita, setJudulBerita ] = useState('')
+     const [ detailBerita, setDetailBerita ] = useState('')
+
+     const [ errorMessageJudulBerita, setErrorMessageJudulBerita ] = useState('')
+     const [ errorMessageDetailBerita, setErrorMessageDetailBerita ] = useState('')
+
+     const [ buatBeritaText, setBuatBeritaText ] = useState(false)
+
+     function newsCloseModal() {
+       setNewsIsOpen(false)
+     }
+   
+     function newsOpenModal() {
+       setNewsIsOpen(true)
+       setJudulBerita("");
+       setDetailBerita(""); 
+     }
+
+     const handleJudulBerita = (e) => {
+        setJudulBerita(e.target.value);
+        setErrorMessageJudulBerita("")
+    }
+    
+    const handleDetailBerita = (e) => {
+        setDetailBerita(e.target.value);
+        setErrorMessageDetailBerita("")
+    }
+
+    const judulBeritaValidation = () => {
+        if (judulBerita === "") {
+            setErrorMessageJudulBerita("Judul berita harus diisi.");
+        }
+    }
+
+    const detailBeritaValidation = () => {
+        if (detailBerita === "") {
+            setErrorMessageDetailBerita("Detail berita harus diisi.");
+        }
+    }
+     
+    const handleBuatBerita = async () => {   
+        if (judulBerita === "" || 
+            detailBerita === "") {
+                judulBeritaValidation();
+                detailBeritaValidation();
+            } else {
+                setBuatBeritaText(true);
+                try {
+                    const newsCollection = collection(db, "news");
+
+                        const setIdNews = `${uuidv4()}`
+                        // Get the current Firestore timestamp
+                        const currentTimestamp = Timestamp.now();
+
+                        // Convert the timestamp to a JavaScript Date object
+                        const currentDate = currentTimestamp.toDate();
+
+                        // Define month names in Indonesian
+                        const monthNames = [
+                        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                        ];
+
+                        // Pad single digits with leading zero
+                        const padWithZero = (num) => (num < 10 ? '0' : '') + num;
+
+                        // Format the date string according to Indonesian locale
+                        const currentDateString = `${padWithZero(currentDate.getDate())} ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}, Pukul ${padWithZero(currentDate.getHours())}:${padWithZero(currentDate.getMinutes())}:${padWithZero(currentDate.getSeconds())}`;
+                            
+                        
+
+                        try {
+                          const docRef = await addDoc(newsCollection, {
+                            idNews: `news-${setIdNews}`, 
+                            idProject: projectData.idProject,
+                            titleNews: judulBerita ? judulBerita : "null",
+                            descriptionNews: detailBerita ? detailBerita : "null",
+                            createdAt: currentDateString ? currentDateString : "null",
+                          });
+                            setCount(3);
+                            setTersimpan(true);
+                            setNewsIsOpen(false)
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 3500);
+        
+                          console.log("Document written with ID: ", docRef.id);
+                        } catch (e) {
+                          console.error("Error adding document: ", e);
+                        }
+                        
+                } catch (error) {
+                    console.log("Error semua maszzeh: " + error)
+                }
+            }
+    }
+
+    const [ fetchedBerita, setFetchedBerita ] = useState([]);
+
+    try {
+        useEffect(() => {
+            const fetchDataBerita = async () => {
+            try {
+                const newsCollection = collection(db, "news");
+                const orderedQuery = query(newsCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "asc")); // Assuming projectData is available
+                
+                const snapshot = await getDocs(orderedQuery);
+                const fetchedDataBerita = snapshot.docs.map(doc => ({
+                    idNews: doc.data().idNews,
+                    titleNews: doc.data().titleNews,
+                    descriptionNews: doc.data().descriptionNews,
+                    createdAt: doc.data().createdAt,
+                }));
+                setFetchedBerita(fetchedDataBerita);
+                console.log("test leak data");
+            } catch (error) {
+                console.log("Error fetching data: ", error);
+            }
+            };
+        
+            // Invoke the fetch function
+            console.log("test leak data");
+            fetchDataBerita();
+        }, [projectData.idProject]);
+    } catch (error) {
+        console.log(error);
+    }
+
+     // Hapus Berita
+     const [ openHapusBerita, setOpenHapusBerita ] = useState(false);
+     const [ yakinHapusBeritaText, setYakinHapusBeritaText ] = useState(false)
+     const cancelButtonRefBerita = useRef(null);
+
+     const [ deleteIdNews, setDeleteIdNews ] = useState('')
+
+     const handleHapusBerita = async () => {
+        console.log("handle Hapus is working: " + deleteIdNews);
+        setYakinHapusBeritaText(true);
+        try {
+            const newsCollection = collection(db, "news");
+    
+            const querySnapshot = await getDocs(query(newsCollection,
+                where("idNews", "==", deleteIdNews)
+            ));
+
+            if (querySnapshot.size === 0) {
+                  console.log("Tidak ketemu id yang akan di hapus");
+              } else if (querySnapshot.size === 1){
+                // Document with the same idUsers already exists, handle accordingly
+                querySnapshot.forEach(async (doc) => {
+                    try {
+                        await deleteDoc(doc.ref);
+                        console.log("Document successfully deleted!");
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 250);
+                    } catch (error) {
+                        console.error("Error deleting document: ", error);
+                    }
+                });
+                
+              } else {
+                console.log("ada 2 result yang akan di hapus");
+              }
+
+        } catch (error) {
+            console.error("Error getting documents: ", error);
+        }
+    }
+
+
     // Modal Deadline
-    let [deadlineIsOpen, deadlineSetIsOpen] = useState(false)
+    let [ deadlineIsOpen, deadlineSetIsOpen ] = useState(false)
 
     function deadlineCloseModal() {
       deadlineSetIsOpen(false)
@@ -205,6 +383,9 @@ const ProjekKu = () => {
 
     const [ errorMessageNamaTugas, setErrorMessageNamaTugas ] = useState('')
     const [ errorMessageTanggalTugas, setErrorMessageTanggalTugas ] = useState('')
+
+    const [ buatDeadlineText, setBuatDeadlineText] = useState(false)
+
 
     const handleNamaTugas = (e) => {
         setNamaTugas(e.target.value)
@@ -245,6 +426,7 @@ const ProjekKu = () => {
             namaTugasValidation();
             tanggalTugasValidation();
         } else {
+            setBuatDeadlineText(true)
             try {
                 const deadlineCollection = collection(db, "deadlines");
     
@@ -295,7 +477,7 @@ const ProjekKu = () => {
                 minuteDeadline: doc.data().minuteDeadline,
                 }));
                 const fetchedDataDeadlinesTime = snapshot.docs.map(doc => ({
-                targetDate: new Date(`${doc.data().dateDeadline}T${doc.data().hourDeadline}:${doc.data().minuteDeadline}:00+07:00`),
+                    targetDate: new Date(`${doc.data().dateDeadline}T${doc.data().hourDeadline}:${doc.data().minuteDeadline}:00+07:00`),
                 }));
                 setFetchedDeadlines(fetchedDataDeadlines);
                 setFetchedDeadlinesTime(fetchedDataDeadlinesTime);
@@ -447,15 +629,15 @@ const ProjekKu = () => {
             const deadlineDescriptionsSnapshot = await getDocs(querySnapshot);
 
             if (deadlineDescriptionsSnapshot.size === 0) {
+                setDetailSaved(true);
                 // No existing document found, add a new one
                 const setIdDeadlineDescriptions = `${uuidv4()}`
                 try {
                   const docRef = await addDoc(deadlineDescriptionsCollection, {
                     idDeadlineDescriptions: `deadlineDescriptions-${setIdDeadlineDescriptions}`, 
                     idDeadline: idDeadline,
-                    description: deadlineDescription,
+                    description: deadlineDescription ? deadlineDescription : "Belum ada deskripsi",
                   });
-                    setDetailSaved(true);
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
@@ -465,14 +647,14 @@ const ProjekKu = () => {
                   console.error("Error adding document: ", e);
                 }
               } else {
-                // Document with the same idUsers already exists, handle accordingly
+                  // Document with the same idUsers already exists, handle accordingly
+                  setDetailSaved(true);
                 console.log("Document with the same idProject already exists (jalankan update)");
                 const doc = deadlineDescriptionsSnapshot.docs[0];
                 try {
                     await updateDoc(doc.ref, {
                       description: deadlineDescription ? deadlineDescription : "Belum ada deskripsi",
                     });
-                    setDetailSaved(true);
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
@@ -506,7 +688,9 @@ const ProjekKu = () => {
             if (deadlineSnapshot.size === 0) {
                 // No existing document found, add a new one
                 console.log("error");
-              } else {
+                setNameDeadlineSaved(true);
+            } else {
+                setNameDeadlineSaved(true);
                 // Document with the same idUsers already exists, handle accordingly
                 console.log("Document with the same idProject already exists (jalankan update)");
                 const doc = deadlineSnapshot.docs[0];
@@ -517,7 +701,6 @@ const ProjekKu = () => {
                         hourDeadline: editHourDeadline ? editHourDeadline : "00",
                         minuteDeadline: editMinuteDeadline ? editMinuteDeadline : "00",
                     });
-                    setNameDeadlineSaved(true);
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
@@ -591,6 +774,89 @@ const ProjekKu = () => {
 
     return (
     <>
+    {/* Modal Hapus Berita */}
+    <Transition.Root show={openHapusBerita} as={Fragment}>
+            <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRefBerita} onClose={setOpenHapusBerita}>
+                <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+                >
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                </Transition.Child>
+
+                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    enterTo="opacity-100 translate-y-0 sm:scale-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                    leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    >
+                    <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                        <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div className="sm:flex sm:items-start">
+                            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <ExclamationCircleIcon className="h-6 w-6 text-yellow-600" aria-hidden="true" />
+                            </div>
+                            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                                Yakin untuk menghapus?
+                            </Dialog.Title>
+                            <div className="mt-2">
+                                <p className="text-sm text-gray-500">
+                                 Apakah kamu yakin menghapus berita di mata kuliah ini? Proses ini tidak bisa dibatalkan.
+                                </p>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                            {yakinHapusBeritaText ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        disabled
+                                        className="inline-flex w-full justify-center rounded-md animate-pulse
+                                         bg-indigo-400 px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto"
+                                    >
+                                        Loading...
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto"
+                                        onClick={handleHapusBerita}
+                                    >
+                                        Yakin
+                                    </button>
+                                </>
+                            )}
+                        <button
+                            type="button"
+                            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                            onClick={() => setOpenHapusBerita(false)}
+                            ref={cancelButtonRefBerita}
+                        >
+                            Batalkan
+                        </button>
+                        </div>
+                    </Dialog.Panel>
+                    </Transition.Child>
+                </div>
+                </div>
+            </Dialog>
+            </Transition.Root>
+
     {/* Modal Detail Deadline */}
     <dialog id="my_modal_2" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box">
@@ -652,13 +918,13 @@ const ProjekKu = () => {
                                     <label for="code-1" className="sr-only"></label>
                                     <input
                                     onChange={handleJamDeadline}
-                                     autoComplete='off' defaultValue={`${hourDeadline}`} type="text" maxlength="2" id="editHourDeadline" name="editHourDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                     autoComplete='off' defaultValue={`${hourDeadline}`} type="text" maxLength="2" id="editHourDeadline" name="editHourDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
                                 </div>
                                 <div>
                                     <label for="code-2" className="sr-only"></label>
                                     <input
                                     onChange={handleMenitDeadline}
-                                     autoComplete='off' defaultValue={`${minuteDeadline}`} type="text" maxlength="2" id="editMinuteDeadline" name="editMinuteDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                     autoComplete='off' defaultValue={`${minuteDeadline}`} type="text" maxLength="2" id="editMinuteDeadline" name="editMinuteDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
                                 </div>
                                 <div  className="mt-1.5">WIB</div>
                             </div>
@@ -709,7 +975,7 @@ const ProjekKu = () => {
             <div className='inline-flex'>
                 {fetchedDescriptionDeadlines.length > 0 ? (
                     <>
-                        <div className='mr-2'>{finalDescription}</div>
+                        <div className='mr-2'>{finalDescription === "Belum ada deskripsi" ? "Belum ada deskripsi" : finalDescription}</div>
                     </>
                 ) : (
                     <>
@@ -775,6 +1041,8 @@ const ProjekKu = () => {
                 </>
             )}
             <div className="divider divider-start font-medium">Lampiran</div>
+            {fetchedAttachmentDeadlines.length > 0 ? (
+                <>
                 {fetchedAttachmentDeadlines.map((attachment) =>
                     <>
                     <div className='inline-flex'>
@@ -789,6 +1057,20 @@ const ProjekKu = () => {
                     </div>
                     </>
                 )}
+                </>
+            ) : (
+                <>
+                     <div className='inline-flex'>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                            </svg>
+                        <div className='flex justify-start'>
+                            <div className='font-extralight ml-0.5'>Belum ada lampiran</div>
+                        </div>
+                     </div>
+                </>
+            )}
             
             {getCurrentRole === "admin" && (
                 <>
@@ -879,6 +1161,123 @@ const ProjekKu = () => {
             <button>close</button>
         </form>
     </dialog>
+
+    {/* Modal Berita */}
+      <Transition appear show={newsIsOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={newsCloseModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Buat Berita Mata Kuliah
+                  </Dialog.Title>
+                  <div className="divider"></div> 
+                  <div className="-mt-3">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Judul Berita
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <input
+                                    autoFocus
+                                    onChange={handleJudulBerita}
+                                    type="text"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageJudulBerita ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageJudulBerita ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageJudulBerita}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan judul berita yang akan dimasukkan.</p>
+                                    )}
+                            </div>
+                       </div>
+                  </div>
+                  <div className="mt-4">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Detail Berita
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <textarea
+                                    autoFocus
+                                    onChange={handleDetailBerita}
+                                    type="text"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageDetailBerita ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageDetailBerita ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageDetailBerita}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan judul berita yang akan dimasukkan.</p>
+                                    )}
+                            </div>
+                       </div>
+                  </div>
+                  <div className="divider"></div> 
+                  <div className="mt-4">
+                    {buatBeritaText ? (
+                        <>
+                        <button
+                            type="submit"
+                            disabled
+                            className={`rounded-md bg-indigo-400 px-10 py-2 text-sm font-semibold float-right animate-pulse
+                            text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Loading...
+                        </button>
+                        </>
+                    ) : (
+                        <>
+                        <button
+                            type="submit"
+                            onClick={handleBuatBerita}
+                            className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
+                            text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Buat
+                        </button>
+                        </>
+                    )}
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
 
     {/* Modal Deadline */}
       <Transition appear show={deadlineIsOpen} as={Fragment}>
@@ -975,13 +1374,13 @@ const ProjekKu = () => {
                                     <label for="code-1" className="sr-only"></label>
                                     <input
                                     onChange={handleJamDeadline}
-                                     autoComplete='off' type="text" maxlength="2" id="code-1" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                     autoComplete='off' type="text" maxLength="2" id="code-1" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
                                 </div>
                                 <div>
                                     <label for="code-2" className="sr-only"></label>
                                     <input
                                     onChange={handleMenitDeadline}
-                                     autoComplete='off' type="text" maxlength="2" id="code-2" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                     autoComplete='off' type="text" maxLength="2" id="code-2" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
                                 </div>
                                 <div  className="mt-1.5">WIB</div>
                             </div>
@@ -991,14 +1390,30 @@ const ProjekKu = () => {
                   </div>
                   <div className="divider"></div> 
                   <div className="mt-4">
-                    <button
-                        type="submit"
-                        onClick={handleBuatDeadline}
-                        className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
-                        text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
-                        >
-                         Buat
-                    </button>
+                    {buatDeadlineText ? (
+                        <>
+                            <button
+                                type="submit"
+                                disabled
+                                className={`rounded-md bg-indigo-400 px-10 py-2 text-sm font-semibold float-right animate-pulse
+                                text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                >
+                                Loading...
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                type="submit"
+                                onClick={handleBuatDeadline}
+                                className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
+                                text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                >
+                                Buat
+                            </button>
+                        </>
+                    )}
+                   
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
@@ -1390,7 +1805,7 @@ const ProjekKu = () => {
                         <div data-dial-init className="flex ml-auto">
                             <div id="speed-dial-menu-horizontal" className="flex me-1 space-x-1 items-center">
                                 <div className="tooltip scale-100 hover:scale-110 transition-all duration-200">
-                                    <button type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
+                                    <button  type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
                                            <path fillRule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V3a.75.75 0 0 1 .75-.75Zm-9 13.5a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
                                         </svg>
@@ -1399,7 +1814,9 @@ const ProjekKu = () => {
                                 {(getCurrentRole === "admin" || (projectData.picProject === getCurrentEmail && getCurrentRole === "user")) && (
                                     <>
                                         <div className="tooltip scale-100 hover:scale-110 transition-all duration-200" data-tip="Berita">
-                                            <button type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
+                                            <button
+                                            onClick={newsOpenModal}
+                                            type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
                                                     <path fillRule="evenodd" d="M4.125 3C3.089 3 2.25 3.84 2.25 4.875V18a3 3 0 0 0 3 3h15a3 3 0 0 1-3-3V4.875C17.25 3.839 16.41 3 15.375 3H4.125ZM12 9.75a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5H12Zm-.75-2.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H12a.75.75 0 0 1-.75-.75ZM6 12.75a.75.75 0 0 0 0 1.5h7.5a.75.75 0 0 0 0-1.5H6Zm-.75 3.75a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5H6a.75.75 0 0 1-.75-.75ZM6 6.75a.75.75 0 0 0-.75.75v3c0 .414.336.75.75.75h3a.75.75 0 0 0 .75-.75v-3A.75.75 0 0 0 9 6.75H6Z" clipRule="evenodd" />
                                                     <path d="M18.75 6.75h1.875c.621 0 1.125.504 1.125 1.125V18a1.5 1.5 0 0 1-3 0V6.75Z" />
@@ -1433,8 +1850,65 @@ const ProjekKu = () => {
                             <div className="card rounded-md w-auto bg-base-100 shadow-xl">
                                 <figure><img className='lg:h-64 md:h-32 w-full object-cover' src={projectData.imageUrlProject} alt="Shoes" /></figure>
                                 <div className="card-body">
-                                    <h2 className="card-title">Berita Mata Kuliah</h2>
-                                    <p>Belum ada berita...</p>
+                                    <h2 className="card-title mb-5 ">Berita Mata Kuliah</h2>
+                                    <div className='-mt-12'></div>
+                                    <div className='divider'></div>
+                                    {fetchedBerita.length > 0 ? (
+                                        <>
+                                        {fetchedBerita.map((berita, index) =>
+                                            <>
+                                            <div className=''>
+                                                <div tabIndex={0} className="collapse collapse-arrow focus:bg-base-200 focus:text-gray-800">
+                                                    <div className="collapse-title text-md font-normal">
+                                                        <div  className='lg:flex lg:justify-between'>
+                                                            <div className='font-bold text-gray-800/80'>
+                                                                {index + 1}. {berita.titleNews}
+                                                            </div>
+                                                            <div className='text-sm font-light text-black'>
+                                                                {berita.createdAt}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="collapse-content -mt-2"> 
+                                                        <p>{berita.descriptionNews}</p>
+                                                    </div>
+                                                </div>
+                                                {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setDeleteIdNews(berita.idNews)
+                                                            setOpenHapusBerita(true)
+                                                        }
+                                                        }
+                                                        type="submit"
+                                                        className={`text-sm font-semibold flex float-right text-red-500 hover:underline`}
+                                                        >
+                                                        Hapus
+                                                    </button>
+                                                )}
+                                                {getCurrentRole === "admin" && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setDeleteIdNews(berita.idNews)
+                                                            setOpenHapusBerita(true)
+                                                        }
+                                                        }
+                                                        type="submit"
+                                                        className={`text-sm font-semibold flex float-right text-red-500 hover:underline`}
+                                                        >
+                                                        Hapus
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <hr className="h-0.5 border-2 border-indigo-300/80"></hr>
+                                            </>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p>Belum ada berita...</p>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                                 <div className='divider'></div>
