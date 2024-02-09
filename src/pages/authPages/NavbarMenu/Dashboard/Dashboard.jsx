@@ -213,7 +213,17 @@ const Dashboard = () => {
                       </div>
                       <h2 className="text-gray-900 text-md md:text-xl lg:text-3xl font-bold lg:font-extrabold mb-2">Deadline Tugas</h2>
                       <hr className="h-0.5 bg-gray-950 border-2"></hr>
-                      <p className="text-lg font-normal mt-3 text-gray-500 mb-4">
+                      <div role="alert" className="alert rounded-xl mt-2 bg-gray-200/50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-blue-800 shrink-0 w-6 h-6 lg:-mt-11"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div>
+                          <h3 className="font-bold">Pengembangan Aplikasi Bergerak - IN</h3>
+                          <div className="text-xs ml-0 lg:ml-0.5">Assignment 1 - ETS, 00 hari 16 jam 12 menit 24 detik</div>
+                          <div className="text-xs ml-0 lg:ml-0.5">Assignment 2 - EAS, 02 hari 23 jam 52 menit 34 detik</div>
+                          <div className="text-xs ml-0 lg:ml-0.5">Assignment 3 - EAS, 12 hari 12 jam 31 menit 49 detik</div>
+                        </div>
+                        <button className="font-medium text-gray-500 hover:underline">Lihat selengkapnya</button>
+                      </div>
+                      <p className="text-lg font-normal mt-3 text-gray-500 mb-4 ml-1">
                                   Belum ada tugas :D !!!
                       </p>
                       {/* <a href="/none" className="text-blue-600  hover:underline font-medium text-lg inline-flex items-center">Read more
@@ -246,47 +256,33 @@ const Dashboard = () => {
                         <ul className="my-4 space-y-3">
                         {(checkPenanggungJawab && role === "user") && (
                           <>
-                              <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200/50`}>
-                                <div className="flex w-0 flex-1 items-center">
-                                    <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-600">
-                                      <path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
-                                    </svg>
-                                    <span className="truncate font-medium">
-                                      Kamu telah menjadi penanggung jawab!
-                                    </span>
-                                    {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
-                                    </div>
-                                </div>
-                                <div className="ml-4 flex-shrink-0">
-                                    <a href='/manajemen-projek' className={`font-medium text-indigo-500 hover:underline`}>
-                                      Buka Manajemen
-                                    </a>
-                                </div>
-                            </li>
+                            <div role="alert" className="alert rounded-xl bg-gray-200/50">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-600">
+                                <path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
+                              </svg>
+                              <div>
+                                <h3 className="font-medium">Kamu telah menjadi penanggung jawab!</h3>
+                              </div>
+                              <a href='/manajemen-projek' className={`font-medium text-gray-500 hover:underline`}>
+                                Buka Manajemen
+                              </a>
+                            </div>
                             <hr className="h-0.5 bg-gray-950 border-2"></hr>
                           </>
                           )}
                         {(role === "admin") && (
                           <>
-                              <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200/50`}>
-                                <div className="flex w-0 flex-1 items-center">
-                                    <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-blue-600">
-                                      <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="truncate font-medium">
-                                      Kamu telah menjadi Admin!
-                                    </span>
-                                    {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
-                                    </div>
-                                </div>
-                                <div className="ml-4 flex-shrink-0">
-                                    <a href='/manajemen-projek' className={`font-medium text-indigo-500 hover:hover:underline`}>
-                                      Buka Manajemen
-                                    </a>
-                                </div>
-                            </li>
+                            <div role="alert" className="alert rounded-xl bg-gray-200/50">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-blue-600">
+                                <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                              </svg>
+                              <div>
+                                <h3 className="font-medium">Kamu telah menjadi Admin!</h3>
+                              </div>
+                              <a href='/manajemen-projek' className={`font-medium text-gray-500 hover:hover:underline`}>
+                                Buka Manajemen
+                              </a>
+                            </div>
                             <hr className="h-0.5 bg-gray-950 border-2"></hr>
                           </>
                           )}
@@ -306,7 +302,7 @@ const Dashboard = () => {
                                       <div className="ml-4 flex-shrink-0">
                                         <Link
                                           to="/personal/projekku" state={{projectData: matkul, clicked: "true"}}
-                                          className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:scale-110 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">
+                                          className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:px-6 drop-shadow-md shadow-cla-blue px-4 py-1 rounded-lg">
                                           Buka
                                         </Link>
                                       </div>
