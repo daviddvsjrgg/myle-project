@@ -10,6 +10,12 @@ import { Dialog, Transition } from '@headlessui/react';
 import Bottom from '../../../../../components/BottomBar/Bottom';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import {
+    Accordion,
+    AccordionHeader,
+    AccordionBody,
+  } from "@material-tailwind/react";
+
 
 const ProjekKu = () => {
 
@@ -320,6 +326,18 @@ const ProjekKu = () => {
     } catch (error) {
         console.log(error);
     }
+
+    // Initialize the state to manage open states of multiple accordions
+    const [openAcc, setOpenAcc] = useState(fetchedBerita.map(() => true));
+
+    // Function to toggle the open state of an accordion
+    const handleToggleAcc = (index) => {
+        setOpenAcc(prevOpenAcc => {
+            const newOpenAcc = [...prevOpenAcc];
+            newOpenAcc[index] = !newOpenAcc[index];
+            return newOpenAcc;
+        });
+    };
 
      // Hapus Berita
      const [ openHapusBerita, setOpenHapusBerita ] = useState(false);
@@ -860,9 +878,9 @@ const ProjekKu = () => {
     {/* Modal Detail Deadline */}
     <dialog id="my_modal_2" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box">
-            <div className='inline-flex'>
+            <div className='flex justify-between'>
                 <h3 className="font-bold text-lg mr-2">{nameDeadline}</h3>
-                <div className={`lg:tooltip lg:tooltip-right ml-auto`} data-tip='Ubah deadline'>
+                <div className={`lg:tooltip lg:tooltip-left ml-auto`} data-tip='Ubah deadline'>
                     {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
                         <>
                         <button
@@ -972,17 +990,8 @@ const ProjekKu = () => {
             </>
             )}
             <div className="divider divider-start font-medium">Deskripsi Tugas</div>
-            <div className='inline-flex'>
-                {fetchedDescriptionDeadlines.length > 0 ? (
-                    <>
-                        <div className='mr-2'>{finalDescription === "Belum ada deskripsi" ? "Belum ada deskripsi" : finalDescription}</div>
-                    </>
-                ) : (
-                    <>
-                        <div className='mr-2'>Belum ada deskripsi</div>
-                    </>
-                )}
-                <div className={`tooltip lg:tooltip-right ml-auto `} data-tip='Ubah deskripsi'>
+            <div className='-mt-2'>
+            <div className={`tooltip tooltip-left ml-auto -mt-12 float-right`} data-tip='Ubah deskripsi'>
                     {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
                         <>
                         <button
@@ -1020,6 +1029,42 @@ const ProjekKu = () => {
                         </>
                     )}
                 </div>
+                {fetchedDescriptionDeadlines.length > 0 ? (
+                    <>
+                        {fetchedDescriptionDeadlines.map((deadline) =>
+                            <>
+                              {deadline.description && deadline.description.includes('\n') ? (
+                                // If the description contains \n, split and map over the lines
+                                deadline.description.split('\n').map((line, index) => (
+                                    <p key={index}>
+                                    {line.split(/\s+/).map((word, wordIndex) => {
+                                        if (word.startsWith('https://')) {
+                                        return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
+                                        }
+                                        return word + ' ';
+                                    })}
+                                    </p>
+                                ))
+                                ) : (
+                                // Otherwise, just render the description as is
+                                <p>
+                                    {deadline.description.split(/\s+/).map((word, wordIndex) => {
+                                    if (word.startsWith('https://')) {
+                                        return <a href={word} key={wordIndex}>{word}</a>;
+                                    }
+                                    return word + ' ';
+                                    })}
+                                </p>
+                                )}
+                            </>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <div className='mr-2'>Belum ada deskripsi</div>
+                    </>
+                )}
+            
             </div>
             <label className={`${editDetailDeadline ? "" : "hidden"} form-control`}>
             <div className="label">
@@ -1241,7 +1286,7 @@ const ProjekKu = () => {
                                         {errorMessageDetailBerita}
                                     </div>
                                     ) : (
-                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan judul berita yang akan dimasukkan.</p>
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan detail berita yang akan dimasukkan.</p>
                                     )}
                             </div>
                        </div>
@@ -1489,7 +1534,7 @@ const ProjekKu = () => {
 
          {/* Start - Content */}
          <main>
-         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+         <div className="mx-auto max-w-7xl pt-6 sm:px-6 lg:px-8">
 
         <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
             {/* Section 1 */}
@@ -1553,7 +1598,7 @@ const ProjekKu = () => {
                     <>
                         <div key={dosen.idLecturers}  className="px-4 py-4 grid">
                             <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
-                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 ${buttonEdit ? "hidden" : ""} `}>
+                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 lg:w-56 ${buttonEdit ? "hidden" : ""} `}>
                                             {dosen.nameLecturers}
                                     </dd>
                             <input
@@ -1791,7 +1836,7 @@ const ProjekKu = () => {
 
 
             {/* Section 2 */}
-            <div className="col-span-7 row-span-3 bg-white border-2 border-gray-300/40 shadow-md rounded-t-md">
+            <div className="col-span-7 row-span-3 bg-white border-2 border-gray-200 shadow-md rounded-t-md">
                 <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                     <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 mt-0.5">
@@ -1846,7 +1891,7 @@ const ProjekKu = () => {
                     </div>
                         {/* Content */}
                         <div className="card rounded-none w-auto border-2 border-gray-200">
-                            <div className="card-body -mx-2">
+                            <div className="card-body -mx-2 -mt-2">
                             <div className="card rounded-md w-auto bg-base-100 shadow-xl">
                                 <figure><img className='lg:h-64 md:h-32 w-full object-cover' src={projectData.imageUrlProject} alt="Shoes" /></figure>
                                 <div className="card-body">
@@ -1854,57 +1899,78 @@ const ProjekKu = () => {
                                     <div className='-mt-12'></div>
                                     <div className='divider'></div>
                                     {fetchedBerita.length > 0 ? (
-                                        <>
-                                        {fetchedBerita.map((berita, index) =>
-                                            <>
-                                            <div className=''>
-                                                <div tabIndex={0} className="collapse collapse-arrow focus:bg-base-200 focus:text-gray-800">
-                                                    <div className="collapse-title text-md font-normal">
-                                                        <div  className='lg:flex lg:justify-between'>
-                                                            <div className='font-bold text-gray-800/80'>
-                                                                {index + 1}. {berita.titleNews}
-                                                            </div>
-                                                            <div className='text-sm font-light text-black'>
-                                                                {berita.createdAt}
-                                                            </div>
+                                    <>
+                                        <div className='-mt-5'></div>
+                                        {fetchedBerita.map((berita, index) => (
+                                            <Accordion className={`${openAcc[index] ? "bg-base-200/50 rounded-md transition-all duration-100 border-2 border-slate-100/90" : ""}
+                                             focus:text-gray-800`} open={openAcc[index]} key={berita.idNews}>
+                                                <AccordionHeader
+                                                    className='p-2 rounded-md font-bold text-gray-800/90 transition-all duration-200 hover:bg-gray-100'
+                                                    onClick={() => handleToggleAcc(index)}> {/* Call handleToggleAcc with the index */}
+                                                    <div  className=''>
+                                                        <div className='font-bold text-gray-800/70'>
+                                                            {berita.titleNews}
+                                                        </div>
+                                                        <div className='text-sm font-light text-black ml-0.5'>
+                                                            dibuat pada {berita.createdAt} WIB
                                                         </div>
                                                     </div>
-                                                    <div className="collapse-content -mt-2"> 
-                                                        <p>{berita.descriptionNews}</p>
-                                                    </div>
-                                                </div>
-                                                {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setDeleteIdNews(berita.idNews)
-                                                            setOpenHapusBerita(true)
-                                                        }
-                                                        }
-                                                        type="submit"
-                                                        className={`text-sm font-semibold flex float-right text-red-500 hover:underline`}
-                                                        >
-                                                        Hapus
-                                                    </button>
-                                                )}
-                                                {getCurrentRole === "admin" && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setDeleteIdNews(berita.idNews)
-                                                            setOpenHapusBerita(true)
-                                                        }
-                                                        }
-                                                        type="submit"
-                                                        className={`text-sm font-semibold flex float-right text-red-500 hover:underline`}
-                                                        >
-                                                        Hapus
-                                                    </button>
-                                                )}
-                                            </div>
-                                            <hr className="h-0.5 border-2 border-indigo-300/80"></hr>
-                                            </>
-                                            )}
-                                        </>
-                                    ) : (
+                                                </AccordionHeader>
+                                                <AccordionBody className="p-3 mb-2 font-normal overflow-x-scroll w-56 lg:w-full lg:overflow-hidden">
+                                                    {berita.descriptionNews && berita.descriptionNews.includes('\n') ? (
+                                                        // If the description contains \n, split and map over the lines
+                                                        berita.descriptionNews.split('\n').map((line, index) => (
+                                                            <p key={index}>
+                                                            {line.split(/\s+/).map((word, wordIndex) => {
+                                                                if (word.startsWith('https://')) {
+                                                                return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
+                                                                }
+                                                                return word + ' ';
+                                                            })}
+                                                            </p>
+                                                        ))
+                                                        ) : (
+                                                        // Otherwise, just render the description as is
+                                                        <p>
+                                                            {berita.descriptionNews.split(/\s+/).map((word, wordIndex) => {
+                                                            if (word.startsWith('https://')) {
+                                                                return <a href={word} key={wordIndex}>{word}</a>;
+                                                            }
+                                                            return word + ' ';
+                                                            })}
+                                                        </p>
+                                                        )}
+                                                        {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setDeleteIdNews(berita.idNews)
+                                                                    setOpenHapusBerita(true)
+                                                                }
+                                                                }
+                                                                type="submit"
+                                                                className={`text-sm font-semibold flex bg-red-500 rounded-md py-2 px-4 hover:bg-red-600 mt-2 lg:float-right text-white`}
+                                                                >
+                                                                Hapus
+                                                            </button>
+                                                        )}
+                                                        {getCurrentRole === "admin" && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setDeleteIdNews(berita.idNews)
+                                                                    setOpenHapusBerita(true)
+                                                                }
+                                                                }
+                                                                type="submit"
+                                                                className={`text-sm font-semibold flex bg-red-500 rounded-md py-2 px-4 hover:bg-red-600 mt-2 lg:float-right text-white`}
+                                                                >
+                                                                Hapus
+                                                            </button>
+                                                        )}
+                                                </AccordionBody>
+                                            </Accordion>
+                                        ))}
+                                    </>
+                                     ) : (
                                         <>
                                             <p>Belum ada berita...</p>
                                         </>
@@ -1973,11 +2039,196 @@ const ProjekKu = () => {
                 </div>
             {/* End Section 2 */}
         </div>
-
-         </div>
-         </main>
+     </div>
+    </main>
          {/* End - Content */}
          
+         {/* Start - Content 2*/}
+        <main>
+        <div className="mx-auto max-w-7xl pt-6 sm:px-6 lg:px-8">
+
+        <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
+
+            {/* hidden, just trigerring the flex */}
+                {/* Section 1 */}
+                    <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} hidden lg:block lg:invisible
+                     select-none cursor-default col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
+                        <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
+                            <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
+                                <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
+                            </div>
+                            <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkul</div>
+                            {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                            <>
+                                <div className={`${buttonEdit ? "hidden" : ""} ml-auto`}>
+                                    <button
+                                        disabled
+                                        className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
+                                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <button
+                                    disabled
+                                    className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-700">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </>
+                            )}
+
+                            {getCurrentRole === "admin" && (
+                            <>
+                                <div className={`${buttonEdit ? "hidden" : ""} ml-auto`}>
+                                    <button
+                                        disabled
+                                        className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
+                                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+
+                                <button
+                                    disabled
+                                    className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-700">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </>
+                            )}
+
+                        </div>
+                        {fetchedInfoMatkul.length > 0 ? (
+                            <>
+                            {fetchedInfoMatkul.map((dosen) => 
+                            <>
+                                <div key={dosen.idLecturers}  className="px-4 py-4 grid">
+                                    <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
+                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 lg:w-56 ${buttonEdit ? "hidden" : ""} `}>
+                                            {dosen.nameLecturers}
+                                    </dd>
+                                </div>
+                            </>
+                        )}
+                            </>
+                        ) : (
+                            <>
+                                <div  className="px-4 py-4 grid">
+                                    <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
+                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 ${buttonEdit ? "hidden" : ""} `}>
+                                        Belum ada dosen pengampu
+                                    </dd>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                {/* End Section 1 */}
+            {/* hidden, just trigerring the flex */}
+
+
+            {/* Section 2 */}
+            <div className="col-span-7 row-span-3 bg-white border-2 border-gray-200 shadow-md rounded-t-md">
+                <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
+                    <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 mt-0.5">
+                            <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
+                            <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" />
+                            <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
+                        </svg>
+                    </div>
+                    <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">Minggu 1 - 19 Februari 2024</div>
+                </div>
+                        {/* Content */}
+                        <div className="card rounded-none w-auto border-2 border-gray-200">
+                            <div className="card-body -mx-2 -mt-2">
+                            <div className="card rounded-md w-auto">
+                                <div className="card-body">
+                                    <h2 className="card-title mb-5 -mx-6 -mt-10">Aktivitas</h2>
+                                    <div className='-mt-12'></div>
+                                    <div className='divider -mx-6'></div>
+                                    <ol className="relative border-s border-gray-200 ">                  
+                                        <li className="mb-10 ms-6">            
+                                            <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                            </svg>
+                                            </span>
+                                            <h3 className="flex items-center mb-1 text-lg font-semibold text-gray-900 ">Materi Pertemuan 1</h3>
+                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
+                                            <p className="mb-4 text-base font-normal text-gray-500   lg:w-72">Harap dibaca dengan .</p>
+                                            <div className='inline-flex'>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5  text-gray-600">
+                                                    <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                                                    <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                                                </svg>
+                                                    <a href="/#" target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-gray-900'>Materi Pemrograman.pdf</a>
+                                            </div>
+                                            <div className='flex justify-start'>
+                                                <div className='font-extralight -mt-2 ml-0.5'>Ukuran: 1.03 mb</div>
+                                            </div>
+                                        </li>
+                                        <li className="mb-10 ms-6">
+                                            <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                            </svg>
+                                            </span>
+                                            <h3 className="mb-1 text-lg font-semibold text-gray-900 ">Flowbite Figma v1.3.0</h3>
+                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
+                                            <p className="text-base font-normal text-gray-500 ">All of the pages and  </p>
+                                        </li>
+                                        <li className="ms-6">
+                                            <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                            </svg>
+                                            </span>
+                                            <h3 className="mb-1 text-lg font-semibold text-gray-900 ">Flowbite Library v1.2.2</h3>
+                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
+                                            <p className="text-base font-normal text-gray-500 ">Get started with dozens</p>
+                                        </li>
+                                    </ol>
+
+
+                                </div>
+                            </div>
+                            <div className="card-body">
+                                    <h2 className="card-title mb-5 -mx-6 -mt-10">Detail Pertemuan</h2>
+                                    <div className='-mt-12'></div>
+                                    <div className='divider -mx-6'></div>
+                                    <div className="stats stats-vertical lg:stats-horizontal shadow-md border-2 borderslate-200/50 -mt-4 ">
+                                        <div className="stat overflow-x-scroll lg:overflow-hidden">
+                                            <div className='inline-flex'>
+                                            <div className="stat-title font-bold text-blue-600">Online</div>
+                                            <div className="stat-title">/</div>
+                                            <div className="stat-title">Offline</div>
+                                            <div className="stat-title">/</div>
+                                            <div className="stat-title">Izin</div>
+                                            <div className="stat-title">/</div>
+                                            <div className="stat-title">Tidak Hadir</div>
+                                            </div>
+                                            <div className="text-xl font-extrabold ">Tidak Hadir</div>
+                                            <div className="stat-desc mt-1">07:00 - 08:30 (1 jam 30 menit)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/* End Content */}
+                </div>
+            {/* End Section 2 */}
+        </div>
+     </div>
+    </main>
+         {/* End - Content 2*/}
      </div>
     ) : (
         <NotFound404 />
