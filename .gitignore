@@ -26,3 +26,5 @@ yarn-error.log*
 firebase.json
 .firebase
 config
+
+Storage

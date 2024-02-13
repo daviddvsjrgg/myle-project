@@ -10,12 +10,6 @@ import { Dialog, Transition } from '@headlessui/react';
 import Bottom from '../../../../../components/BottomBar/Bottom';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
-import {
-    Accordion,
-    AccordionHeader,
-    AccordionBody,
-  } from "@material-tailwind/react";
-
 
 const ProjekKu = () => {
 
@@ -267,8 +261,13 @@ const ProjekKu = () => {
 
                         // Format the date string according to Indonesian locale
                         const currentDateString = `${padWithZero(currentDate.getDate())} ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}, Pukul ${padWithZero(currentDate.getHours())}:${padWithZero(currentDate.getMinutes())}:${padWithZero(currentDate.getSeconds())}`;
-                            
-                        
+                        const user = auth.currentUser;
+                       
+                        const usersCollection = collection(db, "users");
+                        const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+                        const userName = querySnapshot.docs[0].data().usernameUser;
+                        const userImage = querySnapshot.docs[0].data().imageUser;
+                        const userRole = querySnapshot.docs[0].data().roleUser;
 
                         try {
                           const docRef = await addDoc(newsCollection, {
@@ -277,6 +276,11 @@ const ProjekKu = () => {
                             titleNews: judulBerita ? judulBerita : "null",
                             descriptionNews: detailBerita ? detailBerita : "null",
                             createdAt: currentDateString ? currentDateString : "null",
+                            publisherNews: {
+                                userName: userName,
+                                userImage: userImage,
+                                userRole: userRole,
+                            },
                           });
                             setCount(3);
                             setTersimpan(true);
@@ -303,7 +307,7 @@ const ProjekKu = () => {
             const fetchDataBerita = async () => {
             try {
                 const newsCollection = collection(db, "news");
-                const orderedQuery = query(newsCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "asc")); // Assuming projectData is available
+                const orderedQuery = query(newsCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "desc")); // Assuming projectData is available
                 
                 const snapshot = await getDocs(orderedQuery);
                 const fetchedDataBerita = snapshot.docs.map(doc => ({
@@ -311,6 +315,11 @@ const ProjekKu = () => {
                     titleNews: doc.data().titleNews,
                     descriptionNews: doc.data().descriptionNews,
                     createdAt: doc.data().createdAt,
+                    publisherNews: {
+                        userName:  doc.data().publisherNews.userName,
+                        userImage:  doc.data().publisherNews.userImage,
+                        userRole:  doc.data().publisherNews.userRole,
+                    },
                 }));
                 setFetchedBerita(fetchedDataBerita);
                 console.log("test leak data");
@@ -326,18 +335,6 @@ const ProjekKu = () => {
     } catch (error) {
         console.log(error);
     }
-
-    // Initialize the state to manage open states of multiple accordions
-    const [openAcc, setOpenAcc] = useState(fetchedBerita.map(() => true));
-
-    // Function to toggle the open state of an accordion
-    const handleToggleAcc = (index) => {
-        setOpenAcc(prevOpenAcc => {
-            const newOpenAcc = [...prevOpenAcc];
-            newOpenAcc[index] = !newOpenAcc[index];
-            return newOpenAcc;
-        });
-    };
 
      // Hapus Berita
      const [ openHapusBerita, setOpenHapusBerita ] = useState(false);
@@ -755,7 +752,7 @@ const ProjekKu = () => {
       const sizeAttachment = parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3));
       const fileNameAttachment = `${selectedDeadlineAttachmentFile.name}-${setIdDeadlineAttachment}`
       
-      const storageRef = ref(storage, `Semester-6/${projectData.nameProject}-${projectData.labelProject}/${nameDeadline}/${fileNameAttachment}`);
+      const storageRef = ref(storage, `Semester-6/${projectData.nameProject}-${projectData.labelProject}/Assignments/${nameDeadline}/${fileNameAttachment}`);
       
       setDeadlinneAttachmentUpload(true);
       uploadBytes(storageRef, selectedDeadlineAttachmentFile)
@@ -787,6 +784,338 @@ const ProjekKu = () => {
           console.error('Error uploading file:', error);
         });
     };
+
+    // Tambah Bagian
+    let [ sectionIsOpen, setSectionIsOpen ] = useState(false)
+
+    const [ judulBagian, setJudulBagian ] = useState('')
+    const [ previewJudulBagian, setPreviewJudulBagian ] = useState('')
+
+    const [ errorMessageJudulBagian, setErrorMessageJudulBagian ] = useState('')
+
+    const [ buatBagianText, setBuatBagianText ] = useState(false)
+
+
+
+    function sectionCloseModal() {
+        setSectionIsOpen(false)
+        setJudulBagian("")
+        setPreviewJudulBagian("")
+      }
+    
+    function sectionOpenModal() {
+        setSectionIsOpen(true)
+    }
+
+
+    const handleJudulBagian = (e) => {
+        setJudulBagian(e.target.value);
+        setPreviewJudulBagian(e.target.value)
+        setErrorMessageJudulBagian("")
+    }
+    
+    const judulBagianValidation = () => {
+        if (judulBagian === "") {
+            setErrorMessageJudulBagian("Judul Bagian harus diisi.");
+        }
+    }
+
+    const handleBuatBagian = async () => {
+        if(judulBagian === "") {
+            judulBagianValidation();
+        } else {
+            setBuatBagianText(true)
+            try {
+                const sectionsCollection = collection(db, "sections");
+
+                    const setIdNews = `${uuidv4()}`
+                    // Get the current Firestore timestamp
+                    const currentTimestamp = Timestamp.now();
+
+                    // Convert the timestamp to a JavaScript Date object
+                    const currentDate = currentTimestamp.toDate();
+
+                    // Define month names in Indonesian
+                    const monthNames = [
+                    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                    ];
+
+                    // Pad single digits with leading zero
+                    const padWithZero = (num) => (num < 10 ? '0' : '') + num;
+
+                    // Format the date string according to Indonesian locale
+                    const currentDateString = `${padWithZero(currentDate.getDate())} ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}, Pukul ${padWithZero(currentDate.getHours())}:${padWithZero(currentDate.getMinutes())}:${padWithZero(currentDate.getSeconds())}`;
+                    
+                    try {
+                      const docRef = await addDoc(sectionsCollection, {
+                        idSection: `section-${setIdNews}`, 
+                        idProject: projectData.idProject,
+                        titleSections: judulBagian ? judulBagian : "null",
+                        createdAt: currentDateString ? currentDateString : "null",
+                      });
+                        setCount(3);
+                        setTersimpan(true);
+                        setSectionIsOpen(false)
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3500);
+    
+                      console.log("Document written with ID: ", docRef.id);
+                    } catch (e) {
+                      console.error("Error adding document: ", e);
+                    }
+                    
+            } catch (error) {
+                console.log("Error semua maszzeh: " + error)
+            }
+        }
+    } 
+
+    // Fetched Bagian
+    const [ fetchedBagian, setFetchedBagian ] = useState([]);
+
+    try {
+        useEffect(() => {
+            const fetchSections = async () => {
+            try {
+                const newsCollection = collection(db, "sections");
+                const orderedQuery = query(newsCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "asc")); // Assuming projectData is available
+                
+                const snapshot = await getDocs(orderedQuery);
+                const fetchedDataBerita = snapshot.docs.map(doc => ({
+                    idSection: doc.data().idSection,
+                    titleSections: doc.data().titleSections,
+                    createdAt: doc.data().createdAt,
+                }));
+                setFetchedBagian(fetchedDataBerita);
+                console.log("test leak data");
+            } catch (error) {
+                console.log("Error fetching data: ", error);
+            }
+            };
+        
+            // Invoke the fetch function
+            console.log("test leak data");
+            fetchSections();
+        }, [projectData.idProject]);
+    } catch (error) {
+        console.log(error);
+    }
+
+    // Modal Edit Bagian
+    let [ editBagianIsOpen, setEditBagianIsOpen ] = useState(false)
+
+    const [ currentJudulBagian, setCurrentJudulBagian ] = useState('')
+    const [ judulBagianTextEdit, setjudulBagianTextEdit ] = useState('')
+    const [ idSectionsState, setIdJudulBagian ] = useState('')
+
+    const [ ubahEditJudulBagianText, setUbahEditJudulBagianText ] = useState(false)
+
+    const [ errorMessageEditJudulBagian, setErrorMessageEditJudulBagian ] = useState('')
+
+    function editBagianCloseModal() {
+        setEditBagianIsOpen(false)
+        setjudulBagianTextEdit("")
+        setCurrentJudulBagian("")
+        setErrorMessageEditJudulBagian("");
+      }
+    
+    function editBagianOpenModal(titleSections, idSection) {
+        setEditBagianIsOpen(true)
+        setCurrentJudulBagian(titleSections)
+        setjudulBagianTextEdit(titleSections)
+        setIdJudulBagian(idSection)
+    }
+
+    const handleEditJudulBagian = (e) => {
+        setjudulBagianTextEdit(e.target.value)
+    }
+
+    const editJudulBagianValidation = () => {
+        if (judulBagianTextEdit === "") {
+            setErrorMessageEditJudulBagian("Judul Bagian harus diisi.");
+        }
+    }
+
+    const handleSimpanJudulBagian = async () => {
+        if(judulBagianTextEdit === "") {
+            editJudulBagianValidation();
+           
+        } else {
+            setUbahEditJudulBagianText(true)
+            console.log("current judul: " + currentJudulBagian)
+            console.log("id sections: " + idSectionsState)
+            try {
+                const sectionsCollection = collection(db, "sections");
+                const querySnapshot = query(sectionsCollection, where("idSection", "==", idSectionsState));
+                const sectionsSnapshot = await getDocs(querySnapshot);
+    
+                if (sectionsSnapshot.size === 0) {
+                    console.log("data more than 2, please fix")
+                  } else {
+                    console.log("Document with the same idProject already exists (jalankan update)");
+                    const doc = sectionsSnapshot.docs[0];
+                    try {
+                        await updateDoc(doc.ref, {
+                          titleSections: judulBagianTextEdit ? judulBagianTextEdit : "null",
+                        });
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                        
+                        console.log("Updated Data Completed!!!");
+                      } catch (e) {
+                        console.error("Error updating document ERROR: ", e);
+                      }
+                  }
+            } catch (error) {
+                console.log("Error semua maszzeh: " + error)
+            }
+                
+        }
+    }
+
+    // Bagian Aktivitas
+    let [ bagianAktivitasIsOpen, setbagianAktivitasIsOpen ] = useState(false)
+
+    const [ judulBagianAktivitas, setJudulBagianAktivitas ] = useState('')
+    const [ deskripsiBagianAktivitas, setDeskripsiBagianAktivitas ] = useState('')
+
+    const [ judulBagianToBagianAktivitas, setJudulBagianToBagianAktivitas ] = useState('')
+    const [ idSectionToBagianAktivitas, setIdSectionToBagianAktivitas ] = useState('')
+
+    const [ errorMessageJudulBagianAktivitas, setErrorMessageJudulBagianAktivitas ] = useState('')
+    const [ errorMessageDeskripsiBagianAktivitas, setErrorMessageDeskripsiBagianAktivitas ] = useState('')
+    
+    const [ buatAktivitasText, setBuatAktivitasText ] = useState(false)
+
+    function bagianAktivitasCloseModal() {
+        setbagianAktivitasIsOpen(false)
+        setJudulBagianAktivitas("")
+        setDeskripsiBagianAktivitas("")
+        setErrorMessageJudulBagianAktivitas("")
+        setErrorMessageDeskripsiBagianAktivitas("")
+      }
+    
+    function bagianAktivitasOpenModal(titleSections, idSection) {
+        setbagianAktivitasIsOpen(true)
+        setJudulBagianToBagianAktivitas(titleSections)
+        setIdSectionToBagianAktivitas(idSection)
+    }
+
+    const handleJudulBagianAktivitas = (e) => {
+        setJudulBagianAktivitas(e.target.value)
+        setErrorMessageJudulBagianAktivitas("")
+    }
+
+    const handleDeskripsiBagianAktivitas = (e) => {
+        setDeskripsiBagianAktivitas(e.target.value)
+        setErrorMessageDeskripsiBagianAktivitas("")
+    }
+
+    const judulBagianAktivitasValidation = () => {
+        if (judulBagianAktivitas === "") {
+            setErrorMessageJudulBagianAktivitas("Judul Aktivitas harus diisi.");
+        }
+    }
+
+    const deskripsiAktivitasValidation = () => {
+        if (deskripsiBagianAktivitas === "") {
+            setErrorMessageDeskripsiBagianAktivitas("Deskripsi Aktivitas harus diisi.");
+        }
+    }
+
+    const handleBuatAktivitas = async () => {
+        if(judulBagianAktivitas === "" || deskripsiBagianAktivitas === "") {
+            judulBagianAktivitasValidation()
+            deskripsiAktivitasValidation()
+        } else {
+            setBuatAktivitasText(true)
+            try {
+                const sectionActivitiesCollection = collection(db, "sectionActivities");
+
+                    const setIdNews = `${uuidv4()}`
+                    // Get the current Firestore timestamp
+                    const currentTimestamp = Timestamp.now();
+
+                    // Convert the timestamp to a JavaScript Date object
+                    const currentDate = currentTimestamp.toDate();
+
+                    // Define month names in Indonesian
+                    const monthNames = [
+                    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                    ];
+
+                    // Pad single digits with leading zero
+                    const padWithZero = (num) => (num < 10 ? '0' : '') + num;
+
+                    // Format the date string according to Indonesian locale
+                    const currentDateString = `${padWithZero(currentDate.getDate())} ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}, Pukul ${padWithZero(currentDate.getHours())}:${padWithZero(currentDate.getMinutes())}:${padWithZero(currentDate.getSeconds())}`;
+                    const dateOrder = `${padWithZero(currentDate.getDate())} ${monthNames[currentDate.getMonth()]}, ${currentDate.getFullYear()}`;
+                    
+                    try {
+                      const docRef = await addDoc(sectionActivitiesCollection, {
+                        idActivity: `activity-${setIdNews}`, 
+                        idSection: idSectionToBagianAktivitas, 
+                        idProject: projectData.idProject, 
+                        titleActivity: judulBagianAktivitas ? judulBagianAktivitas : "null",
+                        descriptionActivity: deskripsiBagianAktivitas ? deskripsiBagianAktivitas : "null",
+                        dateActivity: dateOrder ? dateOrder : "null",
+                        createdAt: currentDateString ? currentDateString : "null",
+                      });
+                        setCount(3);
+                        setTersimpan(true);
+                        setbagianAktivitasIsOpen(false)
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3500);
+    
+                      console.log("Document written with ID: ", docRef.id);
+                    } catch (e) {
+                      console.error("Error adding document: ", e);
+                    }
+                    
+            } catch (error) {
+                console.log("Error semua maszzeh: " + error)
+            }
+        }
+    }
+
+    // Fetch Bagian Aktivitas
+    const [ fetchedBagianAktivitas, setFetchedBagianAktivitas ] = useState([]);
+
+    try {
+        useEffect(() => {
+            const fetchDataSectionActivities = async () => {
+            try {
+                const sectionActivitiesCollection = collection(db, "sectionActivities");
+                const orderedQuery = query(sectionActivitiesCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "asc")); // Assuming projectData is available
+                
+                const snapshot = await getDocs(orderedQuery);
+                const fetchedDataBerita = snapshot.docs.map(doc => ({
+                    idActivity: doc.data().idActivity,
+                    idSection: doc.data().idSection,
+                    titleActivity: doc.data().titleActivity,
+                    descriptionActivity: doc.data().descriptionActivity,
+                    dateActivity: doc.data().dateActivity,
+                    createdAt: doc.data().createdAt,
+                }));
+                setFetchedBagianAktivitas(fetchedDataBerita);
+                console.log("test leak data");
+            } catch (error) {
+                console.log("Error fetching data: ", error);
+            }
+            };
+        
+            // Invoke the fetch function
+            console.log("test leak data");
+            fetchDataSectionActivities();
+        }, [projectData.idProject]);
+    } catch (error) {
+        console.log(error);
+    }
     
 
 
@@ -1097,7 +1426,11 @@ const ProjekKu = () => {
                         </svg>
                             <a href={attachment.urlAttachment} target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-blue-900'>{attachment.nameAttachment}</a>
                     </div>
-                    <div className='flex justify-start'>
+                    <div className='flex'>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 invisible">
+                        <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                    </svg>
                         <div className='font-extralight -mt-2 ml-0.5'>Ukuran: {attachment.sizeAttachment}</div>
                     </div>
                     </>
@@ -1467,6 +1800,407 @@ const ProjekKu = () => {
         </Dialog>
       </Transition>
 
+
+    {/* Modal Bagian */}
+    <Transition appear show={sectionIsOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={sectionCloseModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Tambah Bagian
+                  </Dialog.Title>
+                  <div className="divider"></div> 
+                  <div className="-mt-3">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Judul Bagian
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    onChange={handleJudulBagian}
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageJudulBagian ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageJudulBagian ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageJudulBagian}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan judul berita yang akan dimasukkan.</p>
+                                    )}
+                            </div>
+                       </div>
+                  </div>
+                  <div className="mt-4">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-xl font-medium leading-6 text-gray-700 mb-2">
+                            Preview/Contoh
+                        </label>
+            {/* Section 2 */}
+            <div className="col-span-7 row-span-3 bg-white border-2 border-gray-200 shadow-md rounded-t-md select-none hover:opacity-80">
+                <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
+                    <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 mt-0.5">
+                            <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
+                            <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" />
+                            <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
+                        </svg>
+                    </div>
+                    <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{previewJudulBagian}</div>
+                </div>
+                        {/* Content */}
+                        <div className="card rounded-none w-auto border-2 border-gray-200">
+                            <div className="card-body -mx-2 -mt-2">
+                            <div className="card rounded-md w-auto">
+                                <div className="card-body">
+                                    <h2 className="card-title mb-5 -mx-6 -mt-10">Aktivitas</h2>
+                                    <div className='-mt-12'></div>
+                                    <div className='divider -mx-6'></div>
+                                    <ol className="relative border-s border-gray-200 ">                  
+                                        <li className="mb-10 ms-6">            
+                                            <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                            </svg>
+                                            </span>
+                                            <h3 className="flex items-center mb-1 text-lg font-semibold text-gray-900 ">Materi</h3>
+                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
+                                            <p className="mb-4 text-base font-normal text-gray-500 lg:w-72"></p>
+                                            <div className='inline-flex'>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5  text-gray-600">
+                                                    <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                                                    <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                                                </svg>
+                                                    <div className='mr-2'>Materi Pemrograman.pdf</div>
+                                            </div>
+                                            <div className='flex justify-start'>
+                                                <div className='font-extralight -mt-2 ml-0.5'>Ukuran: 1.03 mb</div>
+                                            </div>
+                                        </li>
+                                        <li className="mb-10 ms-6">
+                                            <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                            </svg>
+                                            </span>
+                                            <h3 className="mb-1 text-lg font-semibold text-gray-900 ">Link Penting</h3>
+                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
+                                            <p className="text-blue-600 underline font-normal text-base overflow-clip lg:overflow-hidden">https://www.youtube.com/watch?v=z2Iq9nrDZZU</p>
+                                        </li>
+                                        <li className="ms-6">
+                                            <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                            </svg>
+                                            </span>
+                                            <h3 className="mb-1 text-lg font-semibold text-gray-900 ">Lain-Lain</h3>
+                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
+                                        </li>
+                                    </ol>
+
+
+                                </div>
+                            </div>
+                            <div className="card-body">
+                                    <h2 className="card-title mb-5 -mx-6 -mt-10">Detail Pertemuan</h2>
+                                    <div className='-mt-12'></div>
+                                    <div className='divider -mx-6'></div>
+                                    <div className="stats stats-vertical lg:stats-horizontal -mx-6 shadow-md border-2 borderslate-200/50 -mt-4 ">
+                                        <div className="stat overflow-x-scroll lg:overflow-hidden">
+                                            <div className='inline-flex'>
+                                            <div className="stat-title">Online</div>
+                                            <div className="stat-title">/</div>
+                                            <div className="stat-title font-bold text-blue-600">Offline</div>
+                                            <div className="stat-title">/</div>
+                                            <div className="stat-title">Izin</div>
+                                            <div className="stat-title">/</div>
+                                            <div className="stat-title">Tidak Hadir</div>
+                                            </div>
+                                            <div className="text-xl font-extrabold ">Ruang Q-903</div>
+                                            <div className="stat-desc mt-1">07:00 - 08:30 (1 jam 30 menit)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/* End Content */}
+                </div>
+            {/* End Section 2 */}
+                       </div>
+                  </div>
+                  <div className="divider"></div> 
+                  <div className="mt-4">
+                    {buatBagianText ? (
+                        <>
+                        <button
+                            type="submit"
+                            disabled
+                            className={`rounded-md bg-indigo-400 px-10 py-2 text-sm font-semibold float-right animate-pulse
+                            text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Loading...
+                        </button>
+                        </>
+                    ) : (
+                        <>
+                        <button
+                            type="submit"
+                            onClick={handleBuatBagian}
+                            className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
+                            text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Buat
+                        </button>
+                        </>
+                    )}
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Modal Edit Bagian */}
+      <Transition appear show={editBagianIsOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={editBagianCloseModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Ubah Judul
+                  </Dialog.Title>
+                  <div className="divider"></div> 
+                  <div className="-mt-3">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Judul Bagian
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <input
+                                    autoFocus
+                                    defaultValue={`${currentJudulBagian}`}
+                                    onChange={handleEditJudulBagian}
+                                    type="text"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageEditJudulBagian ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageEditJudulBagian ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageEditJudulBagian}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan judul bagian yang akan dimasukkan.</p>
+                                    )}
+                            </div>
+                       </div>
+                  </div>
+                  <div className="divider"></div> 
+                  <div className="mt-4">
+                    {ubahEditJudulBagianText ? (
+                        <>
+                        <button
+                            type="submit"
+                            disabled
+                            className={`rounded-md bg-indigo-400 px-10 py-2 text-sm font-semibold float-right animate-pulse
+                            text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Loading...
+                        </button>
+                        </>
+                    ) : (
+                        <>
+                        <button
+                            type="submit"
+                            onClick={handleSimpanJudulBagian}
+                            className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
+                            text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Ubah
+                        </button>
+                        </>
+                    )}
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Modal Bagian Aktivitas */}
+      <Transition appear show={bagianAktivitasIsOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={bagianAktivitasCloseModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Buat Aktivitas - {judulBagianToBagianAktivitas}
+                  </Dialog.Title>
+                  <div className="divider"></div> 
+                  <div className="-mt-3">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Judul Aktivitas
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <input
+                                    autoFocus
+                                    onChange={handleJudulBagianAktivitas}
+                                    type="text"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageJudulBagianAktivitas ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageJudulBagianAktivitas ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageJudulBagianAktivitas}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan judul aktivitas yang akan tambah.</p>
+                                    )}
+                            </div>
+                       </div>
+                  </div>
+                  <div className="mt-4">
+                     <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Deskripsi Aktivitas
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <textarea
+                                    autoFocus
+                                    rows="6"
+                                    onChange={handleDeskripsiBagianAktivitas}
+                                    type="text"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageDeskripsiBagianAktivitas ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageDeskripsiBagianAktivitas ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageDeskripsiBagianAktivitas}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Tuliskan detaill aktivitas di bagian ini.</p>
+                                    )}
+                            </div>
+                       </div>
+                  </div>
+                  <div className="divider"></div> 
+                  <div className="mt-4">
+                    {buatAktivitasText ? (
+                        <>
+                        <button
+                            type="submit"
+                            disabled
+                            className={`rounded-md bg-indigo-400 px-10 py-2 text-sm font-semibold float-right animate-pulse
+                            text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Loading...
+                        </button>
+                        </>
+                    ) : (
+                        <>
+                        <button
+                            type="submit"
+                            onClick={handleBuatAktivitas}
+                            className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
+                            text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Buat
+                        </button>
+                        </>
+                    )}
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
     {/* Modal Tersimpan */}
     <Transition.Root show={tersimpan} as={Fragment}>
             <Dialog as="div" className="relative" initialFocus={cancelButtonRefTersimpan} onClose={setTersimpan}>
@@ -1537,301 +2271,8 @@ const ProjekKu = () => {
          <div className="mx-auto max-w-7xl pt-6 sm:px-6 lg:px-8">
 
         <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
+            
             {/* Section 1 */}
-            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
-                <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
-                    <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
-                        <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
-                    </div>
-                    <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkul</div>
-                    {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
-                    <>
-                        <div className={`${buttonEdit ? "hidden" : ""} tooltip ml-auto`} data-tip='Ubah'>
-                            <button
-                                onClick={() => setButtonEdit(true)}
-                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
-                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <button
-                            onClick={() => setButtonEdit(false)}
-                            className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-700">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </>
-                    )}
-
-                    {getCurrentRole === "admin" && (
-                    <>
-                        <div className={`${buttonEdit ? "hidden" : ""} tooltip ml-auto`} data-tip='Ubah'>
-                            <button
-                                onClick={() => setButtonEdit(true)}
-                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
-                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                                </svg>
-                            </button>
-                        </div>
-
-
-                        <button
-                            onClick={() => setButtonEdit(false)}
-                            className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-700">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </>
-                    )}
-
-                </div>
-                {fetchedInfoMatkul.length > 0 ? (
-                    <>
-                    {fetchedInfoMatkul.map((dosen) => 
-                    <>
-                        <div key={dosen.idLecturers}  className="px-4 py-4 grid">
-                            <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
-                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 lg:w-56 ${buttonEdit ? "hidden" : ""} `}>
-                                            {dosen.nameLecturers}
-                                    </dd>
-                            <input
-                                defaultValue={`${dosen.nameLecturers}`}
-                                placeholder="Nama dosen pengampu"
-                                type="text" 
-                                name="dosenPengampu" 
-                                id="dosenPengampu"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                        </div>
-                        <div className="px-4 grid">
-                            <dt className="text-md font-bold leading-6 text-gray-900">Jumlah SKS</dt>
-                            <dd className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0`}>{dosen.sksLecturers} SKS</dd>
-                            <input
-                                defaultValue={`${dosen.sksLecturers}`}
-                                placeholder="SKS (ex :2, 3, 4)"
-                                type="text" 
-                                name="jumlahSKS" 
-                                id="jumlahSKS"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                        </div>
-                                
-                        <div className="px-4 py-4 grid">
-                            <div className="inline-flex">
-                                <dt className="text-md font-bold leading-6 text-gray-900 mr-1">Jadwal Kuliah</dt>
-                                <dd className="text-sm leading-6 text-gray-700">{`${dosen.roomLecturers !== "null" ? `(${dosen.roomLecturers})` : ""}`}</dd>
-                            </div>
-                            {/* Loop This */}
-                            <div className={`${buttonEdit ? "hidden" : ""} inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
-                                <dd className="text-sm leading-6 text-gray-700">{day1}</dd>
-                                <dd className="text-sm leading-6 text-gray-700 ml-auto">{time1}</dd>
-                                
-                            </div>
-                            <div className={`${buttonEdit ? "hidden" : ""} ${dosen.scheduleLecturers.secondLecturers === "null" ? "hidden" : ""}
-                            inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
-                                <dd className="text-sm leading-6 text-gray-700">{day2}</dd>
-                                <dd className="text-sm leading-6 text-gray-700 ml-auto">{time2}</dd>
-                            </div>
-                            {/* End Loop This */}
-
-                            {/* Form Khusus Jadwal */}
-                            <input
-                                defaultValue={`${dosen.roomLecturers}`}
-                                placeholder="Ruang kelas (ex:Q310)"
-                                type="text" 
-                                name="ruangKelas" 
-                                id="ruangKelas"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                            <input
-                                defaultValue={`${dosen.scheduleLecturers.firstLecturers}`}
-                                placeholder="Jadwal 1 (ex: Senin 09:30 - 11:10)" 
-                                type="text" 
-                                name="jadwal1" 
-                                id="jadwal1"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                            <input
-                                defaultValue={`${dosen.scheduleLecturers.secondLecturers}`}
-                                placeholder="Jadwal 2 (boleh dikosongkan)" 
-                                type="text" 
-                                name="jadwal2" 
-                                id="jadwal2"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                            {/* End Form Khusus Jadwal */}
-                        </div>
-                        <div className="px-4 grid -mt-1">
-                            <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
-                            {dosen.groupLinkLecturers === "null" || dosen.groupLinkLecturers === "" ? (
-                                <div
-                                className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
-                                    Belum ada link group
-                                </div>
-                            ) : (
-                                <a href={`${dosen.groupLinkLecturers}`} target='_blank' rel="noreferrer" className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700 hover:underline`}>
-                                    Link Group WhatsApp
-                                </a>
-                            )}
-                            <input
-                                defaultValue={`${dosen.groupLinkLecturers}`}
-                                placeholder="Masukkan link"
-                                type="text" 
-                                name="linkWa" 
-                                id="linkWa"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                        </div>
-                    </>
-                )}
-                    </>
-                ) : (
-                    <>
-                        <div  className="px-4 py-4 grid">
-                            <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
-                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 ${buttonEdit ? "hidden" : ""} `}>
-                                        Belum ada dosen pengampu
-                                    </dd>
-                            <input
-                                defaultValue={``}
-                                placeholder="Nama dosen pengampu"
-                                type="text" 
-                                name="dosenPengampu" 
-                                id="dosenPengampu"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                        </div>
-                        <div className="px-4 grid">
-                            <dt className="text-md font-bold leading-6 text-gray-900">Jumlah SKS</dt>
-                            <dd className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0`}>0 SKS</dd>
-                            <input
-                                defaultValue={``}
-                                placeholder="SKS (ex :2, 3, 4)"
-                                type="text" 
-                                name="jumlahSKS" 
-                                id="jumlahSKS"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                        </div>
-                                
-                        <div className="px-4 py-4 grid">
-                            <div className="inline-flex">
-                                <dt className="text-md font-bold leading-6 text-gray-900 mr-1">Jadwal Kuliah</dt>
-                                <dd className="text-sm leading-6 text-gray-700">{``}</dd>
-                            </div>
-                            {/* Loop This */}
-                            <div className={`${buttonEdit ? "hidden" : ""} inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
-                                <dd className="text-sm leading-6 text-gray-700">null</dd>
-                                <dd className="text-sm leading-6 text-gray-700 ml-auto">null</dd>
-                                
-                            </div>
-                            <div className={`${buttonEdit ? "hidden" : ""} 
-                            inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
-                                <dd className="text-sm leading-6 text-gray-700">null</dd>
-                                <dd className="text-sm leading-6 text-gray-700 ml-auto">null</dd>
-                            </div>
-                            {/* End Loop This */}
-
-                            {/* Form Khusus Jadwal */}
-                            <input
-                                defaultValue={``}
-                                placeholder="Ruang kelas (ex:Q310)"
-                                type="text" 
-                                name="ruangKelas" 
-                                id="ruangKelas"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                            <input
-                                defaultValue={``}
-                                placeholder="Jadwal 1 (ex: Senin 09:30 - 11:10)" 
-                                type="text" 
-                                name="jadwal1" 
-                                id="jadwal1"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                            <input
-                                defaultValue={``}
-                                placeholder="Jadwal 2 (boleh dikosongkan)" 
-                                type="text" 
-                                name="jadwal2" 
-                                id="jadwal2"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                            {/* End Form Khusus Jadwal */}
-                        </div>
-                        <div className="px-4 grid -mt-1">
-                            <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
-                                <div
-                                  className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
-                                    Belum ada link group
-                                </div>
-                            <input
-                                defaultValue={``}
-                                placeholder="Masukkan link"
-                                type="text" 
-                                name="linkWa" 
-                                id="linkWa"
-                                // defaultValue={`${projectData.labelProject}`}
-                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
-                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
-                            </input>
-                        </div>
-                    </>
-                )}
-                
-                {/* Simpan */}
-                <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
-                    {buttonClicked ? (
-                        <button
-                            disabled
-                            type="submit"
-                            className={`${!buttonEdit ? "hidden" : "mr-0 -mt-6 sm:mr-4"} animate-pulse rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold 
-                            text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
-                            >
-                        Loading...
-                        </button>
-                    ) : (
-                        <button
-                            type="submit"
-                            onClick={handleSimpanClick}
-                            className={`${!buttonEdit ? "hidden" : "mr-0 -mt-6 sm:mr-4"} rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold 
-                            text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
-                            >
-                        Simpan
-                        </button>
-                    )}
-                  
-                </div>
-            </div>
             {/* End Section 1 */}
 
 
@@ -1849,7 +2290,7 @@ const ProjekKu = () => {
                         
                         <div data-dial-init className="flex ml-auto">
                             <div id="speed-dial-menu-horizontal" className="flex me-1 space-x-1 items-center">
-                                <div className="tooltip scale-100 hover:scale-110 transition-all duration-200">
+                                <div className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200" data-tip="Download">
                                     <button  type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
                                            <path fillRule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V3a.75.75 0 0 1 .75-.75Zm-9 13.5a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
@@ -1858,7 +2299,7 @@ const ProjekKu = () => {
                                 </div>
                                 {(getCurrentRole === "admin" || (projectData.picProject === getCurrentEmail && getCurrentRole === "user")) && (
                                     <>
-                                        <div className="tooltip scale-100 hover:scale-110 transition-all duration-200" data-tip="Berita">
+                                        <div className="lg:tooltip scale-100 hover:scale-110 transition-all duration-200" data-tip="Berita">
                                             <button
                                             onClick={newsOpenModal}
                                             type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
@@ -1870,15 +2311,17 @@ const ProjekKu = () => {
                                         </div>
                                         <div 
                                         onClick={deadlineOpenModal}
-                                        className="tooltip scale-100 hover:scale-110 transition-all duration-200" data-tip="Deadline">
+                                        className="lg:tooltip scale-100 hover:scale-110 transition-all duration-200" data-tip="Deadline">
                                             <button type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
                                                     <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" />
                                                 </svg>
                                             </button>
                                         </div>
-                                        <div className="tooltip scale-100 hover:scale-110 transition-all duration-200">
-                                            <button type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
+                                        <div className="lg:tooltip scale-100 hover:scale-110 transition-all duration-200" data-tip="Tambah Bagian">
+                                            <button
+                                            onClick={sectionOpenModal}
+                                            type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
                                                     <path fillRule="evenodd" d="M19.5 21a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3h-5.379a.75.75 0 0 1-.53-.22L11.47 3.66A2.25 2.25 0 0 0 9.879 3H4.5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h15Zm-6.75-10.5a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V10.5Z" clipRule="evenodd" />
                                                 </svg>
@@ -1900,23 +2343,53 @@ const ProjekKu = () => {
                                     <div className='divider'></div>
                                     {fetchedBerita.length > 0 ? (
                                     <>
-                                        <div className='-mt-5'></div>
-                                        {fetchedBerita.map((berita, index) => (
-                                            <Accordion className={`${openAcc[index] ? "bg-base-200/50 rounded-md transition-all duration-100 border-2 border-slate-100/90" : ""}
-                                             focus:text-gray-800`} open={openAcc[index]} key={berita.idNews}>
-                                                <AccordionHeader
-                                                    className='p-2 rounded-md font-bold text-gray-800/90 transition-all duration-200 hover:bg-gray-100'
-                                                    onClick={() => handleToggleAcc(index)}> {/* Call handleToggleAcc with the index */}
-                                                    <div  className=''>
-                                                        <div className='font-bold text-gray-800/70'>
-                                                            {berita.titleNews}
-                                                        </div>
-                                                        <div className='text-sm font-light text-black ml-0.5'>
-                                                            dibuat pada {berita.createdAt} WIB
-                                                        </div>
+                                    {fetchedBerita.map((berita) => (
+                                        <>
+                                        <div className="flex items-start">
+                                            
+                                            <img className="w-8 h-8 rounded-full hidden lg:block" alt="profile" src={berita.publisherNews.userImage} />
+                                            <div className="flex flex-col gap-1 w-full ml-2">
+                                                <div className="flex items-center space-x-1 rtl:space-x-reverse">
+                                                    <span className="text-sm font-semibold text-gray-900 hidden lg:block">{berita.publisherNews.userName}</span>
+                                                    {berita.publisherNews.userRole === "admin" && (
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mt-0.5 text-blue-600 hidden lg:block">
+                                                        <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                                                        </svg>
+                                                    )}
+                                                    <span className="text-sm font-normal text-gray-500 ">dibuat pada {berita.createdAt} WIB</span>
+                                                </div>
+                                                <div className="flex flex-col leading-1.5 px-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl ">
+                                                    <div className="inline-flex">
+                                                    <p className="text-xl font-bold py-2.5 text-gray-700 ">{berita.titleNews}</p>
+                                                    {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setDeleteIdNews(berita.idNews)
+                                                                    setOpenHapusBerita(true)
+                                                                }
+                                                                }
+                                                                type="submit"
+                                                                className={`text-sm font-semibold fle hover:underline mt-2 text-red-500`}
+                                                                >
+                                                                Hapus
+                                                            </button>
+                                                        )}
+                                                        {getCurrentRole === "admin" && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setDeleteIdNews(berita.idNews)
+                                                                    setOpenHapusBerita(true)
+                                                                }
+                                                                }
+                                                                type="submit"
+                                                                className={`text-sm font-semibold fle hover:underline mt-2 text-red-500`}
+                                                                >
+                                                                Hapus
+                                                            </button>
+                                                        )}
                                                     </div>
-                                                </AccordionHeader>
-                                                <AccordionBody className="p-3 mb-2 font-normal overflow-x-scroll w-56 lg:w-full lg:overflow-hidden">
+                                                    <div className="divider divider-error -mt-3"></div>
+                                                    <p className="text-sm font-normal ml-0.5 -mt-2 text-gray-900 w-28 lg:w-auto">
                                                     {berita.descriptionNews && berita.descriptionNews.includes('\n') ? (
                                                         // If the description contains \n, split and map over the lines
                                                         berita.descriptionNews.split('\n').map((line, index) => (
@@ -1940,35 +2413,13 @@ const ProjekKu = () => {
                                                             })}
                                                         </p>
                                                         )}
-                                                        {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
-                                                            <button
-                                                                onClick={() => {
-                                                                    setDeleteIdNews(berita.idNews)
-                                                                    setOpenHapusBerita(true)
-                                                                }
-                                                                }
-                                                                type="submit"
-                                                                className={`text-sm font-semibold flex bg-red-500 rounded-md py-2 px-4 hover:bg-red-600 mt-2 lg:float-right text-white`}
-                                                                >
-                                                                Hapus
-                                                            </button>
-                                                        )}
-                                                        {getCurrentRole === "admin" && (
-                                                            <button
-                                                                onClick={() => {
-                                                                    setDeleteIdNews(berita.idNews)
-                                                                    setOpenHapusBerita(true)
-                                                                }
-                                                                }
-                                                                type="submit"
-                                                                className={`text-sm font-semibold flex bg-red-500 rounded-md py-2 px-4 hover:bg-red-600 mt-2 lg:float-right text-white`}
-                                                                >
-                                                                Hapus
-                                                            </button>
-                                                        )}
-                                                </AccordionBody>
-                                            </Accordion>
-                                        ))}
+                                                    </p>
+                                                    <p className="mt-4"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </>
+                                    ))}
                                     </>
                                      ) : (
                                         <>
@@ -2043,16 +2494,576 @@ const ProjekKu = () => {
     </main>
          {/* End - Content */}
          
-         {/* Start - Content 2*/}
-        <main>
-        <div className="mx-auto max-w-7xl pt-6 sm:px-6 lg:px-8">
+         {fetchedBagian.length > 0 ? (
+            <>
+                {fetchedBagian.map((bagian, index)=>
+                    <>
+                        {/* Start - Content 2*/}
+                        <main>
+                        <div className="mx-auto max-w-7xl pt-6 sm:px-6 lg:px-8">
 
-        <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
+                        <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
 
-            {/* hidden, just trigerring the flex */}
-                {/* Section 1 */}
-                    <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} hidden lg:block lg:invisible
-                     select-none cursor-default col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
+                            {/* Section 1 */}
+                            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} ${index + 1 > 1 ? "md:invisible hidden" : ""} md:block col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
+                                <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
+                                    <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
+                                        <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
+                                    </div>
+                                    <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkul</div>
+                                    {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                                    <>
+                                        <div className={`${buttonEdit ? "hidden" : ""} lg:tooltip ml-auto`}>
+                                            <button
+                                                onClick={() => setButtonEdit(true)}
+                                                className={`${buttonEdit ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
+                                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <button
+                                            onClick={() => setButtonEdit(false)}
+                                            className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-700">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </>
+                                    )}
+
+                                    {getCurrentRole === "admin" && (
+                                    <>
+                                        <div className={`${buttonEdit ? "hidden" : ""} lg:tooltip ml-auto`}>
+                                            <button
+                                                onClick={() => setButtonEdit(true)}
+                                                className={`${buttonEdit ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
+                                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+
+                                        <button
+                                            onClick={() => setButtonEdit(false)}
+                                            className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-700">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </>
+                                    )}
+
+                                </div>
+                                {fetchedInfoMatkul.length > 0 ? (
+                                    <>
+                                    {fetchedInfoMatkul.map((dosen) => 
+                                    <>
+                                        <div key={dosen.idLecturers}  className="px-4 py-4 grid">
+                                            <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
+                                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 lg:w-56 ${buttonEdit ? "hidden" : ""} `}>
+                                                            {dosen.nameLecturers}
+                                                    </dd>
+                                            <input
+                                                defaultValue={`${dosen.nameLecturers}`}
+                                                placeholder="Nama dosen pengampu"
+                                                type="text" 
+                                                name="dosenPengampu" 
+                                                id="dosenPengampu"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                        </div>
+                                        <div className="px-4 grid">
+                                            <dt className="text-md font-bold leading-6 text-gray-900">Jumlah SKS</dt>
+                                            <dd className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0`}>{dosen.sksLecturers} SKS</dd>
+                                            <input
+                                                defaultValue={`${dosen.sksLecturers}`}
+                                                placeholder="SKS (ex :2, 3, 4)"
+                                                type="text" 
+                                                name="jumlahSKS" 
+                                                id="jumlahSKS"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                        </div>
+                                                
+                                        <div className="px-4 py-4 grid">
+                                            <div className="inline-flex">
+                                                <dt className="text-md font-bold leading-6 text-gray-900 mr-1">Jadwal Kuliah</dt>
+                                                <dd className="text-sm leading-6 text-gray-700">{`${dosen.roomLecturers !== "null" ? `(${dosen.roomLecturers})` : ""}`}</dd>
+                                            </div>
+                                            {/* Loop This */}
+                                            <div className={`${buttonEdit ? "hidden" : ""} inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
+                                                <dd className="text-sm leading-6 text-gray-700">{day1}</dd>
+                                                <dd className="text-sm leading-6 text-gray-700 ml-auto">{time1}</dd>
+                                                
+                                            </div>
+                                            <div className={`${buttonEdit ? "hidden" : ""} ${dosen.scheduleLecturers.secondLecturers === "null" ? "hidden" : ""}
+                                            inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
+                                                <dd className="text-sm leading-6 text-gray-700">{day2}</dd>
+                                                <dd className="text-sm leading-6 text-gray-700 ml-auto">{time2}</dd>
+                                            </div>
+                                            {/* End Loop This */}
+
+                                            {/* Form Khusus Jadwal */}
+                                            <input
+                                                defaultValue={`${dosen.roomLecturers}`}
+                                                placeholder="Ruang kelas (ex:Q310)"
+                                                type="text" 
+                                                name="ruangKelas" 
+                                                id="ruangKelas"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                            <input
+                                                defaultValue={`${dosen.scheduleLecturers.firstLecturers}`}
+                                                placeholder="Jadwal 1 (ex: Senin 09:30 - 11:10)" 
+                                                type="text" 
+                                                name="jadwal1" 
+                                                id="jadwal1"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                            <input
+                                                defaultValue={`${dosen.scheduleLecturers.secondLecturers}`}
+                                                placeholder="Jadwal 2 (boleh dikosongkan)" 
+                                                type="text" 
+                                                name="jadwal2" 
+                                                id="jadwal2"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                            {/* End Form Khusus Jadwal */}
+                                        </div>
+                                        <div className="px-4 grid -mt-1">
+                                            <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
+                                            {dosen.groupLinkLecturers === "null" || dosen.groupLinkLecturers === "" ? (
+                                                <div
+                                                className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
+                                                    Belum ada link group
+                                                </div>
+                                            ) : (
+                                                <a href={`${dosen.groupLinkLecturers}`} target='_blank' rel="noreferrer" className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700 hover:underline`}>
+                                                    Link Group WhatsApp
+                                                </a>
+                                            )}
+                                            <input
+                                                defaultValue={`${dosen.groupLinkLecturers}`}
+                                                placeholder="Masukkan link"
+                                                type="text" 
+                                                name="linkWa" 
+                                                id="linkWa"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                        </div>
+                                    </>
+                                )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <div  className="px-4 py-4 grid">
+                                            <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
+                                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 ${buttonEdit ? "hidden" : ""} `}>
+                                                        Belum ada dosen pengampu
+                                                    </dd>
+                                            <input
+                                                defaultValue={``}
+                                                placeholder="Nama dosen pengampu"
+                                                type="text" 
+                                                name="dosenPengampu" 
+                                                id="dosenPengampu"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                        </div>
+                                        <div className="px-4 grid">
+                                            <dt className="text-md font-bold leading-6 text-gray-900">Jumlah SKS</dt>
+                                            <dd className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0`}>0 SKS</dd>
+                                            <input
+                                                defaultValue={``}
+                                                placeholder="SKS (ex :2, 3, 4)"
+                                                type="text" 
+                                                name="jumlahSKS" 
+                                                id="jumlahSKS"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                        </div>
+                                                
+                                        <div className="px-4 py-4 grid">
+                                            <div className="inline-flex">
+                                                <dt className="text-md font-bold leading-6 text-gray-900 mr-1">Jadwal Kuliah</dt>
+                                                <dd className="text-sm leading-6 text-gray-700">{``}</dd>
+                                            </div>
+                                            {/* Loop This */}
+                                            <div className={`${buttonEdit ? "hidden" : ""} inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
+                                                <dd className="text-sm leading-6 text-gray-700">null</dd>
+                                                <dd className="text-sm leading-6 text-gray-700 ml-auto">null</dd>
+                                                
+                                            </div>
+                                            <div className={`${buttonEdit ? "hidden" : ""} 
+                                            inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
+                                                <dd className="text-sm leading-6 text-gray-700">null</dd>
+                                                <dd className="text-sm leading-6 text-gray-700 ml-auto">null</dd>
+                                            </div>
+                                            {/* End Loop This */}
+
+                                            {/* Form Khusus Jadwal */}
+                                            <input
+                                                defaultValue={``}
+                                                placeholder="Ruang kelas (ex:Q310)"
+                                                type="text" 
+                                                name="ruangKelas" 
+                                                id="ruangKelas"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                            <input
+                                                defaultValue={``}
+                                                placeholder="Jadwal 1 (ex: Senin 09:30 - 11:10)" 
+                                                type="text" 
+                                                name="jadwal1" 
+                                                id="jadwal1"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                            <input
+                                                defaultValue={``}
+                                                placeholder="Jadwal 2 (boleh dikosongkan)" 
+                                                type="text" 
+                                                name="jadwal2" 
+                                                id="jadwal2"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                            {/* End Form Khusus Jadwal */}
+                                        </div>
+                                        <div className="px-4 grid -mt-1">
+                                            <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
+                                                <div
+                                                className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
+                                                    Belum ada link group
+                                                </div>
+                                            <input
+                                                defaultValue={``}
+                                                placeholder="Masukkan link"
+                                                type="text" 
+                                                name="linkWa" 
+                                                id="linkWa"
+                                                // defaultValue={`${projectData.labelProject}`}
+                                                className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                                ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                            </input>
+                                        </div>
+                                    </>
+                                )}
+                                
+                                {/* Simpan */}
+                                <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
+                                    {buttonClicked ? (
+                                        <button
+                                            disabled
+                                            type="submit"
+                                            className={`${!buttonEdit ? "hidden" : "mr-0 -mt-6 sm:mr-4"} animate-pulse rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold 
+                                            text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                            >
+                                        Loading...
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="submit"
+                                            onClick={handleSimpanClick}
+                                            className={`${!buttonEdit ? "hidden" : "mr-0 -mt-6 sm:mr-4"} rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold 
+                                            text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                            >
+                                        Simpan
+                                        </button>
+                                    )}
+                                
+                                </div>
+                            </div>
+                            {/* End Section 1 */}
+
+
+                            {/* Section 2 */}
+                            <div className="col-span-7 row-span-3 bg-white border-2 border-gray-200 shadow-md rounded-t-md">
+                                <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
+                                    <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 mt-0.5">
+                                            <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
+                                            <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" />
+                                            <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
+                                        </svg>
+                                    </div>
+                                    <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{bagian.titleSections}</div>
+                                    {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                                    <>
+                                        <div className={`tooltip ml-auto`} data-tip='Ubah'>
+                                            <button
+                                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
+                                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </>
+                                    )}
+
+                                    {getCurrentRole === "admin" && (
+                                    <>
+                                        <div className={`lg:tooltip ml-auto`} data-tip='Ubah'>
+                                            <button
+                                                onClick={() => {
+                                                    editBagianOpenModal(bagian.titleSections, bagian.idSection)
+                                                }
+                                                }
+                                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
+                                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </>
+                                    )}
+                                </div>
+                                        {/* Content */}
+                                        <div className="card rounded-none w-auto border-2 border-gray-200">
+                                            <div className="card-body -mx-2 -mt-2">
+                                            <div className="card rounded-md w-auto">
+                                                <div className="card-body">
+                                                    <div className="flex justify-between">
+                                                        <h2 className="card-title mb-5 -mx-6 -mt-10">Aktivitas</h2>
+                                                        {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                                                            <>
+                                                                 <div className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200 -mt-10" data-tip="Tambah Aktivitas">
+                                                                    <button 
+                                                                    onClick={() => bagianAktivitasOpenModal(bagian.titleSections, bagian.idSection)}
+                                                                    type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[35px] h-[35px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50 focus:outline-none">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 scale-110 text-gray-600">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+                                                            </>
+                                                            )}
+                                                            {getCurrentRole === "admin" && (
+                                                            <>
+                                                                <div className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200 -mt-10" data-tip="Tambah Aktivitas">
+                                                                    <button 
+                                                                    onClick={() => bagianAktivitasOpenModal(bagian.titleSections, bagian.idSection)}
+                                                                    type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[35px] h-[35px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 scale-110 text-gray-600">
+                                                                            <path fillRule="evenodd" d="M19.5 21a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3h-5.379a.75.75 0 0 1-.53-.22L11.47 3.66A2.25 2.25 0 0 0 9.879 3H4.5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h15Zm-6.75-10.5a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V10.5Z" clipRule="evenodd" />
+                                                                        </svg>
+
+                                                                    </button>
+                                                                </div>
+                                                            </>
+                                                            )}
+                                                    </div>
+                                                    <div className='-mt-12'></div>
+                                                    <div className='divider -mx-6'></div>
+                                                    {fetchedBagianAktivitas.length > 0 ? (
+                                                        <>
+                                                            {fetchedBagianAktivitas.map((aktivitas) =>
+                                                                <>
+                                                                {bagian.idSection === aktivitas.idSection ? (
+                                                                    <>
+                                                                        
+                                                                        <ol className={` relative border-s border-gray-200`}>                
+                                                                            <li className="mb-10 ms-6">            
+                                                                                <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                                                                </svg>
+                                                                                </span>
+                                                                                <h3 className="flex items-center mb-1 text-lg font-semibold text-gray-900 ">{aktivitas.titleActivity}</h3>
+                                                                                <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada {aktivitas.dateActivity}</time>
+                                                                                <p className="mb-4 text-base font-normal text-gray-800 lg:w-72">
+                                                                                {aktivitas.descriptionActivity && aktivitas.descriptionActivity.includes('\n') ? (
+                                                                                    // If the description contains \n, split and map over the lines
+                                                                                    aktivitas.descriptionActivity.split('\n').map((line, index) => (
+                                                                                        <p key={index}>
+                                                                                        {line.split(/\s+/).map((word, wordIndex) => {
+                                                                                            if (word.startsWith('https://')) {
+                                                                                            return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
+                                                                                            }
+                                                                                            return word + ' ';
+                                                                                        })}
+                                                                                        </p>
+                                                                                    ))
+                                                                                    ) : (
+                                                                                    // Otherwise, just render the description as is
+                                                                                    <p>
+                                                                                        {aktivitas.descriptionActivity.split(/\s+/).map((word, wordIndex) => {
+                                                                                        if (word.startsWith('https://')) {
+                                                                                            return <a href={word} key={wordIndex}>{word}</a>;
+                                                                                        }
+                                                                                        return word + ' ';
+                                                                                        })}
+                                                                                    </p>
+                                                                                    )}
+                                                                                </p>
+                                                                                <div className='inline-flex'>
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5  text-gray-600">
+                                                                                        <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                                                                                        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                                                                                    </svg>
+                                                                                        <a href="/#" target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-gray-900'>Materi Pemrograman.pdf</a>
+                                                                                </div>
+                                                                                <div className='flex justify-start'>
+                                                                                    <div className='font-extralight -mt-2 ml-0.5'>Ukuran: 1.03 mb</div>
+                                                                                </div>
+                                                                            </li>
+                                                                        </ol>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                    {bagian.idSection !== aktivitas.idSection ? (
+                                                                        <>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <ol className={`${bagian.idSection !== aktivitas.idSection ? "hidden" : ""} relative border-s border-gray-200`}>                
+                                                                                <li className="mb-10 ms-6">            
+                                                                                    <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                                                                    </svg>
+                                                                                    </span>
+                                                                                    <h3 className="flex items-center mb-1 text-lg font-semibold text-gray-900 ">Belum ada aktivitas</h3>
+                                                                                    <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada </time>
+                                                                                    <p className="mb-4 text-base font-normal text-gray-500   lg:w-72">Belum ada deskripsi</p>
+                                                                                </li>
+                                                                            </ol>
+                                                                        </>
+                                                                    )}
+                                                                    </>
+                                                                )}
+                                                                </>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <ol className={`hidden relative border-s border-gray-200`}>                
+                                                                    <li className="mb-10 ms-6">            
+                                                                        <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                                                        </svg>
+                                                                        </span>
+                                                                        <h3 className="flex items-center mb-1 text-lg font-semibold text-gray-900 ">Belum ada aktivitas</h3>
+                                                                        <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada </time>
+                                                                        <p className="mb-4 text-base font-normal text-gray-500   lg:w-72">Belum ada deskripsi</p>
+                                                                    </li>
+                                                                </ol>
+                                                        </>
+                                                    )}
+                                                    {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                                                            <>
+                                                            <ol className={`relative border-s border-gray-200 tranisition-all duration-200 scale-100 hover:scale-105 hover:translate-x-6`}>                
+                                                                <li className="ms-6">            
+                                                                    <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                                                    </svg>
+                                                                    </span>
+                                                                    <p onClick={() => bagianAktivitasOpenModal(bagian.titleSections, bagian.idSection)} className="text-base font-normal text-gray-500 lg:w-72 cursor-pointer hover:text-gray-700">Tambah Aktivitas baru</p>
+                                                                </li>
+                                                            </ol>
+                                                            </>
+                                                    )}
+                                                    
+                                                    {getCurrentRole === "admin" ? (
+                                                            <>
+                                                            <ol className={`relative border-s border-gray-200 tranisition-all duration-200 scale-100 hover:scale-105 hover:translate-x-6`}>                
+                                                                <li className="ms-6">            
+                                                                    <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                                                    </svg>
+                                                                    </span>
+                                                                    <p onClick={() => bagianAktivitasOpenModal(bagian.titleSections, bagian.idSection)} className="text-base font-normal text-gray-500 lg:w-72 cursor-pointer hover:text-gray-700">Tambah Aktivitas baru</p>
+                                                                </li>
+                                                            </ol>
+                                                            </>
+                                                    ) : (
+                                                        <>
+                                                            <ol className={`relative border-s border-gray-200 invisible`}>                
+                                                                <li className="ms-6">            
+                                                                    <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                                                    </svg>
+                                                                    </span>
+                                                                    <p  className="text-base font-normal text-gray-500 lg:w-72 cursor-pointer hover:text-gray-700">Tambah Aktivitas baru</p>
+                                                                </li>
+                                                            </ol>
+                                                        </> 
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="card-body">
+                                                    <h2 className="card-title mb-5 -mx-6 -mt-10">Detail Pertemuan</h2>
+                                                    <div className='-mt-12'></div>
+                                                    <div className='divider -mx-6'></div>
+                                                    <div className="stats stats-vertical lg:stats-horizontal -mx-6 shadow-md border-2 borderslate-200/50 -mt-4 ">
+                                                        <div className="stat overflow-x-scroll lg:overflow-hidden">
+                                                            <div className='inline-flex'>
+                                                            <div className="stat-title font-bold text-blue-600">Online</div>
+                                                            <div className="stat-title">/</div>
+                                                            <div className="stat-title">Offline</div>
+                                                            <div className="stat-title">/</div>
+                                                            <div className="stat-title">Izin</div>
+                                                            <div className="stat-title">/</div>
+                                                            <div className="stat-title">Tidak Hadir</div>
+                                                            </div>
+                                                            <div className="text-xl font-extrabold ">Zoom</div>
+                                                            <div className="stat-desc mt-1">07:00 - 08:09 (1 jam 9 menit)</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* End Content */}
+                                </div>
+                            {/* End Section 2 */}
+                        </div>
+                    </div>
+                    </main>
+                        {/* End - Content 2*/}
+                    </>
+                )}
+            </>
+         ) : (
+            <>
+                {/* Start - Content 2*/}
+                <main>
+                <div className="mx-auto max-w-7xl pt-6 sm:px-6 lg:px-8">
+
+                <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
+
+                    {/* Section 1 */}
+                    <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
                         <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                             <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                                 <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
@@ -2060,9 +3071,9 @@ const ProjekKu = () => {
                             <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkul</div>
                             {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                             <>
-                                <div className={`${buttonEdit ? "hidden" : ""} ml-auto`}>
+                                <div className={`${buttonEdit ? "hidden" : ""} lg:tooltip ml-auto`} data-tip='Ubah'>
                                     <button
-                                        disabled
+                                        onClick={() => setButtonEdit(true)}
                                         className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
                                             <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
@@ -2072,7 +3083,7 @@ const ProjekKu = () => {
                                 </div>
 
                                 <button
-                                    disabled
+                                    onClick={() => setButtonEdit(false)}
                                     className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-700">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -2083,9 +3094,9 @@ const ProjekKu = () => {
 
                             {getCurrentRole === "admin" && (
                             <>
-                                <div className={`${buttonEdit ? "hidden" : ""} ml-auto`}>
+                                <div className={`${buttonEdit ? "hidden" : ""} lg:tooltip ml-auto`} data-tip='Ubah'>
                                     <button
-                                        disabled
+                                        onClick={() => setButtonEdit(true)}
                                         className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
                                             <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
@@ -2096,7 +3107,7 @@ const ProjekKu = () => {
 
 
                                 <button
-                                    disabled
+                                    onClick={() => setButtonEdit(false)}
                                     className={`${!buttonEdit ? "hidden" : ""}  ml-auto`}>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-700">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -2112,9 +3123,108 @@ const ProjekKu = () => {
                             <>
                                 <div key={dosen.idLecturers}  className="px-4 py-4 grid">
                                     <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
-                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 lg:w-56 ${buttonEdit ? "hidden" : ""} `}>
-                                            {dosen.nameLecturers}
-                                    </dd>
+                                            <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 lg:w-56 ${buttonEdit ? "hidden" : ""} `}>
+                                                    {dosen.nameLecturers}
+                                            </dd>
+                                    <input
+                                        defaultValue={`${dosen.nameLecturers}`}
+                                        placeholder="Nama dosen pengampu"
+                                        type="text" 
+                                        name="dosenPengampu" 
+                                        id="dosenPengampu"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                </div>
+                                <div className="px-4 grid">
+                                    <dt className="text-md font-bold leading-6 text-gray-900">Jumlah SKS</dt>
+                                    <dd className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0`}>{dosen.sksLecturers} SKS</dd>
+                                    <input
+                                        defaultValue={`${dosen.sksLecturers}`}
+                                        placeholder="SKS (ex :2, 3, 4)"
+                                        type="text" 
+                                        name="jumlahSKS" 
+                                        id="jumlahSKS"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                </div>
+                                        
+                                <div className="px-4 py-4 grid">
+                                    <div className="inline-flex">
+                                        <dt className="text-md font-bold leading-6 text-gray-900 mr-1">Jadwal Kuliah</dt>
+                                        <dd className="text-sm leading-6 text-gray-700">{`${dosen.roomLecturers !== "null" ? `(${dosen.roomLecturers})` : ""}`}</dd>
+                                    </div>
+                                    {/* Loop This */}
+                                    <div className={`${buttonEdit ? "hidden" : ""} inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
+                                        <dd className="text-sm leading-6 text-gray-700">{day1}</dd>
+                                        <dd className="text-sm leading-6 text-gray-700 ml-auto">{time1}</dd>
+                                        
+                                    </div>
+                                    <div className={`${buttonEdit ? "hidden" : ""} ${dosen.scheduleLecturers.secondLecturers === "null" ? "hidden" : ""}
+                                    inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
+                                        <dd className="text-sm leading-6 text-gray-700">{day2}</dd>
+                                        <dd className="text-sm leading-6 text-gray-700 ml-auto">{time2}</dd>
+                                    </div>
+                                    {/* End Loop This */}
+
+                                    {/* Form Khusus Jadwal */}
+                                    <input
+                                        defaultValue={`${dosen.roomLecturers}`}
+                                        placeholder="Ruang kelas (ex:Q310)"
+                                        type="text" 
+                                        name="ruangKelas" 
+                                        id="ruangKelas"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                    <input
+                                        defaultValue={`${dosen.scheduleLecturers.firstLecturers}`}
+                                        placeholder="Jadwal 1 (ex: Senin 09:30 - 11:10)" 
+                                        type="text" 
+                                        name="jadwal1" 
+                                        id="jadwal1"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                    <input
+                                        defaultValue={`${dosen.scheduleLecturers.secondLecturers}`}
+                                        placeholder="Jadwal 2 (boleh dikosongkan)" 
+                                        type="text" 
+                                        name="jadwal2" 
+                                        id="jadwal2"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                    {/* End Form Khusus Jadwal */}
+                                </div>
+                                <div className="px-4 grid -mt-1">
+                                    <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
+                                    {dosen.groupLinkLecturers === "null" || dosen.groupLinkLecturers === "" ? (
+                                        <div
+                                        className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
+                                            Belum ada link group
+                                        </div>
+                                    ) : (
+                                        <a href={`${dosen.groupLinkLecturers}`} target='_blank' rel="noreferrer" className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700 hover:underline`}>
+                                            Link Group WhatsApp
+                                        </a>
+                                    )}
+                                    <input
+                                        defaultValue={`${dosen.groupLinkLecturers}`}
+                                        placeholder="Masukkan link"
+                                        type="text" 
+                                        name="linkWa" 
+                                        id="linkWa"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
                                 </div>
                             </>
                         )}
@@ -2123,112 +3233,200 @@ const ProjekKu = () => {
                             <>
                                 <div  className="px-4 py-4 grid">
                                     <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
-                                    <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 ${buttonEdit ? "hidden" : ""} `}>
-                                        Belum ada dosen pengampu
-                                    </dd>
+                                            <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 ${buttonEdit ? "hidden" : ""} `}>
+                                                Belum ada dosen pengampu
+                                            </dd>
+                                    <input
+                                        defaultValue={``}
+                                        placeholder="Nama dosen pengampu"
+                                        type="text" 
+                                        name="dosenPengampu" 
+                                        id="dosenPengampu"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                </div>
+                                <div className="px-4 grid">
+                                    <dt className="text-md font-bold leading-6 text-gray-900">Jumlah SKS</dt>
+                                    <dd className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0`}>0 SKS</dd>
+                                    <input
+                                        defaultValue={``}
+                                        placeholder="SKS (ex :2, 3, 4)"
+                                        type="text" 
+                                        name="jumlahSKS" 
+                                        id="jumlahSKS"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                </div>
+                                        
+                                <div className="px-4 py-4 grid">
+                                    <div className="inline-flex">
+                                        <dt className="text-md font-bold leading-6 text-gray-900 mr-1">Jadwal Kuliah</dt>
+                                        <dd className="text-sm leading-6 text-gray-700">{``}</dd>
+                                    </div>
+                                    {/* Loop This */}
+                                    <div className={`${buttonEdit ? "hidden" : ""} inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
+                                        <dd className="text-sm leading-6 text-gray-700">null</dd>
+                                        <dd className="text-sm leading-6 text-gray-700 ml-auto">null</dd>
+                                        
+                                    </div>
+                                    <div className={`${buttonEdit ? "hidden" : ""} 
+                                    inline-flex bg-indigo-100 rounded-md py-1 px-2  border-2 border-indigo-400/10 mb-1`}>
+                                        <dd className="text-sm leading-6 text-gray-700">null</dd>
+                                        <dd className="text-sm leading-6 text-gray-700 ml-auto">null</dd>
+                                    </div>
+                                    {/* End Loop This */}
+
+                                    {/* Form Khusus Jadwal */}
+                                    <input
+                                        defaultValue={``}
+                                        placeholder="Ruang kelas (ex:Q310)"
+                                        type="text" 
+                                        name="ruangKelas" 
+                                        id="ruangKelas"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                    <input
+                                        defaultValue={``}
+                                        placeholder="Jadwal 1 (ex: Senin 09:30 - 11:10)" 
+                                        type="text" 
+                                        name="jadwal1" 
+                                        id="jadwal1"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                    <input
+                                        defaultValue={``}
+                                        placeholder="Jadwal 2 (boleh dikosongkan)" 
+                                        type="text" 
+                                        name="jadwal2" 
+                                        id="jadwal2"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
+                                    {/* End Form Khusus Jadwal */}
+                                </div>
+                                <div className="px-4 grid -mt-1">
+                                    <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
+                                        <div
+                                        className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
+                                            Belum ada link group
+                                        </div>
+                                    <input
+                                        defaultValue={``}
+                                        placeholder="Masukkan link"
+                                        type="text" 
+                                        name="linkWa" 
+                                        id="linkWa"
+                                        // defaultValue={`${projectData.labelProject}`}
+                                        className={`${!buttonEdit ? "hidden" : "mt-1"} block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm 
+                                        ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6`}>
+                                    </input>
                                 </div>
                             </>
                         )}
+                        
+                        {/* Simpan */}
+                        <div className="mt-6 flex items-center justify-end px-4 py-3 sm:gap-4 sm:px-0">
+                            {buttonClicked ? (
+                                <button
+                                    disabled
+                                    type="submit"
+                                    className={`${!buttonEdit ? "hidden" : "mr-0 -mt-6 sm:mr-4"} animate-pulse rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold 
+                                    text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                    >
+                                Loading...
+                                </button>
+                            ) : (
+                                <button
+                                    type="submit"
+                                    onClick={handleSimpanClick}
+                                    className={`${!buttonEdit ? "hidden" : "mr-0 -mt-6 sm:mr-4"} rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold 
+                                    text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                    >
+                                Simpan
+                                </button>
+                            )}
+                        
+                        </div>
                     </div>
-                {/* End Section 1 */}
-            {/* hidden, just trigerring the flex */}
+                    {/* End Section 1 */}
 
 
-            {/* Section 2 */}
-            <div className="col-span-7 row-span-3 bg-white border-2 border-gray-200 shadow-md rounded-t-md">
-                <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
-                    <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 mt-0.5">
-                            <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
-                            <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" />
-                            <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
-                        </svg>
-                    </div>
-                    <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">Minggu 1 - 19 Februari 2024</div>
-                </div>
-                        {/* Content */}
-                        <div className="card rounded-none w-auto border-2 border-gray-200">
-                            <div className="card-body -mx-2 -mt-2">
-                            <div className="card rounded-md w-auto">
-                                <div className="card-body">
-                                    <h2 className="card-title mb-5 -mx-6 -mt-10">Aktivitas</h2>
-                                    <div className='-mt-12'></div>
-                                    <div className='divider -mx-6'></div>
-                                    <ol className="relative border-s border-gray-200 ">                  
-                                        <li className="mb-10 ms-6">            
-                                            <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
-                                            </svg>
-                                            </span>
-                                            <h3 className="flex items-center mb-1 text-lg font-semibold text-gray-900 ">Materi Pertemuan 1</h3>
-                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
-                                            <p className="mb-4 text-base font-normal text-gray-500   lg:w-72">Harap dibaca dengan .</p>
-                                            <div className='inline-flex'>
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5  text-gray-600">
-                                                    <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
-                                                    <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                                                </svg>
-                                                    <a href="/#" target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-gray-900'>Materi Pemrograman.pdf</a>
-                                            </div>
-                                            <div className='flex justify-start'>
-                                                <div className='font-extralight -mt-2 ml-0.5'>Ukuran: 1.03 mb</div>
-                                            </div>
-                                        </li>
-                                        <li className="mb-10 ms-6">
-                                            <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
-                                            </svg>
-                                            </span>
-                                            <h3 className="mb-1 text-lg font-semibold text-gray-900 ">Flowbite Figma v1.3.0</h3>
-                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
-                                            <p className="text-base font-normal text-gray-500 ">All of the pages and  </p>
-                                        </li>
-                                        <li className="ms-6">
-                                            <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
-                                            </svg>
-                                            </span>
-                                            <h3 className="mb-1 text-lg font-semibold text-gray-900 ">Flowbite Library v1.2.2</h3>
-                                            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
-                                            <p className="text-base font-normal text-gray-500 ">Get started with dozens</p>
-                                        </li>
-                                    </ol>
-
-
-                                </div>
+                    {/* Section 2 */}
+                    <div className="col-span-7 opacity-40 hover:opacity-60 select-none
+                     transition-all duration 300 tooltip row-span-3 bg-white border-2 border-gray-200 shadow-md rounded-t-md" data-tip="Belum ada data">
+                        <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
+                            <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 mt-0.5">
+                                    <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
+                                    <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" />
+                                    <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
+                                </svg>
                             </div>
-                            <div className="card-body">
-                                    <h2 className="card-title mb-5 -mx-6 -mt-10">Detail Pertemuan</h2>
-                                    <div className='-mt-12'></div>
-                                    <div className='divider -mx-6'></div>
-                                    <div className="stats stats-vertical lg:stats-horizontal shadow-md border-2 borderslate-200/50 -mt-4 ">
-                                        <div className="stat overflow-x-scroll lg:overflow-hidden">
-                                            <div className='inline-flex'>
-                                            <div className="stat-title font-bold text-blue-600">Online</div>
-                                            <div className="stat-title">/</div>
-                                            <div className="stat-title">Offline</div>
-                                            <div className="stat-title">/</div>
-                                            <div className="stat-title">Izin</div>
-                                            <div className="stat-title">/</div>
-                                            <div className="stat-title">Tidak Hadir</div>
+                            <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">Belum ada data</div>
+                        </div>
+                                {/* Content */}
+                                <div className="card rounded-none w-auto border-2 border-gray-200">
+                                    <div className="card-body -mx-2 -mt-2">
+                                    <div className="card rounded-md w-auto">
+                                        <div className="card-body">
+                                            <h2 className="card-title mb-5 -mx-6 -mt-10">Aktivitas</h2>
+                                            <div className='-mt-12'></div>
+                                            <div className='divider -mx-6'></div>
+                                            <ol className="relative border-s border-gray-200 ">                  
+                                                <li className="mb-10 ms-6">            
+                                                    <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                                    </svg>
+                                                    </span>
+                                                    <h3 className="flex items-center mb-1 text-lg font-semibold text-gray-900 ">Belum ada data</h3>
+                                                </li>
+                                            </ol>
+
+
+                                        </div>
+                                    </div>
+                                    <div className="card-body">
+                                            <h2 className="card-title mb-5 -mx-6 -mt-10">Detail Pertemuan</h2>
+                                            <div className='-mt-12'></div>
+                                            <div className='divider -mx-6'></div>
+                                            <div className="stats stats-vertical lg:stats-horizontal -mx-6 shadow-md border-2 borderslate-200/50 -mt-4 ">
+                                                <div className="stat overflow-x-scroll lg:overflow-hidden">
+                                                    <div className='inline-flex'>
+                                                    <div className="stat-title">Online</div>
+                                                    <div className="stat-title">/</div>
+                                                    <div className="stat-title">Offline</div>
+                                                    <div className="stat-title">/</div>
+                                                    <div className="stat-title">Izin</div>
+                                                    <div className="stat-title">/</div>
+                                                    <div className="stat-title">Tidak Hadir</div>
+                                                    </div>
+                                                    <div className="text-xl font-extrabold flex">Belum ada data</div>
+                                                    <div className="stat-desc mt-1 flex">00:00 - 00:00 (0 menit)</div>
+                                                </div>
                                             </div>
-                                            <div className="text-xl font-extrabold ">Tidak Hadir</div>
-                                            <div className="stat-desc mt-1">07:00 - 08:30 (1 jam 30 menit)</div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                                {/* End Content */}
                         </div>
-                        {/* End Content */}
+                    {/* End Section 2 */}
                 </div>
-            {/* End Section 2 */}
-        </div>
-     </div>
-    </main>
-         {/* End - Content 2*/}
+            </div>
+            </main>
+                {/* End - Content 2*/}
+            </>
+         )}
+         
      </div>
     ) : (
         <NotFound404 />
