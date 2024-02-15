@@ -76,6 +76,7 @@ const Projek = () => {
   
   useEffect(() => {
     const fetchData = async () => {
+      localStorage.setItem('navbarClicked', "manajemenMatkulClicked");
         const user = auth.currentUser;
         if (!user) return;
 

@@ -56,6 +56,7 @@ const Dashboard = () => {
               setEmail(getEmail);
 
               setLoadingSimpan(getId);
+              localStorage.setItem('navbarClicked', "dashboardClicked");
 
             } catch (error) {
               console.log("Error: " + error)

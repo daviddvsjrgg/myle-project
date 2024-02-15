@@ -1,7 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 import Navbar from '../../../../../components/Navbar/Navbar'
 import { useLocation } from 'react-router-dom';
-import NotFound404 from '../../../../../url/NotFound404';
 import { BookOpenIcon } from '@heroicons/react/20/solid';
 import { auth, db, storage } from '../../../../../config/firebase/firebase';
 import { Timestamp, addDoc, collection, deleteDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
@@ -10,9 +9,9 @@ import { Dialog, Transition } from '@headlessui/react';
 import Bottom from '../../../../../components/BottomBar/Bottom';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import BaseLoading from '../../../../../components/Loading/BaseLoading/BaseLoading';
 
 const ProjekKu = () => {
-
     const location = useLocation();
     const projectData = location.state ? location.state.projectData : null;
 
@@ -41,6 +40,9 @@ const ProjekKu = () => {
     // Countdown
     const [count, setCount] = useState(null);
 
+    // loading
+    const [ isLoading, setIsLoading ] = useState(true);
+
     useEffect(() => {
         const countdownInterval = setInterval(() => {
         if (count > 0) {
@@ -57,6 +59,7 @@ const ProjekKu = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+        localStorage.setItem('navbarClicked', "manajemenPersonalClicked");
         const lecturersCollection = collection(db, "lecturers");
 
         try {
@@ -69,9 +72,12 @@ const ProjekKu = () => {
 
             setGetCurrentEmail(getEmail);
             setGetCurrentRole(getRole);
+            // setTimeout(() => {
+            //     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+            // }, 150);
             setTimeout(() => {
-                window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-            }, 150);
+                setIsLoading(false)
+            }, 1250);
         } catch (error) {
             console.log("user error: " + error)
         }
@@ -479,10 +485,10 @@ const ProjekKu = () => {
     try {
         useEffect(() => {
             const fetchDataDeadline = async () => {
-            try {
+                try {
                 const deadlinesCollection = collection(db, "deadlines");
                 const orderedQuery = query(deadlinesCollection, where("idProject", "==", projectData.idProject), orderBy("dateDeadline", "asc")); // Assuming projectData is available
-                
+                    
                 const snapshot = await getDocs(orderedQuery);
                 const fetchedDataDeadlines = snapshot.docs.map(doc => ({
                 idDeadline: doc.data().idDeadline,
@@ -509,6 +515,9 @@ const ProjekKu = () => {
     } catch (error) {
         console.log(error);
     }
+
+   
+
     
 
     const [ timeRemaining, setTimeRemaining ] = useState([]);
@@ -1020,16 +1029,9 @@ const ProjekKu = () => {
         }
     }
 
-    const deskripsiAktivitasValidation = () => {
-        if (deskripsiBagianAktivitas === "") {
-            setErrorMessageDeskripsiBagianAktivitas("Deskripsi Aktivitas harus diisi.");
-        }
-    }
-
     const handleBuatAktivitas = async () => {
-        if(judulBagianAktivitas === "" || deskripsiBagianAktivitas === "") {
+        if(judulBagianAktivitas === "") {
             judulBagianAktivitasValidation()
-            deskripsiAktivitasValidation()
         } else {
             setBuatAktivitasText(true)
             try {
@@ -1061,7 +1063,7 @@ const ProjekKu = () => {
                         idSection: idSectionToBagianAktivitas, 
                         idProject: projectData.idProject, 
                         titleActivity: judulBagianAktivitas ? judulBagianAktivitas : "null",
-                        descriptionActivity: deskripsiBagianAktivitas ? deskripsiBagianAktivitas : "null",
+                        descriptionActivity: deskripsiBagianAktivitas ? deskripsiBagianAktivitas : "",
                         dateActivity: dateOrder ? dateOrder : "null",
                         createdAt: currentDateString ? currentDateString : "null",
                       });
@@ -1104,6 +1106,7 @@ const ProjekKu = () => {
                 }));
                 setFetchedBagianAktivitas(fetchedDataBerita);
                 console.log("test leak data");
+                
             } catch (error) {
                 console.log("Error fetching data: ", error);
             }
@@ -1116,12 +1119,92 @@ const ProjekKu = () => {
     } catch (error) {
         console.log(error);
     }
-    
 
+    // Edit Bagian Aktivitas
+    let [ editBagianAktivitasIsOpen, setEditBagianAktivitasIsOpen ] = useState(false)  
+
+    const [ editIdBagianAktivitas, setEditIdBagianAktivitas ] = useState('')  
+    const [ editJudulBagianAktivitasInput, setEditJudulBagianAktivitasInput ] = useState('')
+    const [ editDeskripsiBagianAktivitasInput, setEditDeskripsiBagianAktivitasInput ] = useState('')
+
+    const [ errorMessageEditJudulBagianAktivitas, setErrorMessageEditJudulBagianAktivitas ] = useState('')
+
+    const [ editUbahBagianAktivitas, setEditUbahBagianAktivitas ] = useState(false)
+
+    function editBagianAktivitasCloseModal() {
+        setEditBagianAktivitasIsOpen(false)
+        setEditJudulBagianAktivitasInput("")
+        setEditDeskripsiBagianAktivitasInput("")
+      }
+    
+    function editBagianAktivitasOpenModal(titleActivity, idActivity, descriptionActivity) {
+        setEditBagianAktivitasIsOpen(true)
+        setEditIdBagianAktivitas(idActivity)
+        
+        setEditJudulBagianAktivitasInput(titleActivity)
+        setEditDeskripsiBagianAktivitasInput(descriptionActivity)
+    }
+
+    const handleEditJudulBagianAktivitas = (e) => {
+        setEditJudulBagianAktivitasInput(e.target.value)
+        setErrorMessageEditJudulBagianAktivitas("")
+    }
+
+    const handleEditDeskripsiBagianAktivitas = (e) => {
+        setEditDeskripsiBagianAktivitasInput(e.target.value)
+    }
+
+    const editJudulBagianAktivitasValidation = () => {
+        if (editJudulBagianAktivitasInput === "") {
+            setErrorMessageEditJudulBagianAktivitas("Judul Aktivitas harus diisi.");
+        }
+    }
+
+    const handleEditBagianAktivitas = async () => {
+        if (editJudulBagianAktivitasInput === "") {
+            editJudulBagianAktivitasValidation()
+        } else {
+            setEditUbahBagianAktivitas(true)
+            try {
+                const sectionActivitiesCollection = collection(db, "sectionActivities");
+                const querySnapshot = query(sectionActivitiesCollection, where("idActivity", "==", editIdBagianAktivitas));
+                const sectionsSnapshot = await getDocs(querySnapshot);
+    
+                if (sectionsSnapshot.size === 0) {
+                    console.log("data more than 2, please fix")
+                  } else {
+                    console.log("Document with the same idProject already exists (jalankan update)");
+                    const doc = sectionsSnapshot.docs[0];
+                    try {
+                        await updateDoc(doc.ref, {
+                          titleActivity: editJudulBagianAktivitasInput ? editJudulBagianAktivitasInput : "null",
+                          descriptionActivity: editDeskripsiBagianAktivitasInput ? editDeskripsiBagianAktivitasInput : "",
+                        });
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000); 
+                        
+                        console.log("Updated Data Completed!!!");
+                      } catch (e) {
+                        console.error("Error updating document ERROR: ", e);
+                      }
+                  }
+            } catch (error) {
+                console.log("Error semua maszzeh: " + error)
+            }
+        }
+    }
+
+    if (isLoading) {
+        return <BaseLoading />
+    }
 
     return (
     <>
-    {/* Modal Hapus Berita */}
+
+    {projectData ? (
+        <>
+        {/* Modal Hapus Berita */}
     <Transition.Root show={openHapusBerita} as={Fragment}>
             <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRefBerita} onClose={setOpenHapusBerita}>
                 <Transition.Child
@@ -1362,29 +1445,20 @@ const ProjekKu = () => {
                     <>
                         {fetchedDescriptionDeadlines.map((deadline) =>
                             <>
-                              {deadline.description && deadline.description.includes('\n') ? (
-                                // If the description contains \n, split and map over the lines
+                              {deadline.description && deadline.description.trim() && (
                                 deadline.description.split('\n').map((line, index) => (
                                     <p key={index}>
-                                    {line.split(/\s+/).map((word, wordIndex) => {
-                                        if (word.startsWith('https://')) {
-                                        return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
-                                        }
-                                        return word + ' ';
-                                    })}
+                                        {line.split(/\s+/).map((word, wordIndex) => {
+                                            if (word.startsWith('https://')) {
+                                                return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
+                                            }
+                                            return word + ' ';
+                                        })}
+                                        {/* Add a non-breaking space if it's not the last line */}
+                                        {index !== deadline.description.split('\n').length - 1 && <br />}
                                     </p>
                                 ))
-                                ) : (
-                                // Otherwise, just render the description as is
-                                <p>
-                                    {deadline.description.split(/\s+/).map((word, wordIndex) => {
-                                    if (word.startsWith('https://')) {
-                                        return <a href={word} key={wordIndex}>{word}</a>;
-                                    }
-                                    return word + ' ';
-                                    })}
-                                </p>
-                                )}
+                            )}
                             </>
                         )}
                     </>
@@ -2163,7 +2237,7 @@ const ProjekKu = () => {
                                         {errorMessageDeskripsiBagianAktivitas}
                                     </div>
                                     ) : (
-                                        <p className="mt-1 text-sm leading-6 text-gray-600">Tuliskan detaill aktivitas di bagian ini.</p>
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Tuliskan detail aktivitas di bagian ini / kosongkan untuk menghapus bagian deskripsi di bagian aktivitas nanti.</p>
                                     )}
                             </div>
                        </div>
@@ -2200,6 +2274,126 @@ const ProjekKu = () => {
           </div>
         </Dialog>
       </Transition>
+
+      {/* Modal Edit Bagian Aktivitas */}
+      <Transition appear show={editBagianAktivitasIsOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={editBagianAktivitasCloseModal}>
+            <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+            >
+            <div className="fixed inset-0 bg-black/25" />
+            </Transition.Child>
+
+            <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+                <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+                >
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all">
+                    <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                    >
+                    Edit Judul Aktivitas 
+                    </Dialog.Title>
+                    <div className="divider"></div> 
+                    <div className="-mt-3">
+                        <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Judul Aktivitas
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <input
+                                    autoFocus
+                                    onChange={handleEditJudulBagianAktivitas}
+                                    defaultValue={`${editJudulBagianAktivitasInput}`}
+                                    type="text"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageEditJudulBagianAktivitas ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageEditJudulBagianAktivitas ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageEditJudulBagianAktivitas}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan judul aktivitas yang akan tambah.</p>
+                                    )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Deskripsi Aktivitas
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <textarea
+                                    autoFocus
+                                    rows="6"
+                                    onChange={handleEditDeskripsiBagianAktivitas}
+                                    defaultValue={`${editDeskripsiBagianAktivitasInput}`}
+                                    type="text"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageDeskripsiBagianAktivitas ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageDeskripsiBagianAktivitas ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageDeskripsiBagianAktivitas}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Tuliskan detail aktivitas di bagian ini / kosongkan untuk menghapus bagian deskripsi di bagian aktivitas nanti.</p>
+                                    )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="divider"></div> 
+                    <div className="mt-4">
+                    {editUbahBagianAktivitas ? (
+                        <>
+                        <button
+                            type="submit"
+                            disabled
+                            className={`rounded-md bg-indigo-400 px-10 py-2 text-sm font-semibold float-right animate-pulse
+                            text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Loading...
+                        </button>
+                        </>
+                    ) : (
+                        <>
+                        <button
+                            type="submit"
+                            onClick={handleEditBagianAktivitas}
+                            className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
+                            text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                            >
+                            Ubah
+                        </button>
+                        </>
+                    )}
+                    </div>
+                </Dialog.Panel>
+                </Transition.Child>
+            </div>
+            </div>
+        </Dialog>
+        </Transition>
 
     {/* Modal Tersimpan */}
     <Transition.Root show={tersimpan} as={Fragment}>
@@ -2254,6 +2448,16 @@ const ProjekKu = () => {
             </div>
             </Dialog>
         </Transition.Root>
+        </>
+    ) : (
+        <>
+        </>
+    )}
+    
+
+
+
+
     {projectData ? (
          <div className="min-h-full">
          <Navbar />
@@ -2390,29 +2594,20 @@ const ProjekKu = () => {
                                                     </div>
                                                     <div className="divider divider-error -mt-3"></div>
                                                     <p className="text-sm font-normal ml-0.5 -mt-2 text-gray-900 w-28 lg:w-auto">
-                                                    {berita.descriptionNews && berita.descriptionNews.includes('\n') ? (
-                                                        // If the description contains \n, split and map over the lines
+                                                    {berita.descriptionNews && berita.descriptionNews.trim() && (
                                                         berita.descriptionNews.split('\n').map((line, index) => (
                                                             <p key={index}>
-                                                            {line.split(/\s+/).map((word, wordIndex) => {
-                                                                if (word.startsWith('https://')) {
-                                                                return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
-                                                                }
-                                                                return word + ' ';
-                                                            })}
+                                                                {line.split(/\s+/).map((word, wordIndex) => {
+                                                                    if (word.startsWith('https://')) {
+                                                                        return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
+                                                                    }
+                                                                    return word + ' ';
+                                                                })}
+                                                                {/* Add a non-breaking space if it's not the last line */}
+                                                                {index !== berita.descriptionNews.split('\n').length - 1 && <br />}
                                                             </p>
                                                         ))
-                                                        ) : (
-                                                        // Otherwise, just render the description as is
-                                                        <p>
-                                                            {berita.descriptionNews.split(/\s+/).map((word, wordIndex) => {
-                                                            if (word.startsWith('https://')) {
-                                                                return <a href={word} key={wordIndex}>{word}</a>;
-                                                            }
-                                                            return word + ' ';
-                                                            })}
-                                                        </p>
-                                                        )}
+                                                    )}
                                                     </p>
                                                     <p className="mt-4"></p>
                                                 </div>
@@ -2431,13 +2626,14 @@ const ProjekKu = () => {
                                 <div className='divider'></div>
                                 <ul className="menu w-auto rounded-box -my-5">
                                 <li>
-                                    <details closed>
+                                    <details open>
                                     <summary className='font-bold text-lg'>Deadline Tugas Mahasiswa</summary>
                                     <ul>
                                         <li>
                                         {fetchedDeadlines.length > 0 ?(
                                             <>
                                                 {fetchedDeadlines.map((deadline, index) => (
+                                                    <>
                                                     <div key={index}>
                                                         <ul onClick={() => handleDetailDeadline(deadline, index)}>
                                                             {timeRemaining[index + 0] && (
@@ -2470,6 +2666,7 @@ const ProjekKu = () => {
                                                             )}
                                                         </ul>
                                                     </div>
+                                                    </>
                                                 ))}
                                             </>
                                         ) : (
@@ -2482,6 +2679,50 @@ const ProjekKu = () => {
                                     </details>
                                 </li>
                                 </ul>
+                                {/* {openDeadlineList && (
+                                    <>
+                                    <ul className="menu w-56 rounded-box">
+                                    <li>
+                                        <ul>
+                                            <li>
+                                            <div className="flex flex-col gap-2 w-52">
+                                                <div className="skeleton h-2 w-full"></div>
+                                            </div>
+                                            </li>
+                                            <li>
+                                            <div className="flex flex-col gap-2 w-96">
+                                                <div className="skeleton h-2 w-full"></div>
+                                            </div>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                            <li>
+                                            <div className="flex flex-col gap-2 w-52">
+                                                <div className="skeleton h-2 w-full"></div>
+                                            </div>
+                                            </li>
+                                            <li>
+                                            <div className="flex flex-col gap-2 w-96">
+                                                <div className="skeleton h-2 w-full"></div>
+                                            </div>
+                                            </li>
+                                        </ul>
+                                            <ul>
+                                                <li>
+                                                <div className="flex flex-col gap-2 w-52">
+                                                    <div className="skeleton h-2 w-full"></div>
+                                                </div>
+                                                </li>
+                                                <li>
+                                                <div className="flex flex-col gap-2 w-96">
+                                                    <div className="skeleton h-2 w-full"></div>
+                                                </div>
+                                                </li>
+                                            </ul>
+                                    </li>
+                                    </ul>
+                                    </>
+                                )} */}
                                 <div className='divider'></div>
 
                             </div>
@@ -2812,7 +3053,7 @@ const ProjekKu = () => {
                                             <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
                                         </svg>
                                     </div>
-                                    <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{bagian.titleSections}</div>
+                                    <div className="text-lg mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{bagian.titleSections}</div>
                                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                                     <>
                                         <div className={`tooltip ml-auto`} data-tip='Ubah'>
@@ -2896,32 +3137,39 @@ const ProjekKu = () => {
                                                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
                                                                                 </svg>
                                                                                 </span>
-                                                                                <h3 className="flex items-center mb-1 text-lg font-semibold text-gray-900 ">{aktivitas.titleActivity}</h3>
+                                                                                <div className="flex justify-between">
+                                                                                    <h3 className="mb-1 text-sm lg:text-lg font-semibold text-gray-900 w-20 lg:w-auto">{aktivitas.titleActivity}</h3>
+                                                                                    {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                                                                                    <>
+                                                                                        <h3 onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity)}
+                                                                                            className="mb-1 text-md font-normal text-indigo-500 underline hover:text-indigo-600 cursor-pointer mr-1">Edit</h3>
+                                                                                    </>
+                                                                                    )}
+
+                                                                                    {getCurrentRole === "admin" && (
+                                                                                    <>
+                                                                                        <h3 onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity)}
+                                                                                            className="mb-1 text-md font-normal text-indigo-500 underline hover:text-indigo-600 cursor-pointer mr-1">Edit</h3>
+                                                                                    </>
+                                                                                    )}
+                                                                                </div>
                                                                                 <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada {aktivitas.dateActivity}</time>
-                                                                                <p className="mb-4 text-base font-normal text-gray-800 lg:w-72">
-                                                                                {aktivitas.descriptionActivity && aktivitas.descriptionActivity.includes('\n') ? (
-                                                                                    // If the description contains \n, split and map over the lines
+                                                                                <p className={`${aktivitas.descriptionActivity === "" ? "hidden" : ""}
+                                                                                mb-4 text-base font-normal bg-gray-50 rounded-md border-2 border-slate-200 text-gray-800 w-48 overflow-x-scroll lg:overflow-hidden p-2 lg:w-auto`}>
+                                                                                {aktivitas.descriptionActivity && aktivitas.descriptionActivity.trim() && (
                                                                                     aktivitas.descriptionActivity.split('\n').map((line, index) => (
                                                                                         <p key={index}>
-                                                                                        {line.split(/\s+/).map((word, wordIndex) => {
-                                                                                            if (word.startsWith('https://')) {
-                                                                                            return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
-                                                                                            }
-                                                                                            return word + ' ';
-                                                                                        })}
+                                                                                            {line.split(/\s+/).map((word, wordIndex) => {
+                                                                                                if (word.startsWith('https://')) {
+                                                                                                    return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
+                                                                                                }
+                                                                                                return word + ' ';
+                                                                                            })}
+                                                                                            {/* Add a non-breaking space if it's not the last line */}
+                                                                                            {index !== aktivitas.descriptionActivity.split('\n').length - 1 && <br />}
                                                                                         </p>
                                                                                     ))
-                                                                                    ) : (
-                                                                                    // Otherwise, just render the description as is
-                                                                                    <p>
-                                                                                        {aktivitas.descriptionActivity.split(/\s+/).map((word, wordIndex) => {
-                                                                                        if (word.startsWith('https://')) {
-                                                                                            return <a href={word} key={wordIndex}>{word}</a>;
-                                                                                        }
-                                                                                        return word + ' ';
-                                                                                        })}
-                                                                                    </p>
-                                                                                    )}
+                                                                                )}
                                                                                 </p>
                                                                                 <div className='inline-flex'>
                                                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5  text-gray-600">
@@ -3016,6 +3264,7 @@ const ProjekKu = () => {
                                                                     </svg>
                                                                     </span>
                                                                     <p  className="text-base font-normal text-gray-500 lg:w-72 cursor-pointer hover:text-gray-700">Tambah Aktivitas baru</p>
+                                                                    
                                                                 </li>
                                                             </ol>
                                                         </> 
@@ -3037,10 +3286,11 @@ const ProjekKu = () => {
                                                             <div className="stat-title">/</div>
                                                             <div className="stat-title">Tidak Hadir</div>
                                                             </div>
-                                                            <div className="text-xl font-extrabold ">Zoom</div>
+                                                            <div className="text-xl font-extrabold ">Belum ada detail pertemuan</div>
                                                             <div className="stat-desc mt-1">07:00 - 08:09 (1 jam 9 menit)</div>
                                                         </div>
                                                     </div>
+                                                        <div className="stat-title hidden lg:invisible lg:block">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -3068,7 +3318,7 @@ const ProjekKu = () => {
                             <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                                 <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
                             </div>
-                            <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkul</div>
+                            <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkuls</div>
                             {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                             <>
                                 <div className={`${buttonEdit ? "hidden" : ""} lg:tooltip ml-auto`} data-tip='Ubah'>
@@ -3429,9 +3679,24 @@ const ProjekKu = () => {
          
      </div>
     ) : (
-        <NotFound404 />
+        <>
+             <div className="min-h-full">
+                <Navbar />
+                <header className="bg-white drop-shadow-md">
+                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Mata Kuliah Tidak Ditemukan</h1>
+                    </div>
+                </header>
+
+                {/* Start - Content */}
+                <main>
+                    <div className="lg:mx-auto max-w-7xl py-6 sm:px-6 lg:px-8 px-4">Pastikan kamu menekan tombol "Buka" di halaman mata kuliah.</div>
+                </main>
+                {/* End - Content */}
+                
+            </div>
+        </>
     )}
-       
     <Bottom />
     </>
     )

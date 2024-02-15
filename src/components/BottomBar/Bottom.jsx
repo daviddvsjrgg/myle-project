@@ -12,8 +12,8 @@ const Bottom = () => {
     <>
     {showBottom && (
       <>
-      <div className="min-h-screen -mt-60">
-        <div className="sticky top-[100vh]">
+      <div className="min-h-screen -mt-48">
+        <div className="sticky top-[150vh]">
         <footer className="footer footer-center p-4 bg-gray-900/90 text-gray-100">
           <aside>
             <p>Copyright © 2024 - All right reserved by David Dwiyanto</p>
@@ -21,7 +21,7 @@ const Bottom = () => {
         </footer>
         </div>
       </div>
-
+      
       </>
     )}
     </>
