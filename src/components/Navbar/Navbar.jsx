@@ -41,69 +41,68 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
   
   useEffect(()=>{
     
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      // User is signed in, see docs for a list of available properties
-      // https://firebase.google.com/docs/reference/js/firebase.User
-      const usersCollection = collection(db, "users");
-    
-            try {
-              const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
-              // Field from firestore
-              const getUsername = querySnapshot.docs[0].data().usernameUser;
-              const getEmail = querySnapshot.docs[0].data().emailUser;
-              const getPhoto = querySnapshot.docs[0].data().imageUser;
-              const getRole = querySnapshot.docs[0].data().roleUser;
-              setUsername(getUsername);
-              setEmail(getEmail);
-              setPhoto(getPhoto);
-              setRole(getRole);
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        const usersCollection = collection(db, "users");
+      
+              try {
+                const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
+                // Field from firestore
+                const getUsername = querySnapshot.docs[0].data().usernameUser;
+                const getEmail = querySnapshot.docs[0].data().emailUser;
+                const getPhoto = querySnapshot.docs[0].data().imageUser;
+                const getRole = querySnapshot.docs[0].data().roleUser;
+                setUsername(getUsername);
+                setEmail(getEmail);
+                setPhoto(getPhoto);
+                setRole(getRole);
 
-            } catch (error) {
-              console.log("Error: " + error)
-              setTimeout(() => {
-                navigate('/login')
-              }, 2000);
-            }
+              } catch (error) {
+                console.log("Error: " + error)
+                setTimeout(() => {
+                  navigate('/login')
+                }, 2000);
+              }
+            
+            // ...
           
-          // ...
-        
-      });
-      return () => {
-        unsubscribe();
-      }
-}, [navigate])
-
-useEffect(() => {
-    const fetchData = async () => {
-      const projectsCollection = collection(db, "projects");
-
-        try {
-          // projects table
-          const querySnapshotProjects = await getDocs(query(projectsCollection, where("picProject", "==", email)));
-          if (querySnapshotProjects.size > 0) {
-            setCheckPenanggungJawab(true)
-          }
-
-        } catch (error) {
-          console.log("err projects:" + error)
+        });
+        return () => {
+          unsubscribe();
         }
-    };
+  }, [navigate])
 
-      fetchData();
-    }, [email]);
+  useEffect(() => {
+      const fetchData = async () => {
+        const projectsCollection = collection(db, "projects");
+
+          try {
+            // projects table
+            const querySnapshotProjects = await getDocs(query(projectsCollection, where("picProject", "==", email)));
+            if (querySnapshotProjects.size > 0) {
+              setCheckPenanggungJawab(true)
+            }
+
+          } catch (error) {
+            console.log("err projects:" + error)
+          }
+      };
+
+        fetchData();
+      }, [email]);
 
 
-  const handleLogout = () => {               
-    signOut(auth).then(() => {
-    // Sign-out successful.
-        navigate("/login");
-    }).catch((error) => {
-    // An error happened.
-        console.log(error)
-    });
-}
-
-
+    const handleLogout = () => {               
+      signOut(auth).then(() => {
+      // Sign-out successful.
+          navigate("/login");
+      }).catch((error) => {
+      // An error happened.
+          console.log(error)
+      });
+  }
+  
   return (
     <Disclosure as="nav" className="bg-gray-800">
     {({ open }) => (
@@ -122,13 +121,15 @@ useEffect(() => {
                 <div className="ml-10 flex items-baseline space-x-4">
                   {(role === "user" || role === "admin") ? (
                     <>
-                      <Link to="/" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      <Link to="/" className={`${localStorage.getItem('navbarClicked') === "dashboardClicked" ? "bg-gray-700 text-white" : ""}
+                      text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium`}>
                         Dashboard
                       </Link>
                     </>
                   ) : (
                     <>
-                      <Link to="/" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      <Link to="/" className={`${localStorage.getItem('navbarClicked') === "dashboardClicked" ? "bg-gray-700 text-white" : ""}
+                      text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium`}>
                         Dashboard
                       </Link>
                     </>
@@ -136,7 +137,13 @@ useEffect(() => {
                   {(role === "user" || role === "admin") ? (
                     <>
                      <Popover className="relative">
-                      <Popover.Button className="inline-flex gap-x-1 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">
+                      <Popover.Button 
+                      className={`${
+                        localStorage.getItem('navbarClicked') === "manajemenUserClicked" ||
+                        localStorage.getItem('navbarClicked') === "manajemenProjekClicked" ||
+                        localStorage.getItem('navbarClicked') === "manajemenMatkulClicked"
+                       ? "text-white bg-gray-700" : ""}
+                     inline-flex gap-x-1 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium`}>
                         <span>Manajemen</span>
                         <ChevronDownIcon className="h-5 w-5" aria-hidden="true" />
                       </Popover.Button>
@@ -158,12 +165,15 @@ useEffect(() => {
                                   {(checkPenanggungJawab || role === 'admin') ? (
                                     <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                         <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                          className={`${localStorage.getItem('navbarClicked') === "manajemenProjekClicked" ? "text-indigo-600 bg-gray-50" : ""}
+                                          h-6 w-6 text-gray-600 group-hover:text-indigo-600`}>
                                             <path d="M5.566 4.657A4.505 4.505 0 016.75 4.5h10.5c.41 0 .806.055 1.183.157A3 3 0 0015.75 3h-7.5a3 3 0 00-2.684 1.657zM2.25 12a3 3 0 013-3h13.5a3 3 0 013 3v6a3 3 0 01-3 3H5.25a3 3 0 01-3-3v-6zM5.25 7.5c-.41 0-.806.055-1.184.157A3 3 0 016.75 6h10.5a3 3 0 012.683 1.657A4.505 4.505 0 0018.75 7.5H5.25z" />
                                           </svg>
                                         </div>
                                         <div>
-                                          <Link to="/manajemen-projek" className="font-semibold text-gray-900">
+                                          <Link to="/manajemen-projek"
+                                           className="font-semibold text-gray-900">
                                             Manajemen Projek
                                             <span className="absolute inset-0" />
                                           </Link>
@@ -176,7 +186,9 @@ useEffect(() => {
                                     {role === "admin" && (
                                     <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                       <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                      className={`${localStorage.getItem('navbarClicked') === "manajemenUserClicked" ? "text-indigo-600 bg-gray-50" : ""}
+                                      h-6 w-6 text-gray-600 group-hover:text-indigo-600`}>
                                         <path fillRule="evenodd" d="M8.25 6.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-4.38z" clipRule="evenodd" />
                                         <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a3.75 3.75 0 013.57-4.047zM20.226 19.389a8.287 8.287 0 00-1.308-5.135 3.75 3.75 0 013.57 4.047l-.01.121a.563.563 0 01-.373.486l-.115.04c-.567.2-1.156.349-1.764.441z" />
                                       </svg>
@@ -194,7 +206,9 @@ useEffect(() => {
                               )}
                                 <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                   <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                  className={`${localStorage.getItem('navbarClicked') === "manajemenMatkulClicked" ? "text-indigo-600 bg-gray-50" : ""}
+                                  h-6 w-6 text-gray-600 group-hover:text-indigo-600`}>
                                     <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
                                   </svg>
                                   </div>
@@ -224,7 +238,9 @@ useEffect(() => {
                   )}
                   {(role === "user" || role === "admin") ? (
                     <>
-                      <Link to="/personal" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
+                      <Link to="/personal" 
+                      className={`${localStorage.getItem('navbarClicked') === "manajemenPersonalClicked" ? "text-white bg-gray-700" : ""} 
+                      text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium`}>
                         Mata Kuliahku
                       </Link>
                       <Link to="/none" className='text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium'>
@@ -349,7 +365,8 @@ useEffect(() => {
           <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
               {(role === "user" || role === "admin") && (
                 <>
-                  <Disclosure.Button as="a" href="/" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                  <Disclosure.Button as="a" href="/" className={`${localStorage.getItem('navbarClicked') === "dashboardClicked" ? "bg-gray-700 text-white" : ""}
+                  text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium`}>
                     Dashboard
                   </Disclosure.Button>
                 </>
@@ -357,7 +374,13 @@ useEffect(() => {
               {(role === "user" || role === "admin") && (
                <>
                 <Popover className="relative">
-                  <Popover.Button className="inline-flex gap-x-1 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">
+                  <Popover.Button
+                   className={`${
+                      localStorage.getItem('navbarClicked') === "manajemenUserClicked" ||
+                      localStorage.getItem('navbarClicked') === "manajemenProjekClicked" ||
+                      localStorage.getItem('navbarClicked') === "manajemenMatkulClicked"
+                     ? "text-white bg-gray-700" : ""}
+                   inline-flex gap-x-1 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium`}>
                     <span>Manajemen</span>
                     <ChevronDownIcon className="h-5 w-5" aria-hidden="true" />
                   </Popover.Button>
@@ -379,12 +402,15 @@ useEffect(() => {
                                   {(checkPenanggungJawab || role === "admin") ? (
                                     <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                         <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                          className={`${localStorage.getItem('navbarClicked') === "manajemenProjekClicked" ? "text-indigo-600 bg-gray-50" : ""}
+                                          h-6 w-6 text-gray-600 group-hover:text-indigo-600`}>
                                             <path d="M5.566 4.657A4.505 4.505 0 016.75 4.5h10.5c.41 0 .806.055 1.183.157A3 3 0 0015.75 3h-7.5a3 3 0 00-2.684 1.657zM2.25 12a3 3 0 013-3h13.5a3 3 0 013 3v6a3 3 0 01-3 3H5.25a3 3 0 01-3-3v-6zM5.25 7.5c-.41 0-.806.055-1.184.157A3 3 0 016.75 6h10.5a3 3 0 012.683 1.657A4.505 4.505 0 0018.75 7.5H5.25z" />
                                           </svg>
                                         </div>
                                         <div>
-                                          <Link to="/manajemen-projek" className="font-semibold text-gray-900">
+                                          <Link to="/manajemen-projek"
+                                          className="font-semibold text-gray-900">
                                             Manajemen Projek
                                             <span className="absolute inset-0" />
                                           </Link>
@@ -397,7 +423,10 @@ useEffect(() => {
                                     {role === "admin" && (
                                     <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                                       <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                      className={`
+                                      ${localStorage.getItem('navbarClicked') === "manajemenUserClicked" ? "text-indigo-600 bg-gray-50" : ""}
+                                      h-6 w-6 text-gray-600 group-hover:text-indigo-600`}>
                                         <path fillRule="evenodd" d="M8.25 6.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-4.38z" clipRule="evenodd" />
                                         <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a3.75 3.75 0 013.57-4.047zM20.226 19.389a8.287 8.287 0 00-1.308-5.135 3.75 3.75 0 013.57 4.047l-.01.121a.563.563 0 01-.373.486l-.115.04c-.567.2-1.156.349-1.764.441z" />
                                       </svg>
@@ -415,7 +444,9 @@ useEffect(() => {
                               )}
                             <div className="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
                               <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-gray-600 group-hover:text-indigo-600">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                              className={`${localStorage.getItem('navbarClicked') === "manajemenMatkulClicked" ? "text-indigo-600 bg-gray-50" : ""}
+                              h-6 w-6 text-gray-600 group-hover:text-indigo-600`}>
                                 <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
                               </svg>
                               </div>
@@ -437,7 +468,9 @@ useEffect(() => {
               {(role === "user" || role === "admin") && (
                 <>
                 <Link to="/personal">
-                  <Disclosure.Button as="a" className='text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium'>
+                  <Disclosure.Button as="a"
+                  className={`${localStorage.getItem('navbarClicked') === "manajemenPersonalClicked" ? "text-white bg-gray-700" : ""} 
+                  text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium`}>
                     Mata Kuliahku
                   </Disclosure.Button>
                 </Link>

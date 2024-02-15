@@ -48,6 +48,7 @@ const ManajemenProjek = () => {
 
   useEffect(() => {
   const fetchData = async () => {
+    localStorage.setItem('navbarClicked', "manajemenProjekClicked");
     setDisabledPagination(true);
     if(role === "admin") {
       setDisabledPagination(false);

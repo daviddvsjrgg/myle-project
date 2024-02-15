@@ -40,6 +40,7 @@ const ManajemenUser = () => {
    const [ disabledSelanjutnya, setDisabledSelanjutnya ] = useState(true)
 
    useEffect(() => {
+    localStorage.setItem('navbarClicked', "manajemenUserClicked");
     const fetchData = async () => {
 
       const user = auth.currentUser;

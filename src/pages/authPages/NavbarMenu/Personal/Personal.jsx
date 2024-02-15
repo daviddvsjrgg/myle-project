@@ -33,6 +33,7 @@ const Personal = () => {
   const [ totalProjects, setTotalProjects ] = useState(0)
   
   useEffect(() => {
+    localStorage.setItem('navbarClicked', "manajemenPersonalClicked");
     const fetchData = async () => {
         const user = auth.currentUser;
         if (!user) return;
@@ -255,7 +256,7 @@ useEffect(() => {
                             <div key={project.id} className="p-4 md:w-1/3 scale-100 transition-all duration-400 hover:scale-105 w-screen">
                             <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md border-2 border-gray-600/20">
                                 {/* <a href="/toProject"> */}
-                                {/* <img className="lg:h-64 md:h-32 w-screen object-cover md:object-scale scale-110 transition-all duration-400 hover:opacity-90" src={project.imageUrlProject} alt="blog" /> */}
+                                <img className="lg:h-44 md:h-32 w-screen object-cover md:object-scale scale-110 transition-all duration-400 hover:opacity-90" src={project.imageUrlProject} alt="blog" />
                                 {/* </a> */}
                                 <div className="p-6">
                                 <div className="flex justify-between">        
@@ -308,12 +309,12 @@ useEffect(() => {
                             <div className="p-4 md:w-1/3 scale-105">
                             <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden">
                                 {/* <a href="/toProject"> */}
-                                {/* <div class="flex items-center justify-center h-48 bg-gray-300 rounded animate-pulse">
+                                <div class="flex items-center justify-center h-48 bg-gray-300 rounded animate-pulse">
                                     <svg class="w-10 h-10 text-gray-200 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
                                         <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2ZM10.5 6a1.5 1.5 0 1 1 0 2.999A1.5 1.5 0 0 1 10.5 6Zm2.221 10.515a1 1 0 0 1-.858.485h-8a1 1 0 0 1-.9-1.43L5.6 10.039a.978.978 0 0 1 .936-.57 1 1 0 0 1 .9.632l1.181 2.981.541-1a.945.945 0 0 1 .883-.522 1 1 0 0 1 .879.529l1.832 3.438a1 1 0 0 1-.031.988Z"/>
                                         <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z"/>
                                     </svg>
-                                </div> */}
+                                </div>
                                 {/* </a> */}
                                 <div className="p-3">
                                 <div className="flex justify-between">        
@@ -376,7 +377,7 @@ useEffect(() => {
                         <div key={project.id} className="p-4 md:w-1/3 scale-100 transition-all duration-400 hover:scale-105 w-screen">
                           <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden hover:shadow-md border-2 border-gray-600/20">
                             {/* <a href="/toProject"> */}
-                              {/* <img className="lg:h-64 md:h-32 w-screen object-cover md:object-scale scale-110 transition-all duration-400 hover:opacity-90" src={project.imageUrlProject} alt="blog" /> */}
+                              <img className="lg:h-44 md:h-32 w-screen object-cover md:object-scale scale-110 transition-all duration-400 hover:opacity-90" src={project.imageUrlProject} alt="blog" />
                             {/* </a> */}
                             <div className="p-6">
                               <div className="flex justify-between">        
@@ -429,12 +430,12 @@ useEffect(() => {
                         <div className="p-4 md:w-1/3 scale-105">
                           <div className="h-full rounded-xl shadow-cla-blue bg-gradient-to-tr from-gray-50 to-indigo-50 overflow-hidden">
                             {/* <a href="/toProject"> */}
-                            {/* <div class="flex items-center justify-center h-48 bg-gray-300 rounded animate-pulse">
+                            <div class="flex items-center justify-center h-48 bg-gray-300 rounded animate-pulse">
                                 <svg class="w-10 h-10 text-gray-200 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
                                     <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2ZM10.5 6a1.5 1.5 0 1 1 0 2.999A1.5 1.5 0 0 1 10.5 6Zm2.221 10.515a1 1 0 0 1-.858.485h-8a1 1 0 0 1-.9-1.43L5.6 10.039a.978.978 0 0 1 .936-.57 1 1 0 0 1 .9.632l1.181 2.981.541-1a.945.945 0 0 1 .883-.522 1 1 0 0 1 .879.529l1.832 3.438a1 1 0 0 1-.031.988Z"/>
                                     <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z"/>
                                 </svg>
-                            </div> */}
+                            </div>
                             {/* </a> */}
                             <div className="p-3">
                               <div className="flex justify-between">        
