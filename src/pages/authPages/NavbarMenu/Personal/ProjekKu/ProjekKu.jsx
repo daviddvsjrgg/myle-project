@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 import Navbar from '../../../../../components/Navbar/Navbar'
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { BookOpenIcon } from '@heroicons/react/20/solid';
 import { auth, db, storage } from '../../../../../config/firebase/firebase';
 import { Timestamp, addDoc, collection, deleteDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
@@ -72,12 +72,9 @@ const ProjekKu = () => {
 
             setGetCurrentEmail(getEmail);
             setGetCurrentRole(getRole);
-            // setTimeout(() => {
-            //     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-            // }, 150);
             setTimeout(() => {
                 setIsLoading(false)
-            }, 1250);
+            }, 1400);
         } catch (error) {
             console.log("user error: " + error)
         }
@@ -1195,6 +1192,81 @@ const ProjekKu = () => {
         }
     }
 
+    // Get List User (Terdaftar)
+    const [ fetchedUsers, setFetchedUsers ] = useState([]);
+    const [ noDaftar, setStatusDaftar ] = useState(false);
+    const [ picData, setPicData ] = useState([]);
+
+    const [ currentPic, setCurrentPic ] = useState('');
+    const [ totalUserListed, setTotalUserListed ] = useState('');
+
+    const handleCurrentPic = async (pic) => {
+        setCurrentPic(pic);
+    };
+
+    try {
+        useEffect(() => {
+            const fetchData = async () => {
+                const usersListCollection = collection(db, "usersProjects");
+
+                const usersCollection = collection(db, "users");
+
+                const picProject = query(usersCollection, where("emailUser", "==", currentPic));
+                const picProjectSnapshot = await getDocs(picProject);
+                const fetchedPicProjectData = picProjectSnapshot.docs.map(doc => ({
+                    usernameUser: doc.data().usernameUser,
+                    emailUser: doc.data().emailUser,
+                    positionUser: doc.data().positionUser,
+                    roleUser: doc.data().roleUser,
+                    imageUser: doc.data().imageUser,
+                }));
+                setPicData(fetchedPicProjectData);
+        
+                try {
+                    const userListQuery = query(usersListCollection, where("idProject", "==", projectData.idProject));
+                    const querySnapshot = await getDocs(userListQuery);
+        
+                    if (querySnapshot.docs.length > 0) {
+                        const fetchedListUser = querySnapshot.docs.map(doc => ({
+                            idUser: doc.data().idUser,
+                        }));
+
+                        setTotalUserListed(fetchedListUser.length + 1)
+        
+                        // Fetch users based on idUser
+                        const usersCollection = collection(db, "users");
+        
+                        if (fetchedListUser.length > 0) {
+                            const usersQuery = query(usersCollection, where("idUser", "in", fetchedListUser.map(user => user.idUser)));
+                            const usersSnapshot = await getDocs(usersQuery);
+        
+                            if (usersSnapshot.docs.length > 0) {
+                                const userList = usersSnapshot.docs.map(doc => doc.data());
+                                setFetchedUsers(userList);
+                            } else {
+                                console.log("No users found for the given idUser values.");
+                            }
+                        } else {
+                            console.log("dataListUser is empty.");
+                        }
+                    } else {
+                        console.log("No documents found for the given query.");
+                        setStatusDaftar(true);
+                    }
+                } catch (error) {
+                    console.error("Error fetching data: ", error);
+                }
+            };
+        
+            // Invoke the fetch function
+            fetchData();
+            console.log("test leak data")
+            // No cleanup needed in this case, so the return can be omitted or left empty.
+            }, [projectData.idProject, currentPic]);
+    } catch (error) {
+        console.log(error)
+    }
+
     if (isLoading) {
         return <BaseLoading />
     }
@@ -1286,333 +1358,6 @@ const ProjekKu = () => {
                 </div>
             </Dialog>
             </Transition.Root>
-
-    {/* Modal Detail Deadline */}
-    <dialog id="my_modal_2" className="modal modal-bottom sm:modal-middle">
-        <div className="modal-box">
-            <div className='flex justify-between'>
-                <h3 className="font-bold text-lg mr-2">{nameDeadline}</h3>
-                <div className={`lg:tooltip lg:tooltip-left ml-auto`} data-tip='Ubah deadline'>
-                    {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
-                        <>
-                        <button
-                            onClick={() => setEditNameDeadline(true)}
-                            className={`${editNameDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110s`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={() => setEditNameDeadline(false)}
-                            className={`${editNameDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                        </button>
-                        </>
-                    )}
-                    {getCurrentRole === "admin" && (
-                        <>
-                        <button
-                            onClick={() => setEditNameDeadline(true)}
-                            className={`${editNameDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={() => setEditNameDeadline(false)}
-                            className={`${editNameDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                        </button>
-                        </>
-                    )}
-                </div>
-            </div>
-                <label className={`${editNameDeadline ? "" : "hidden"} form-control w-full max-w-xs`}>
-                    <div className="label">
-                        <span className="label-text">Nama Tugas</span>
-                    </div>
-                    <input defaultValue={`${nameDeadline}`} type="text" id='editNameDeadline' name='editNameDeadline' placeholder="Type here" className="input input-bordered w-full max-w-xs" />
-                    <div className="label">
-                        <span className="label-text">Tanggal Deadline</span>
-                    </div>
-                    <input type="date" defaultValue={`${dateDeadline}`} id='editDateDeadline' name='editDateDeadline' placeholder="Type here" className="input input-bordered w-full max-w-xs" />
-                    <div className="mt-1">
-                       <span className="label-text">Jam Deadline</span>
-                            <div className="mt-2 sm:max-w-md">
-                            <div className="flex mb-2 space-x-2 rtl:space-x-reverse">
-                                <div>
-                                    <label for="code-1" className="sr-only"></label>
-                                    <input
-                                    onChange={handleJamDeadline}
-                                     autoComplete='off' defaultValue={`${hourDeadline}`} type="text" maxLength="2" id="editHourDeadline" name="editHourDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
-                                </div>
-                                <div>
-                                    <label for="code-2" className="sr-only"></label>
-                                    <input
-                                    onChange={handleMenitDeadline}
-                                     autoComplete='off' defaultValue={`${minuteDeadline}`} type="text" maxLength="2" id="editMinuteDeadline" name="editMinuteDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
-                                </div>
-                                <div  className="mt-1.5">WIB</div>
-                            </div>
-                                <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan jam, format waktu 00:00 - 24:00.</p>
-                            </div>
-                       </div>
-                </label>
-                {nameDeadlineSaved ? (
-                <>
-                <div className={`${editNameDeadline ? "" : "hidden"} label justify-end`}>
-                    <span className="label-text-alt bg-indigo-300 text-white px-4 py-2 rounded-md">Saved</span>
-                </div>
-                </>
-            ) : (
-                <>
-                <div className={`${editNameDeadline ? "" : "hidden"} label justify-end`}>
-                    <span onClick={handleSimpanNameDeadline} className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Simpan</span>
-                </div>
-                </>
-            )}
-            <div className='-mt-4'></div>
-            <div className='divider'></div>
-            {timeRemaining[indexDetailDeadline + 0] && (
-                <>
-            {timeRemaining[indexDetailDeadline].days < 0 &&
-                timeRemaining[indexDetailDeadline].hours < 0 &&
-                timeRemaining[indexDetailDeadline].minutes < 0 &&
-                timeRemaining[indexDetailDeadline].seconds < 0 ? (
-                <>
-                <div className='-mt-2 font-medium'>Selesai pada: </div>
-                <div className={`text-indigo-700`}>
-                    Jam  {hourDeadline}:{minuteDeadline} WIB,{" "}
-                    {dateDeadline}
-                </div>
-                </>
-            ) : (
-                <>  
-                    <div className='-mt-2 font-medium'>Sisa Waktu: </div>
-                    <div className={`${timeRemaining[indexDetailDeadline].days === 0 ? 'text-red-600' : ""}`}>
-                        {timeRemaining[indexDetailDeadline].days} hari {timeRemaining[indexDetailDeadline].hours} jam{" "}
-                        {timeRemaining[indexDetailDeadline].minutes} menit {timeRemaining[indexDetailDeadline].seconds} detik
-                    </div>
-                </>
-            )}
-            </>
-            )}
-            <div className="divider divider-start font-medium">Deskripsi Tugas</div>
-            <div className='-mt-2'>
-            <div className={`tooltip tooltip-left ml-auto -mt-12 float-right`} data-tip='Ubah deskripsi'>
-                    {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
-                        <>
-                        <button
-                            onClick={() => setEditDetailDeadline(true)}
-                            className={`${editDetailDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={() => setEditDetailDeadline(false)}
-                            className={`${editDetailDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                        </button>
-                        </>
-                    )}
-                    {getCurrentRole === "admin" && (
-                        <>
-                        <button
-                            onClick={() => setEditDetailDeadline(true)}
-                            className={`${editDetailDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={() => setEditDetailDeadline(false)}
-                            className={`${editDetailDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                        </button>
-                        </>
-                    )}
-                </div>
-                {fetchedDescriptionDeadlines.length > 0 ? (
-                    <>
-                        {fetchedDescriptionDeadlines.map((deadline) =>
-                            <>
-                              {deadline.description && deadline.description.trim() && (
-                                deadline.description.split('\n').map((line, index) => (
-                                    <p key={index}>
-                                        {line.split(/\s+/).map((word, wordIndex) => {
-                                            if (word.startsWith('https://')) {
-                                                return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
-                                            }
-                                            return word + ' ';
-                                        })}
-                                        {/* Add a non-breaking space if it's not the last line */}
-                                        {index !== deadline.description.split('\n').length - 1 && <br />}
-                                    </p>
-                                ))
-                            )}
-                            </>
-                        )}
-                    </>
-                ) : (
-                    <>
-                        <div className='mr-2'>Belum ada deskripsi</div>
-                    </>
-                )}
-            
-            </div>
-            <label className={`${editDetailDeadline ? "" : "hidden"} form-control`}>
-            <div className="label">
-                <span className="label-text">Tuliskan deskripsi</span>
-            </div>
-            <textarea onChange={handleDeskripsiDeadline} defaultValue={`${finalDescription}`} className="textarea textarea-bordered h-24" placeholder="ex: Dikerjakan individu, Tidak boleh chat gpt"></textarea>
-            </label>
-            {detailSaved ? (
-                <>
-                <div className={`${editDetailDeadline ? "" : "hidden"} label justify-end`}>
-                    <span className="label-text-alt bg-indigo-300 text-white px-4 py-2 rounded-md">Saved</span>
-                </div>
-                </>
-            ) : (
-                <>
-                <div className={`${editDetailDeadline ? "" : "hidden"} label justify-end`}>
-                    <span onClick={handleSimpanEditDetailDeadline} className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Simpan</span>
-                </div>
-                </>
-            )}
-            <div className="divider divider-start font-medium">Lampiran</div>
-            {fetchedAttachmentDeadlines.length > 0 ? (
-                <>
-                {fetchedAttachmentDeadlines.map((attachment) =>
-                    <>
-                    <div className='inline-flex'>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                            <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
-                            <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                        </svg>
-                            <a href={attachment.urlAttachment} target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-blue-900'>{attachment.nameAttachment}</a>
-                    </div>
-                    <div className='flex'>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 invisible">
-                        <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
-                        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                    </svg>
-                        <div className='font-extralight -mt-2 ml-0.5'>Ukuran: {attachment.sizeAttachment}</div>
-                    </div>
-                    </>
-                )}
-                </>
-            ) : (
-                <>
-                     <div className='inline-flex'>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
-                                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                            </svg>
-                        <div className='flex justify-start'>
-                            <div className='font-extralight ml-0.5'>Belum ada lampiran</div>
-                        </div>
-                     </div>
-                </>
-            )}
-            
-            {getCurrentRole === "admin" && (
-                <>
-                    <input 
-                    onChange={handleDeadlineAttachment}
-                    type="file" 
-                    className="file-input file-input-bordered file-input-sm w-full mt-2" 
-                    accept="application/pdf"/>
-                    {selectedDeadlineAttachmentFile && (
-                        <div>
-                            <p>Ukuran file: {parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3))} mb</p>
-                        </div>
-                    )}
-                    <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p>
-                    {deadlinneAttachmentUpload ? (
-                        <>
-                        {endingDeadlinneAttachmentUpload ? (
-                            <>
-                            <div 
-                            className={`mt-2 label justify-end`}>
-                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md">Uploaded</span>
-                            </div>
-                            </>
-                        ) : (
-                            <>
-                            <div 
-                            className={`mt-2 label justify-end`}>
-                                <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Uploading...</span>
-                            </div>
-                            </>
-                        )}
-                        </>
-                    ) : (
-                        <>
-                            <div 
-                            onClick={handleUploadDeadlineAttachment}
-                            className={`mt-2 label justify-end`}>
-                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Upload</span>
-                            </div>
-                        </>
-                    )}
-                </>
-            )}
-            {getCurrentRole === "user" && getCurrentEmail === projectData.picProject && (
-                <>
-                    <input 
-                    onChange={handleDeadlineAttachment}
-                    type="file" 
-                    className="file-input file-input-bordered file-input-sm w-full mt-2" 
-                    accept="application/pdf"/>
-                    {selectedDeadlineAttachmentFile && (
-                        <div>
-                            <p>Ukuran file: {parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3))} mb</p>
-                        </div>
-                    )}
-                    <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p>
-                    {deadlinneAttachmentUpload ? (
-                        <>
-                        {endingDeadlinneAttachmentUpload ? (
-                            <>
-                            <div 
-                            className={`mt-2 label justify-end`}>
-                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md">Uploaded</span>
-                            </div>
-                            </>
-                        ) : (
-                            <>
-                            <div 
-                            className={`mt-2 label justify-end`}>
-                                <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Uploading...</span>
-                            </div>
-                            </>
-                        )}
-                        </>
-                    ) : (
-                        <>
-                            <div 
-                            onClick={handleUploadDeadlineAttachment}
-                            className={`mt-2 label justify-end`}>
-                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Upload</span>
-                            </div>
-                        </>
-                    )}
-                </>
-            )}
-        </div>
-        <form method="dialog" className="modal-backdrop">
-            <button>close</button>
-        </form>
-    </dialog>
 
     {/* Modal Berita */}
       <Transition appear show={newsIsOpen} as={Fragment}>
@@ -2357,7 +2102,7 @@ const ProjekKu = () => {
                                         {errorMessageDeskripsiBagianAktivitas}
                                     </div>
                                     ) : (
-                                        <p className="mt-1 text-sm leading-6 text-gray-600">Tuliskan detail aktivitas di bagian ini / kosongkan untuk menghapus bagian deskripsi di bagian aktivitas nanti.</p>
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Tuliskan detail aktivitas di bagian ini / kosongkan untuk menghapus bagian deskripsi.</p>
                                     )}
                             </div>
                         </div>
@@ -2454,9 +2199,412 @@ const ProjekKu = () => {
         </>
     )}
     
+    {/* Modal Detail Deadline */}
+    <dialog id="my_modal_2" className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box">
+            <div className='flex justify-between'>
+                <h3 className="font-bold text-lg mr-2">{nameDeadline}</h3>
+                <div className={`lg:tooltip lg:tooltip-left ml-auto`} data-tip='Ubah deadline'>
+                    {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
+                        <>
+                        <button
+                            onClick={() => setEditNameDeadline(true)}
+                            className={`${editNameDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110s`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setEditNameDeadline(false)}
+                            className={`${editNameDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        </>
+                    )}
+                    {getCurrentRole === "admin" && (
+                        <>
+                        <button
+                            onClick={() => setEditNameDeadline(true)}
+                            className={`${editNameDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setEditNameDeadline(false)}
+                            className={`${editNameDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        </>
+                    )}
+                </div>
+            </div>
+                <label className={`${editNameDeadline ? "" : "hidden"} form-control w-full max-w-xs`}>
+                    <div className="label">
+                        <span className="label-text">Nama Tugas</span>
+                    </div>
+                    <input defaultValue={`${nameDeadline}`} type="text" id='editNameDeadline' name='editNameDeadline' placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                    <div className="label">
+                        <span className="label-text">Tanggal Deadline</span>
+                    </div>
+                    <input type="date" defaultValue={`${dateDeadline}`} id='editDateDeadline' name='editDateDeadline' placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                    <div className="mt-1">
+                       <span className="label-text">Jam Deadline</span>
+                            <div className="mt-2 sm:max-w-md">
+                            <div className="flex mb-2 space-x-2 rtl:space-x-reverse">
+                                <div>
+                                    <label for="code-1" className="sr-only"></label>
+                                    <input
+                                    onChange={handleJamDeadline}
+                                     autoComplete='off' defaultValue={`${hourDeadline}`} type="text" maxLength="2" id="editHourDeadline" name="editHourDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                </div>
+                                <div>
+                                    <label for="code-2" className="sr-only"></label>
+                                    <input
+                                    onChange={handleMenitDeadline}
+                                     autoComplete='off' defaultValue={`${minuteDeadline}`} type="text" maxLength="2" id="editMinuteDeadline" name="editMinuteDeadline" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                </div>
+                                <div  className="mt-1.5">WIB</div>
+                            </div>
+                                <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan jam, format waktu 00:00 - 24:00.</p>
+                            </div>
+                       </div>
+                </label>
+                {nameDeadlineSaved ? (
+                <>
+                <div className={`${editNameDeadline ? "" : "hidden"} label justify-end`}>
+                    <span className="label-text-alt bg-indigo-300 text-white px-4 py-2 rounded-md">Saved</span>
+                </div>
+                </>
+            ) : (
+                <>
+                <div className={`${editNameDeadline ? "" : "hidden"} label justify-end`}>
+                    <span onClick={handleSimpanNameDeadline} className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Simpan</span>
+                </div>
+                </>
+            )}
+            <div className='-mt-4'></div>
+            <div className='divider'></div>
+            {timeRemaining[indexDetailDeadline + 0] && (
+                <>
+            {timeRemaining[indexDetailDeadline].days < 0 &&
+                timeRemaining[indexDetailDeadline].hours < 0 &&
+                timeRemaining[indexDetailDeadline].minutes < 0 &&
+                timeRemaining[indexDetailDeadline].seconds < 0 ? (
+                <>
+                <div className='-mt-2 font-medium'>Selesai pada: </div>
+                <div className={`text-indigo-700`}>
+                    Jam  {hourDeadline}:{minuteDeadline} WIB,{" "}
+                    {dateDeadline}
+                </div>
+                </>
+            ) : (
+                <>  
+                    <div className='-mt-2 font-medium'>Sisa Waktu: </div>
+                    <div className={`${timeRemaining[indexDetailDeadline].days === 0 ? 'text-red-600' : ""}`}>
+                        {timeRemaining[indexDetailDeadline].days} hari {timeRemaining[indexDetailDeadline].hours} jam{" "}
+                        {timeRemaining[indexDetailDeadline].minutes} menit {timeRemaining[indexDetailDeadline].seconds} detik
+                    </div>
+                </>
+            )}
+            </>
+            )}
+            <div className="divider divider-start font-medium">Deskripsi Tugas</div>
+            <div className='-mt-2'>
+            <div className={`tooltip tooltip-left ml-auto -mt-12 float-right`} data-tip='Ubah deskripsi'>
+                    {getCurrentEmail === projectData.picProject && getCurrentRole === "user" && (
+                        <>
+                        <button
+                            onClick={() => setEditDetailDeadline(true)}
+                            className={`${editDetailDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setEditDetailDeadline(false)}
+                            className={`${editDetailDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        </>
+                    )}
+                    {getCurrentRole === "admin" && (
+                        <>
+                        <button
+                            onClick={() => setEditDetailDeadline(true)}
+                            className={`${editDetailDeadline ? "hidden" : ""} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setEditDetailDeadline(false)}
+                            className={`${editDetailDeadline ? "" : "hidden"} transition-all duration-100 sclae-100 hover:scale-110`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 hover:text-gray-900">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        </>
+                    )}
+                </div>
+                {fetchedDescriptionDeadlines.length > 0 ? (
+                    <>
+                        {fetchedDescriptionDeadlines.map((deadline) =>
+                            <>
+                              {deadline.description && deadline.description.trim() && (
+                                deadline.description.split('\n').map((line, index) => (
+                                    <p key={index}>
+                                        {line.split(/\s+/).map((word, wordIndex) => {
+                                            if (word.startsWith('https://')) {
+                                                return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
+                                            }
+                                            return word + ' ';
+                                        })}
+                                        {/* Add a non-breaking space if it's not the last line */}
+                                        {index !== deadline.description.split('\n').length - 1 && <br />}
+                                    </p>
+                                ))
+                            )}
+                            </>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <div className='mr-2'>Belum ada deskripsi</div>
+                    </>
+                )}
+            
+            </div>
+            <label className={`${editDetailDeadline ? "" : "hidden"} form-control`}>
+            <div className="label">
+                <span className="label-text">Tuliskan deskripsi</span>
+            </div>
+            <textarea onChange={handleDeskripsiDeadline} defaultValue={`${finalDescription}`} className="textarea textarea-bordered h-24" placeholder="ex: Dikerjakan individu, Tidak boleh chat gpt"></textarea>
+            </label>
+            {detailSaved ? (
+                <>
+                <div className={`${editDetailDeadline ? "" : "hidden"} label justify-end`}>
+                    <span className="label-text-alt bg-indigo-300 text-white px-4 py-2 rounded-md">Saved</span>
+                </div>
+                </>
+            ) : (
+                <>
+                <div className={`${editDetailDeadline ? "" : "hidden"} label justify-end`}>
+                    <span onClick={handleSimpanEditDetailDeadline} className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Simpan</span>
+                </div>
+                </>
+            )}
+            <div className="divider divider-start font-medium">Lampiran</div>
+            {fetchedAttachmentDeadlines.length > 0 ? (
+                <>
+                {fetchedAttachmentDeadlines.map((attachment) =>
+                    <>
+                    <div className='inline-flex'>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                            <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                            <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                        </svg>
+                            <a href={attachment.urlAttachment} target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-blue-900'>{attachment.nameAttachment}</a>
+                    </div>
+                    <div className='flex'>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 invisible">
+                        <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                    </svg>
+                        <div className='font-extralight -mt-2 ml-0.5'>Ukuran: {attachment.sizeAttachment}</div>
+                    </div>
+                    </>
+                )}
+                </>
+            ) : (
+                <>
+                     <div className='inline-flex'>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                            </svg>
+                        <div className='flex justify-start'>
+                            <div className='font-extralight ml-0.5'>Belum ada lampiran</div>
+                        </div>
+                     </div>
+                </>
+            )}
+            
+            {getCurrentRole === "admin" && (
+                <>
+                    <input 
+                    onChange={handleDeadlineAttachment}
+                    type="file" 
+                    className="file-input file-input-bordered file-input-sm w-full mt-2" 
+                    accept="application/pdf"/>
+                    {selectedDeadlineAttachmentFile && (
+                        <div>
+                            <p>Ukuran file: {parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3))} mb</p>
+                        </div>
+                    )}
+                    <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p>
+                    {deadlinneAttachmentUpload ? (
+                        <>
+                        {endingDeadlinneAttachmentUpload ? (
+                            <>
+                            <div 
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md">Uploaded</span>
+                            </div>
+                            </>
+                        ) : (
+                            <>
+                            <div 
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Uploading...</span>
+                            </div>
+                            </>
+                        )}
+                        </>
+                    ) : (
+                        <>
+                            <div 
+                            onClick={handleUploadDeadlineAttachment}
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Upload</span>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
+            {getCurrentRole === "user" && getCurrentEmail === projectData.picProject && (
+                <>
+                    <input 
+                    onChange={handleDeadlineAttachment}
+                    type="file" 
+                    className="file-input file-input-bordered file-input-sm w-full mt-2" 
+                    accept="application/pdf"/>
+                    {selectedDeadlineAttachmentFile && (
+                        <div>
+                            <p>Ukuran file: {parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3))} mb</p>
+                        </div>
+                    )}
+                    <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p>
+                    {deadlinneAttachmentUpload ? (
+                        <>
+                        {endingDeadlinneAttachmentUpload ? (
+                            <>
+                            <div 
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md">Uploaded</span>
+                            </div>
+                            </>
+                        ) : (
+                            <>
+                            <div 
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Uploading...</span>
+                            </div>
+                            </>
+                        )}
+                        </>
+                    ) : (
+                        <>
+                            <div 
+                            onClick={handleUploadDeadlineAttachment}
+                            className={`mt-2 label justify-end`}>
+                                <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Upload</span>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
+        </div>
+        <form method="dialog" className="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
 
-
-
+    {/* Modal Pendaftar */}
+    <dialog id="modal_pendaftar" className="modal modal-bottom sm:modal-middle">
+    <div className="modal-box">
+        <h3 className="font-bold text-lg">Daftar Pengguna</h3>
+        <div className="-mt-4"></div>
+        <div className="divider"></div>
+        <div className="flex flex-col w-full">
+        <div className="-mt-2"></div>
+        <div className="divider divider-start">Penanggung Jawab</div>
+        {picData.map((pic) =>
+            <div className="flex items-center py-2 rounded-md hover:bg-gray-100">
+                <div className="flex-shrink-0 h-10 w-10 ml-3">
+                <img className="h-10 w-10 rounded-full" src={pic.imageUser} alt=":/" />
+                </div>
+                <div className="ml-4">
+                <div className="text-sm font-medium text-gray-900 inline-flex">{pic.usernameUser}
+                    {pic.roleUser === "admin" && (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1  text-blue-600">
+                        <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                    </svg>
+                    )}
+                </div>
+                <div className="text-sm text-gray-500">{pic.positionUser}</div>
+                </div>
+            </div>
+        )}
+        </div>
+        <div className="flex flex-col w-full">
+            <div className="divider divider-start">Terdaftar</div>
+            {fetchedUsers ? (
+                <>
+                    {fetchedUsers.map((user) => 
+                    <div className="flex items-center py-3 rounded-md hover:bg-gray-100">
+                        <div className="flex-shrink-0 h-10 w-10 ml-3">
+                        <img className="h-10 w-10 rounded-full" src={user.imageUser} alt=":/" />
+                        </div>
+                        <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900 inline-flex">{user.usernameUser}
+                            {user.roleUser === "admin" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1  text-blue-600">
+                                <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                            </svg>
+                            )}
+                        </div>
+                        <div className="text-sm text-gray-500">{user.positionUser}</div>
+                        </div>
+                    </div>
+                    )}
+                </>
+            ) : (
+                <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
+                    <div className="flex w-0 flex-1 items-center">
+                        <div className="ml-4 flex min-w-0 flex-1 gap-2">
+                        <span className="truncate font-medium animate-pulse">Loading Daftar Mahasiswa</span>
+                        {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
+                        </div>
+                    </div>
+                </li>
+            )}
+            {noDaftar && (
+                <>
+                    <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
+                    <div className="flex w-0 flex-1 items-center">
+                        <div className="flex min-w-0 flex-1 gap-2">
+                        <span className="truncate font-medium">Belum ada yang terdaftar</span>
+                        {/* <span className="flex-shrink-0 text-gray-400">4.5mb</span> */}
+                        </div>
+                    </div>
+                        <div className="ml-4 flex-shrink-0">
+                    </div>
+                </li>
+                </>
+            )}
+        </div>
+    </div>
+    <form method="dialog" className="modal-backdrop">
+        <button>close</button>
+    </form>
+    </dialog>
 
     {projectData ? (
          <div className="min-h-full">
@@ -2464,9 +2612,48 @@ const ProjekKu = () => {
          
          <header className="bg-white drop-shadow-md">
             <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                    {projectData.nameProject} {projectData.nameProject.includes("-") ? '' : `- ${projectData.labelProject}`}
-                </h1>
+                <div className="lg:flex lg:justify-between">
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                        {projectData.nameProject} {projectData.nameProject.includes("-") ? '' : `- ${projectData.labelProject}`}
+                    </h1>
+                    <div onClick={() =>  {
+                         document.getElementById('modal_pendaftar').showModal()
+                         handleCurrentPic(projectData.picProject)
+                    }} className="avatar-group -space-x-5 rtl:space-x-reverse cursor-pointer transition-all duration-200 scale-100 lg:hover:scale-110">
+                    {fetchedUsers.map((user, index) => 
+                    <div className={`${index >= 3 ? "hidden" : ''} avatar`}>
+                        <div className="w-8">
+                        <img src={user.imageUser} alt='none'/>
+                        </div>
+                    </div>
+                    )}
+                    {totalUserListed >= 4 && (
+                    <div className="avatar placeholder">
+                        <div className="w-8 bg-neutral text-neutral-content">
+                        <span>+{totalUserListed - 3}</span>
+                        </div>
+                    </div>
+                    )}
+                    </div>
+                </div>
+                    <div className="text-sm breadcrumbs">
+                    <ul className='text-gray-600'>
+                        <li>
+                        <Link to='/personal'>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                        </svg>
+                            Mata Kuliahku
+                        </Link>
+                        </li> 
+                        <li>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+                        </svg>
+                            {projectData.nameProject} {projectData.nameProject.includes("-") ? '' : `- ${projectData.labelProject}`}
+                        </li> 
+                    </ul>
+                    </div>
             </div>
          </header>
 
@@ -2593,10 +2780,10 @@ const ProjekKu = () => {
                                                         )}
                                                     </div>
                                                     <div className="divider divider-error -mt-3"></div>
-                                                    <p className="text-sm font-normal ml-0.5 -mt-2 text-gray-900 w-28 lg:w-auto">
+                                                    <p className="text-sm font-normal ml-0.5 -mt-2 text-gray-900 w-28 overflow-clip lg:w-auto">
                                                     {berita.descriptionNews && berita.descriptionNews.trim() && (
                                                         berita.descriptionNews.split('\n').map((line, index) => (
-                                                            <p key={index}>
+                                                            <p key={index} className=''>
                                                                 {line.split(/\s+/).map((word, wordIndex) => {
                                                                     if (word.startsWith('https://')) {
                                                                         return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
@@ -2679,50 +2866,6 @@ const ProjekKu = () => {
                                     </details>
                                 </li>
                                 </ul>
-                                {/* {openDeadlineList && (
-                                    <>
-                                    <ul className="menu w-56 rounded-box">
-                                    <li>
-                                        <ul>
-                                            <li>
-                                            <div className="flex flex-col gap-2 w-52">
-                                                <div className="skeleton h-2 w-full"></div>
-                                            </div>
-                                            </li>
-                                            <li>
-                                            <div className="flex flex-col gap-2 w-96">
-                                                <div className="skeleton h-2 w-full"></div>
-                                            </div>
-                                            </li>
-                                        </ul>
-                                        <ul>
-                                            <li>
-                                            <div className="flex flex-col gap-2 w-52">
-                                                <div className="skeleton h-2 w-full"></div>
-                                            </div>
-                                            </li>
-                                            <li>
-                                            <div className="flex flex-col gap-2 w-96">
-                                                <div className="skeleton h-2 w-full"></div>
-                                            </div>
-                                            </li>
-                                        </ul>
-                                            <ul>
-                                                <li>
-                                                <div className="flex flex-col gap-2 w-52">
-                                                    <div className="skeleton h-2 w-full"></div>
-                                                </div>
-                                                </li>
-                                                <li>
-                                                <div className="flex flex-col gap-2 w-96">
-                                                    <div className="skeleton h-2 w-full"></div>
-                                                </div>
-                                                </li>
-                                            </ul>
-                                    </li>
-                                    </ul>
-                                    </>
-                                )} */}
                                 <div className='divider'></div>
 
                             </div>
@@ -3056,7 +3199,7 @@ const ProjekKu = () => {
                                     <div className="text-lg mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{bagian.titleSections}</div>
                                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                                     <>
-                                        <div className={`tooltip ml-auto`} data-tip='Ubah'>
+                                        <div className={`tooltip ml-auto`} data-tip='Ubah Judul'>
                                             <button
                                                 className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
@@ -3070,7 +3213,7 @@ const ProjekKu = () => {
 
                                     {getCurrentRole === "admin" && (
                                     <>
-                                        <div className={`lg:tooltip ml-auto`} data-tip='Ubah'>
+                                        <div className={`lg:tooltip ml-auto`} data-tip='Ubah Judul'>
                                             <button
                                                 onClick={() => {
                                                     editBagianOpenModal(bagian.titleSections, bagian.idSection)
@@ -3137,19 +3280,31 @@ const ProjekKu = () => {
                                                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
                                                                                 </svg>
                                                                                 </span>
-                                                                                <div className="flex justify-between">
+                                                                                <div className="flex justify-between lg:justify-start">
                                                                                     <h3 className="mb-1 text-sm lg:text-lg font-semibold text-gray-900 w-20 lg:w-auto">{aktivitas.titleActivity}</h3>
                                                                                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                                                                                     <>
-                                                                                        <h3 onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity)}
-                                                                                            className="mb-1 text-md font-normal text-indigo-500 underline hover:text-indigo-600 cursor-pointer mr-1">Edit</h3>
+                                                                                        <div
+                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity)}
+                                                                                        className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip" data-tip="Ubah Aktivitas">
+                                                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-600">
+                                                                                                <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                                                                <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                                                                            </svg>
+                                                                                        </div>
                                                                                     </>
                                                                                     )}
 
                                                                                     {getCurrentRole === "admin" && (
                                                                                     <>
-                                                                                        <h3 onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity)}
-                                                                                            className="mb-1 text-md font-normal text-indigo-500 underline hover:text-indigo-600 cursor-pointer mr-1">Edit</h3>
+                                                                                        <div
+                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity)}
+                                                                                        className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip" data-tip="Ubah Aktivitas">
+                                                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-600">
+                                                                                                <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                                                                <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                                                                            </svg>
+                                                                                        </div>
                                                                                     </>
                                                                                     )}
                                                                                 </div>
@@ -3181,6 +3336,13 @@ const ProjekKu = () => {
                                                                                 <div className='flex justify-start'>
                                                                                     <div className='font-extralight -mt-2 ml-0.5'>Ukuran: 1.03 mb</div>
                                                                                 </div>
+                                                                                {/* <div className="mt-2 lg:flex lg:justify-between">
+                                                                                    <input type="file" className="file-input file-input-bordered file-input-sm w-full max-w-xs" />
+                                                                                    <div className={`lg:-mt-2 label`}>
+                                                                                        <span className="label-text-alt -ml-1 lg:-ml-0 bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Upload</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <p className="-mt-2 text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p> */}
                                                                             </li>
                                                                         </ol>
                                                                     </>
@@ -3228,7 +3390,7 @@ const ProjekKu = () => {
                                                     )}
                                                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                                                             <>
-                                                            <ol className={`relative border-s border-gray-200 tranisition-all duration-200 scale-100 hover:scale-105 hover:translate-x-6`}>                
+                                                            <ol className={`relative border-s border-gray-200 tranisition-all duration-200 scale-100 hover:scale-105 hover:translate-x-5`}>                
                                                                 <li className="ms-6">            
                                                                     <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -3243,7 +3405,7 @@ const ProjekKu = () => {
                                                     
                                                     {getCurrentRole === "admin" ? (
                                                             <>
-                                                            <ol className={`relative border-s border-gray-200 tranisition-all duration-200 scale-100 hover:scale-105 hover:translate-x-6`}>                
+                                                            <ol className={`relative border-s border-gray-200 tranisition-all duration-200 scale-100 hover:scale-105 hover:translate-x-5`}>                
                                                                 <li className="ms-6">            
                                                                     <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -3318,7 +3480,7 @@ const ProjekKu = () => {
                             <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                                 <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
                             </div>
-                            <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkuls</div>
+                            <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkul</div>
                             {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                             <>
                                 <div className={`${buttonEdit ? "hidden" : ""} lg:tooltip ml-auto`} data-tip='Ubah'>
