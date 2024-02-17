@@ -542,6 +542,10 @@ const ProjekKu = () => {
 
     
     // Handle Detail Deadline
+
+    const [ selectedDeadlineAttachmentFile, setSelectedDeadlineAttachmentFile ] = useState(null); // Just for delete attachment
+    const [ errorMessageUploadDeadlineAttachments, setErrorMessageUploadDeadlineAttachments ] = useState(""); // delete error message
+
     const [ indexDetailDeadline, setIndexDetailDeadline ] = useState(0);
     const [ idDeadline, setIdDeadline ] = useState('');
     const [ nameDeadline, setNameDeadline ] = useState('');
@@ -550,6 +554,8 @@ const ProjekKu = () => {
     const [ minuteDeadline, setMinuteDeadline ] = useState('');
 
     const handleDetailDeadline = (deadlineValue, index) => {
+        setSelectedDeadlineAttachmentFile(null)
+        setErrorMessageUploadDeadlineAttachments("")
         document.getElementById('my_modal_2').showModal();
         setIndexDetailDeadline(index);
         setIdDeadline(deadlineValue.idDeadline);
@@ -737,30 +743,32 @@ const ProjekKu = () => {
     }
 
     // Handle Detail Attachment
-    const [ selectedDeadlineAttachmentFile, setSelectedDeadlineAttachmentFile ] = useState(null);
-    const [ deadlinneAttachmentUpload, setDeadlinneAttachmentUpload ] = useState(false);
+    // const [ selectedDeadlineAttachmentFile, setSelectedDeadlineAttachmentFile ] = useState(null);
+    const [ deadlineAttachmentUpload, setDeadlineAttachmentUpload ] = useState(false);
     const [ endingDeadlinneAttachmentUpload, setEndingDeadlinneAttachmentUpload ] = useState(false);
     
     
     const handleDeadlineAttachment = (event) => {
         setSelectedDeadlineAttachmentFile(event.target.files[0]);
+        setErrorMessageUploadDeadlineAttachments("")
     };
     
     // Handle Upload Deadline Attachment
     const handleUploadDeadlineAttachment = () => {
       if (!selectedDeadlineAttachmentFile) {
+        setSelectedDeadlineAttachmentFile(null)
+        setErrorMessageUploadDeadlineAttachments("File masih kosong.")
         console.error('No file selected.');
         return;
       }
-      
       const setIdDeadlineAttachment = `${uuidv4()}`
       const nameAttachment = selectedDeadlineAttachmentFile.name;
       const sizeAttachment = parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3));
-      const fileNameAttachment = `${selectedDeadlineAttachmentFile.name}-${setIdDeadlineAttachment}`
+      const fileNameAttachment = `${setIdDeadlineAttachment}-${selectedDeadlineAttachmentFile.name}`
       
       const storageRef = ref(storage, `Semester-6/${projectData.nameProject}-${projectData.labelProject}/Assignments/${nameDeadline}/${fileNameAttachment}`);
       
-      setDeadlinneAttachmentUpload(true);
+      setDeadlineAttachmentUpload(true);
       uploadBytes(storageRef, selectedDeadlineAttachmentFile)
         .then(async (snapshot) => {
           console.log('File uploaded successfully!', snapshot);
@@ -1123,20 +1131,28 @@ const ProjekKu = () => {
     const [ editIdBagianAktivitas, setEditIdBagianAktivitas ] = useState('')  
     const [ editJudulBagianAktivitasInput, setEditJudulBagianAktivitasInput ] = useState('')
     const [ editDeskripsiBagianAktivitasInput, setEditDeskripsiBagianAktivitasInput ] = useState('')
+    const [ titleSections, setTitleSections ] = useState('')
 
     const [ errorMessageEditJudulBagianAktivitas, setErrorMessageEditJudulBagianAktivitas ] = useState('')
 
     const [ editUbahBagianAktivitas, setEditUbahBagianAktivitas ] = useState(false)
 
+
+    const [ selectedActivityAttachmentFile, setSelectedActivityAttachmentFile ] = useState(null); // just for delete the unused attachments the file
+    const [ errorMessageUploadActivityAttachments, setErrorMessageUploadActivityAttachments ] = useState(""); // delete error message
+
     function editBagianAktivitasCloseModal() {
+        setSelectedActivityAttachmentFile(null)
         setEditBagianAktivitasIsOpen(false)
         setEditJudulBagianAktivitasInput("")
         setEditDeskripsiBagianAktivitasInput("")
       }
     
-    function editBagianAktivitasOpenModal(titleActivity, idActivity, descriptionActivity) {
+    function editBagianAktivitasOpenModal(titleActivity, idActivity, descriptionActivity, titleSections, idSections) {
+        setErrorMessageUploadActivityAttachments("")
         setEditBagianAktivitasIsOpen(true)
         setEditIdBagianAktivitas(idActivity)
+        setTitleSections(titleSections)
         
         setEditJudulBagianAktivitasInput(titleActivity)
         setEditDeskripsiBagianAktivitasInput(descriptionActivity)
@@ -1266,6 +1282,93 @@ const ProjekKu = () => {
     } catch (error) {
         console.log(error)
     }
+
+     // Handle Activity Attachment
+    //  const [ selectedActivityAttachmentFile, setSelectedActivityAttachmentFile ] = useState(null);
+    //  const [ errorMessageUploadActivityAttachments, setErrorMessageUploadActivityAttachments ] = useState("");
+     
+     const handleActivityAttachment = (event) => {
+         setSelectedActivityAttachmentFile(event.target.files[0]);
+         setErrorMessageUploadActivityAttachments("")
+     };
+
+    const [ activityAttachmentUpload, setActivityAttachmentUpload ] = useState(false);
+    const [ endingActivityAttachmentUpload, setEndingActivityAttachmentUpload ] = useState(false);
+     
+     // Handle Upload Deadline Attachment
+     const handleUploadActivitytAttachment = () => {
+       if (!selectedActivityAttachmentFile) {
+         console.error('No file selected.');
+         setErrorMessageUploadActivityAttachments("File masih kosong.")
+         return;
+        }
+        const setIdAvtivityAttachments = `${uuidv4()}`
+        const nameAttachment = selectedActivityAttachmentFile.name;
+        const sizeAttachment = parseFloat((selectedActivityAttachmentFile.size / (1024 * 1024)).toFixed(3));
+        const fileNameAttachment = `${setIdAvtivityAttachments}-${selectedActivityAttachmentFile.name}`
+        
+        const storageRef = ref(storage, `Semester-6/${projectData.nameProject}-${projectData.labelProject}/${titleSections}/${editJudulBagianAktivitasInput}/${fileNameAttachment}`);
+        
+        setActivityAttachmentUpload(true)
+        uploadBytes(storageRef, selectedActivityAttachmentFile)
+            .then(async (snapshot) => {
+            console.log('File uploaded successfully!', snapshot);
+            try {
+                const urlDeadlineAttachment = await getDownloadURL(storageRef);
+                console.log('Download URL:', urlDeadlineAttachment);
+                // You can use this URL to open the PDF in a browser or PDF viewer
+                const deadlineAttachmentsRef = collection(db, 'activityAttachments');
+                await addDoc(deadlineAttachmentsRef, {
+                    idProject: projectData.idProject,
+                    idActivity: editIdBagianAktivitas,
+                    idActivityAttachment: `activityAttachments-${setIdAvtivityAttachments}`,
+                    nameAttachment: nameAttachment,
+                    sizeAttachment: `${sizeAttachment} mb`,
+                    urlAttachment: urlDeadlineAttachment,
+                    fileNameAttachment: `${fileNameAttachment}`,
+                });
+                setEndingActivityAttachmentUpload(true)
+                setTimeout(() => {
+                    window.location.reload()
+                }, 1250);
+                console.log("ednding upload...")
+            } catch (error) {
+                console.error('Error getting download URL:', error);
+            }
+            })
+            .catch((error) => {
+            console.error('Error uploading file:', error);
+            });
+    }
+
+     // Fetch data attachment activity
+     const [ fetchedActivityAttachments, setFetchedActivityAttachments ] = useState([]);
+
+     try {
+         useEffect(() => {
+             const fetchDataActivityAttachments = async () => {
+             try {
+                 const activityAttachmentCollection = collection(db, "activityAttachments");
+                 const orderedQuery = query(activityAttachmentCollection, where("idProject", "==", projectData.idProject)); // Assuming projectData is available
+                 
+                 const snapshot = await getDocs(orderedQuery);
+                 const fetchedActivityAttachments = snapshot.docs.map(doc => ({
+                     ...doc.data(),
+                 }));
+ 
+                 setFetchedActivityAttachments(fetchedActivityAttachments);
+                 console.log("Open after activity clicked :D");
+             } catch (error) {
+                 console.log("Error fetching data: ", error);
+             }
+             };
+             console.log("test leak data");
+             fetchDataActivityAttachments();
+         }, [projectData.idProject]);
+     } catch (error) {
+         console.log(error);
+     }
+    
 
     if (isLoading) {
         return <BaseLoading />
@@ -2051,7 +2154,7 @@ const ProjekKu = () => {
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                     >
-                    Edit Judul Aktivitas 
+                    {titleSections} - Edit Aktivitas 
                     </Dialog.Title>
                     <div className="divider"></div> 
                     <div className="-mt-3">
@@ -2105,6 +2208,55 @@ const ProjekKu = () => {
                                         <p className="mt-1 text-sm leading-6 text-gray-600">Tuliskan detail aktivitas di bagian ini / kosongkan untuk menghapus bagian deskripsi.</p>
                                     )}
                             </div>
+                            <label htmlFor="first-name" className="mt-2 block text-sm font-medium leading-6 text-gray-900">
+                                Tambah Lampiran Baru
+                            </label>
+                            <div className="lg:flex lg:justify-between">
+                                <input
+                                onChange={handleActivityAttachment}
+                                type="file" className="file-input file-input-bordered file-input-sm w-full max-w-xs" />
+                                {activityAttachmentUpload ? (
+                                    <>
+                                    {endingActivityAttachmentUpload ? (
+                                        <>
+                                        <div 
+                                        className={`lg:-mt-2 label justify-end`}>
+                                            <span className="label-text-alt bg-indigo-500 text-white px-4 py-2 rounded-md">Uploaded</span>
+                                        </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                        <div 
+                                        className={`lg:-mt-2 label justify-end`}>
+                                            <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Uploading...</span>
+                                        </div>
+                                        </>
+                                    )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <div
+                                        onClick={handleUploadActivitytAttachment}
+                                        className={`lg:-mt-2 label`}>
+                                            <span className="label-text-alt -ml-1 lg:-ml-0 bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Upload</span>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            {errorMessageUploadActivityAttachments ? (
+                                <div className="text-red-500 text-sm -mt-2">
+                                    {errorMessageUploadActivityAttachments}
+                                </div>
+                            ) : (
+                                <>
+                                {selectedActivityAttachmentFile && (
+                                    <div className="-mt-2.5 text-gray-600">
+                                        <p>Ukuran file: {parseFloat((selectedActivityAttachmentFile.size / (1024 * 1024)).toFixed(3))} mb</p>
+                                    </div>
+                                )}
+                                <p className="-mt-1.5 text-sm leading-6 text-gray-600">Boleh upload dengan format bebas (boleh kosong)</p>
+                                </>
+                            )}
                         </div>
                     </div>
                     <div className="divider"></div> 
@@ -2193,14 +2345,9 @@ const ProjekKu = () => {
             </div>
             </Dialog>
         </Transition.Root>
-        </>
-    ) : (
-        <>
-        </>
-    )}
-    
-    {/* Modal Detail Deadline */}
-    <dialog id="my_modal_2" className="modal modal-bottom sm:modal-middle">
+
+     {/* Modal Detail Deadline */}
+     <dialog id="my_modal_2" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box">
             <div className='flex justify-between'>
                 <h3 className="font-bold text-lg mr-2">{nameDeadline}</h3>
@@ -2438,6 +2585,9 @@ const ProjekKu = () => {
             
             {getCurrentRole === "admin" && (
                 <>
+                <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                    Tambah Lampiran Baru
+                </label>
                     <input 
                     onChange={handleDeadlineAttachment}
                     type="file" 
@@ -2448,8 +2598,14 @@ const ProjekKu = () => {
                             <p>Ukuran file: {parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3))} mb</p>
                         </div>
                     )}
-                    <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p>
-                    {deadlinneAttachmentUpload ? (
+                     {errorMessageUploadDeadlineAttachments ? (
+                        <div className="text-red-500 text-sm">
+                            {errorMessageUploadDeadlineAttachments}
+                        </div>
+                    ) : (
+                        <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf (boleh kosong)</p>
+                    )}
+                    {deadlineAttachmentUpload ? (
                         <>
                         {endingDeadlinneAttachmentUpload ? (
                             <>
@@ -2480,6 +2636,9 @@ const ProjekKu = () => {
             )}
             {getCurrentRole === "user" && getCurrentEmail === projectData.picProject && (
                 <>
+                <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                    Tambah Lampiran Baru
+                </label>
                     <input 
                     onChange={handleDeadlineAttachment}
                     type="file" 
@@ -2490,8 +2649,14 @@ const ProjekKu = () => {
                             <p>Ukuran file: {parseFloat((selectedDeadlineAttachmentFile.size / (1024 * 1024)).toFixed(3))} mb</p>
                         </div>
                     )}
-                    <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p>
-                    {deadlinneAttachmentUpload ? (
+                    {errorMessageUploadDeadlineAttachments ? (
+                        <div className="text-red-500 text-sm">
+                            {errorMessageUploadDeadlineAttachments}
+                        </div>
+                    ) : (
+                        <p className="text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf (boleh kosong)</p>
+                    )}
+                    {deadlineAttachmentUpload ? (
                         <>
                         {endingDeadlinneAttachmentUpload ? (
                             <>
@@ -2605,6 +2770,13 @@ const ProjekKu = () => {
         <button>close</button>
     </form>
     </dialog>
+        </>
+    ) : (
+        <>
+        </>
+    )}
+    
+   
 
     {projectData ? (
          <div className="min-h-full">
@@ -3199,9 +3371,13 @@ const ProjekKu = () => {
                                     <div className="text-lg mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{bagian.titleSections}</div>
                                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                                     <>
-                                        <div className={`tooltip ml-auto`} data-tip='Ubah Judul'>
+                                        <div className={`lg:tooltip ml-auto`} data-tip='Ubah Judul'>
                                             <button
-                                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                                onClick={() => {
+                                                    editBagianOpenModal(bagian.titleSections, bagian.idSection)
+                                                }
+                                                }
+                                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-2`}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
                                                     <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
                                                     <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
@@ -3219,7 +3395,7 @@ const ProjekKu = () => {
                                                     editBagianOpenModal(bagian.titleSections, bagian.idSection)
                                                 }
                                                 }
-                                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-0.5`}>
+                                                className={`transition-all duration-100 sclae-100 hover:scale-110 mt-2`}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-700">
                                                     <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
                                                     <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
@@ -3272,7 +3448,6 @@ const ProjekKu = () => {
                                                                 <>
                                                                 {bagian.idSection === aktivitas.idSection ? (
                                                                     <>
-                                                                        
                                                                         <ol className={` relative border-s border-gray-200`}>                
                                                                             <li className="mb-10 ms-6">            
                                                                                 <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
@@ -3285,7 +3460,7 @@ const ProjekKu = () => {
                                                                                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                                                                                     <>
                                                                                         <div
-                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity)}
+                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity, bagian.titleSections, bagian.idSection)}
                                                                                         className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip" data-tip="Ubah Aktivitas">
                                                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-600">
                                                                                                 <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
@@ -3298,7 +3473,7 @@ const ProjekKu = () => {
                                                                                     {getCurrentRole === "admin" && (
                                                                                     <>
                                                                                         <div
-                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity)}
+                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity, bagian.titleSections, bagian.idSection)}
                                                                                         className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip" data-tip="Ubah Aktivitas">
                                                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-600">
                                                                                                 <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
@@ -3326,23 +3501,27 @@ const ProjekKu = () => {
                                                                                     ))
                                                                                 )}
                                                                                 </p>
-                                                                                <div className='inline-flex'>
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5  text-gray-600">
-                                                                                        <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
-                                                                                        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                                                                                    </svg>
-                                                                                        <a href="/#" target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-gray-900'>Materi Pemrograman.pdf</a>
-                                                                                </div>
-                                                                                <div className='flex justify-start'>
-                                                                                    <div className='font-extralight -mt-2 ml-0.5'>Ukuran: 1.03 mb</div>
-                                                                                </div>
-                                                                                {/* <div className="mt-2 lg:flex lg:justify-between">
-                                                                                    <input type="file" className="file-input file-input-bordered file-input-sm w-full max-w-xs" />
-                                                                                    <div className={`lg:-mt-2 label`}>
-                                                                                        <span className="label-text-alt -ml-1 lg:-ml-0 bg-indigo-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-indigo-600">Upload</span>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <p className="-mt-2 text-sm leading-6 text-gray-600">Hanya bisa upload dengan format .pdf</p> */}
+                                                                                {fetchedActivityAttachments.map((attachments) =>
+                                                                                    <>
+                                                                                        {aktivitas.idActivity === attachments.idActivity ? (
+                                                                                            <div className={``}>
+                                                                                                <div className='inline-flex'>
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5  text-gray-600">
+                                                                                                        <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
+                                                                                                        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                                                                                                    </svg>
+                                                                                                        <a href={attachments.urlAttachment} target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-gray-500 underline'>{attachments.nameAttachment}</a>
+                                                                                                </div>
+                                                                                                <div className='flex justify-start'>
+                                                                                                    <div className='font-extralight -mt-2 ml-0.5'>{attachments.sizeAttachment}</div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            <>
+                                                                                            </>
+                                                                                        )}
+                                                                                    </>
+                                                                                )}
                                                                             </li>
                                                                         </ol>
                                                                     </>
