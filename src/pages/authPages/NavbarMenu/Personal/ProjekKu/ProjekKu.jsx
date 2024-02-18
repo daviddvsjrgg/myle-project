@@ -7,13 +7,19 @@ import { Timestamp, addDoc, collection, deleteDoc, getDocs, orderBy, query, upda
 import { v4 as uuidv4 } from 'uuid';
 import { Dialog, Transition } from '@headlessui/react';
 import Bottom from '../../../../../components/BottomBar/Bottom';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { getDownloadURL, getMetadata, listAll, ref, uploadBytes } from 'firebase/storage'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import BaseLoading from '../../../../../components/Loading/BaseLoading/BaseLoading';
+
 
 const ProjekKu = () => {
     const location = useLocation();
     const projectData = location.state ? location.state.projectData : null;
+
+    // Download Materi
+    const handleDownload = async () => {
+        console.log("awaw")
+    }
 
     // Set Edit Button
     const [ buttonEdit, setButtonEdit ] = useState(false)
@@ -865,7 +871,7 @@ const ProjekKu = () => {
                       const docRef = await addDoc(sectionsCollection, {
                         idSection: `section-${setIdNews}`, 
                         idProject: projectData.idProject,
-                        titleSections: judulBagian ? judulBagian : "null",
+                        titleSection: judulBagian ? judulBagian : "null",
                         createdAt: currentDateString ? currentDateString : "null",
                       });
                         setCount(3);
@@ -899,7 +905,7 @@ const ProjekKu = () => {
                 const snapshot = await getDocs(orderedQuery);
                 const fetchedDataBerita = snapshot.docs.map(doc => ({
                     idSection: doc.data().idSection,
-                    titleSections: doc.data().titleSections,
+                    titleSection: doc.data().titleSection,
                     createdAt: doc.data().createdAt,
                 }));
                 setFetchedBagian(fetchedDataBerita);
@@ -935,10 +941,10 @@ const ProjekKu = () => {
         setErrorMessageEditJudulBagian("");
       }
     
-    function editBagianOpenModal(titleSections, idSection) {
+    function editBagianOpenModal(titleSection, idSection) {
         setEditBagianIsOpen(true)
-        setCurrentJudulBagian(titleSections)
-        setjudulBagianTextEdit(titleSections)
+        setCurrentJudulBagian(titleSection)
+        setjudulBagianTextEdit(titleSection)
         setIdJudulBagian(idSection)
     }
 
@@ -972,7 +978,7 @@ const ProjekKu = () => {
                     const doc = sectionsSnapshot.docs[0];
                     try {
                         await updateDoc(doc.ref, {
-                          titleSections: judulBagianTextEdit ? judulBagianTextEdit : "null",
+                          titleSection: judulBagianTextEdit ? judulBagianTextEdit : "null",
                         });
                         setTimeout(() => {
                             window.location.reload();
@@ -1012,9 +1018,9 @@ const ProjekKu = () => {
         setErrorMessageDeskripsiBagianAktivitas("")
       }
     
-    function bagianAktivitasOpenModal(titleSections, idSection) {
+    function bagianAktivitasOpenModal(titleSection, idSection) {
         setbagianAktivitasIsOpen(true)
-        setJudulBagianToBagianAktivitas(titleSections)
+        setJudulBagianToBagianAktivitas(titleSection)
         setIdSectionToBagianAktivitas(idSection)
     }
 
@@ -1131,7 +1137,7 @@ const ProjekKu = () => {
     const [ editIdBagianAktivitas, setEditIdBagianAktivitas ] = useState('')  
     const [ editJudulBagianAktivitasInput, setEditJudulBagianAktivitasInput ] = useState('')
     const [ editDeskripsiBagianAktivitasInput, setEditDeskripsiBagianAktivitasInput ] = useState('')
-    const [ titleSections, setTitleSections ] = useState('')
+    const [ titleSection, setTitleSections ] = useState('')
 
     const [ errorMessageEditJudulBagianAktivitas, setErrorMessageEditJudulBagianAktivitas ] = useState('')
 
@@ -1148,11 +1154,11 @@ const ProjekKu = () => {
         setEditDeskripsiBagianAktivitasInput("")
       }
     
-    function editBagianAktivitasOpenModal(titleActivity, idActivity, descriptionActivity, titleSections, idSections) {
+    function editBagianAktivitasOpenModal(titleActivity, idActivity, descriptionActivity, titleSection) {
         setErrorMessageUploadActivityAttachments("")
         setEditBagianAktivitasIsOpen(true)
         setEditIdBagianAktivitas(idActivity)
-        setTitleSections(titleSections)
+        setTitleSections(titleSection)
         
         setEditJudulBagianAktivitasInput(titleActivity)
         setEditDeskripsiBagianAktivitasInput(descriptionActivity)
@@ -1307,8 +1313,25 @@ const ProjekKu = () => {
         const sizeAttachment = parseFloat((selectedActivityAttachmentFile.size / (1024 * 1024)).toFixed(3));
         const fileNameAttachment = `${setIdAvtivityAttachments}-${selectedActivityAttachmentFile.name}`
         
-        const storageRef = ref(storage, `Semester-6/${projectData.nameProject}-${projectData.labelProject}/${titleSections}/${editJudulBagianAktivitasInput}/${fileNameAttachment}`);
+        const storageRef = ref(storage, `Semester-6/${projectData.nameProject}-${projectData.labelProject}/${titleSection}/${editJudulBagianAktivitasInput}/${fileNameAttachment}`);
         
+        const currentTimestamp = Timestamp.now();
+
+        // Convert the timestamp to a JavaScript Date object
+        const currentDate = currentTimestamp.toDate();
+
+        // Define month names in Indonesian
+        const monthNames = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        // Pad single digits with leading zero
+        const padWithZero = (num) => (num < 10 ? '0' : '') + num;
+
+        // Format the date string according to Indonesian locale
+        const currentDateString = `${padWithZero(currentDate.getDate())} ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}, Pukul ${padWithZero(currentDate.getHours())}:${padWithZero(currentDate.getMinutes())}:${padWithZero(currentDate.getSeconds())}`;
+
         setActivityAttachmentUpload(true)
         uploadBytes(storageRef, selectedActivityAttachmentFile)
             .then(async (snapshot) => {
@@ -1326,6 +1349,7 @@ const ProjekKu = () => {
                     sizeAttachment: `${sizeAttachment} mb`,
                     urlAttachment: urlDeadlineAttachment,
                     fileNameAttachment: `${fileNameAttachment}`,
+                    createdAt: currentDateString,
                 });
                 setEndingActivityAttachmentUpload(true)
                 setTimeout(() => {
@@ -1349,7 +1373,7 @@ const ProjekKu = () => {
              const fetchDataActivityAttachments = async () => {
              try {
                  const activityAttachmentCollection = collection(db, "activityAttachments");
-                 const orderedQuery = query(activityAttachmentCollection, where("idProject", "==", projectData.idProject)); // Assuming projectData is available
+                 const orderedQuery = query(activityAttachmentCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "desc")); // Assuming projectData is available
                  
                  const snapshot = await getDocs(orderedQuery);
                  const fetchedActivityAttachments = snapshot.docs.map(doc => ({
@@ -1357,7 +1381,7 @@ const ProjekKu = () => {
                  }));
  
                  setFetchedActivityAttachments(fetchedActivityAttachments);
-                 console.log("Open after activity clicked :D");
+                 console.log("Test leak data");
              } catch (error) {
                  console.log("Error fetching data: ", error);
              }
@@ -1368,7 +1392,344 @@ const ProjekKu = () => {
      } catch (error) {
          console.log(error);
      }
+
+     // Modal Tambah Pertemuan
+    let [ meetingIsOpen, meetingSetIsOpen ] = useState(false)
+
+    const [ idSectionForMeeting, setIdSectionForMeeting ] = useState("")
+    const [ titleSectionForMeeting, setTitleSectionForMeeting ] = useState("")
+
+    const [ statusPertemuan, setStatusPertemuan ] = useState("")
+    const [ errorMessageStatusPertemuan, setErrorMessageStatusPertemuan ] = useState("")
     
+    const [ namaPertemuan, setNamaPertemuan ] = useState("")
+    const [ errorMessageNamaPertemuan, setErrorMessageNamaPertemuan ] = useState("")
+    
+    const [ deskripsiPertemuan, setDeskripsiPertemuan ] = useState("")
+    const [ errorMessageDeskripsiPertemuan, setErrorMessageDeskripsiPertemuan ] = useState("")
+
+    const [ awal1Pertemuan, setAwal1Pertemuan ] = useState("")
+    const [ awal2Pertemuan, setAwal2Pertemuan ] = useState("")
+
+    const [ akhir1Pertemuan, setAkhir1Pertemuan ] = useState("")
+    const [ akhir2Pertemuan, setAkhir2Pertemuan ] = useState("")
+    
+    const [ buatTambahPertemuanButton, setBuatTambahPertemuanButton ] = useState(false)
+    
+
+    function meetingCloseModal() {
+      meetingSetIsOpen(false)
+      setStatusPertemuan("")
+      setNamaPertemuan("")
+      setDeskripsiPertemuan("")
+      setAwal1Pertemuan("")
+      setAwal2Pertemuan("")
+      setAkhir1Pertemuan("")
+      setAkhir2Pertemuan("")
+
+      setErrorMessageStatusPertemuan("")
+      setErrorMessageNamaPertemuan("")
+      setErrorMessageDeskripsiPertemuan("")
+    }
+  
+    function meetingOpenModal() {
+      meetingSetIsOpen(true)
+    }
+    
+    const handleTambahPertemuanModalSendingParameter = (titleSection, idSection) => {
+        setTitleSectionForMeeting(titleSection)
+        setIdSectionForMeeting(idSection)
+    }
+
+    // Tambah Pertemuan Function
+
+    const handleStatusPertemuan = (e) => {
+        setStatusPertemuan(e.target.value)
+        setErrorMessageStatusPertemuan("")
+    }
+
+    const statusPertemuanVaidation = () => {
+        if (statusPertemuan === "") {
+            setErrorMessageStatusPertemuan("Status harus diisi.");
+        }
+    }
+
+    const handleNamaPertemuan = (e) => {
+        setNamaPertemuan(e.target.value)
+        setErrorMessageNamaPertemuan("")
+    }
+
+    const namaPertemuanVaidation = () => {
+        if (namaPertemuan === "") {
+            setErrorMessageNamaPertemuan("Nama pertemuan harus diisi.");
+        }
+    }
+    
+    const handleTanggalPertemuan = (e) => {
+        setDeskripsiPertemuan(e.target.value)
+        setErrorMessageDeskripsiPertemuan("")
+    }
+
+    const deskripsiPertemuanVaidation = () => {
+        if (deskripsiPertemuan === "") {
+            setErrorMessageDeskripsiPertemuan("Tanggal pertemuan harus diisi.");
+        }
+    }
+
+    const handleAwal1Pertemuan = (e) => {
+        setAwal1Pertemuan(e.target.value)
+    }
+
+    const handleAwal2Pertemuan = (e) => {
+        setAwal2Pertemuan(e.target.value)
+    }
+
+    const handleAkhir1Pertemuan = (e) => {
+        setAkhir1Pertemuan(e.target.value)
+    }
+
+    const handleAkhir2Pertemuan = (e) => {
+        setAkhir2Pertemuan(e.target.value)
+    }   
+
+    const handleBuatPertemuan = async () => {
+        if (statusPertemuan === "" ||
+            namaPertemuan === "" ||
+            deskripsiPertemuan === "") {
+                statusPertemuanVaidation()
+                namaPertemuanVaidation()
+                deskripsiPertemuanVaidation()
+            } else {
+                setBuatTambahPertemuanButton(true)
+
+                const jamAwal = `${awal1Pertemuan ? awal1Pertemuan : "00"}:${awal2Pertemuan ? awal2Pertemuan : "00"}`
+                const jamAkhir = `${akhir1Pertemuan ? akhir1Pertemuan : "00"}:${akhir2Pertemuan ? akhir2Pertemuan : "00"}`
+
+                // Split the time strings into hours and minutes
+                const [hours1, minutes1] = jamAwal.split(':').map(Number);
+                const [hours2, minutes2] = jamAkhir.split(':').map(Number);
+
+                // Calculate the time difference
+                let hoursDiff = hours2 - hours1;
+                let minutesDiff = minutes2 - minutes1;
+
+                // Adjust for negative time differences
+                if (minutesDiff < 0) {
+                    hoursDiff--;
+                    minutesDiff += 60;
+                }
+
+                const durasiPertemuan = `${hoursDiff} jam ${minutesDiff} menit`
+
+                try {
+                    const sectionMeetingsCollection = collection(db, "sectionMeetings");
+    
+                        const setIdsectionMeeting = `${uuidv4()}`
+                        // Get the current Firestore timestamp
+                        const currentTimestamp = Timestamp.now();
+    
+                        // Convert the timestamp to a JavaScript Date object
+                        const currentDate = currentTimestamp.toDate();
+    
+                        // Define month names in Indonesian
+                        const monthNames = [
+                        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                        ];
+    
+                        // Pad single digits with leading zero
+                        const padWithZero = (num) => (num < 10 ? '0' : '') + num;
+    
+                        // Format the date string according to Indonesian locale
+                        const currentDateString = `${padWithZero(currentDate.getDate())} ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}, Pukul ${padWithZero(currentDate.getHours())}:${padWithZero(currentDate.getMinutes())}:${padWithZero(currentDate.getSeconds())}`;
+                        
+                        try {
+                          const docRef = await addDoc(sectionMeetingsCollection, {
+                            idMeeting: `meeting-${setIdsectionMeeting}`, 
+                            idProject: projectData.idProject,
+                            idSection: idSectionForMeeting,
+                            statusMeeting: statusPertemuan,
+                            nameMeeting: namaPertemuan,
+                            descriptionMeeting: deskripsiPertemuan,
+                            firstHourMeeting: jamAwal,
+                            lastHourMeeting: jamAkhir,
+                            durationMeeting: durasiPertemuan,
+                            createdAt: currentDateString ? currentDateString : "null",
+                          });
+                            setCount(3);
+                            setTersimpan(true);
+                            meetingSetIsOpen(false)
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 3500);
+        
+                          console.log("Document written with ID: ", docRef.id);
+                        } catch (e) {
+                          console.error("Error adding document: ", e);
+                        }
+                        
+                } catch (error) {
+                    console.log("Error semua maszzeh: " + error)
+                }
+
+            }
+
+            
+        }
+        
+        // Fetch Bagian Aktivitas
+        const [ fetchedPertemuan, setFetchedPertemuan ] = useState([]);
+    
+        try {
+            useEffect(() => {
+                const fetchDataPertemuan = async () => {
+                try {
+                    const sectionMeetingsCollection = collection(db, "sectionMeetings");
+                    const orderedQuery = query(sectionMeetingsCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "desc")); // Assuming projectData is available
+                    
+                    const snapshot = await getDocs(orderedQuery);
+                    const fetchedDataPertemuan = snapshot.docs.map(doc => ({
+                        ...doc.data()
+                    }));
+                    setFetchedPertemuan(fetchedDataPertemuan);
+                    
+                } catch (error) {
+                    console.log("Error fetching data: ", error);
+                }
+                };
+            
+                // Invoke the fetch function
+                console.log("test leak data");
+                fetchDataPertemuan();
+            }, [projectData.idProject]);
+        } catch (error) {
+            console.log(error);
+        }
+
+    // Modal Edit Pertemuan
+    let [ editMeetingIsOpen, editMeetingSetIsOpen ] = useState(false)
+    
+    const [ currentIdMeeting, setCurrentIdMeeting ] = useState("")
+    const [ editCurrentDeskripsiPertemuan, setEditCurrentDeskripsiPertemuan ] = useState("")
+    const [ titleSectionForEditPertemuan, setTitleSectionForEditPertemuan ] = useState("")
+
+    const [ errorMessageeditCurrentDeskripsiPertemuan, setErrorMessageeditCurrentDeskripsiPertemuan ] = useState("")
+    
+    const [ ubahPertemuanButton, setUbahPertemuanButton ] = useState(false)
+
+    function editMeetingCloseModal() {
+        editMeetingSetIsOpen(false)
+
+        setCurrentIdMeeting("")
+        setEditCurrentDeskripsiPertemuan("")
+        setTitleSectionForEditPertemuan("")
+
+        setErrorMessageeditCurrentDeskripsiPertemuan("")
+      }
+    
+    function editMeetingOpenModal(idMeeting, descriptionMeeting, titleSection) {
+        editMeetingSetIsOpen(true)
+        setCurrentIdMeeting(idMeeting)
+        setEditCurrentDeskripsiPertemuan(descriptionMeeting)
+        setTitleSectionForEditPertemuan(titleSection)
+    }
+
+    const handleEditTanggalPertemuan = (e) => {
+        setEditCurrentDeskripsiPertemuan(e.target.value)
+        setErrorMessageeditCurrentDeskripsiPertemuan("")
+    }
+
+    const deskripsiEditPertemuanVaidation = () => {
+        if (editCurrentDeskripsiPertemuan === "") {
+            setErrorMessageeditCurrentDeskripsiPertemuan("Tanggal pertemuan harus diisi.");
+        }
+    }
+
+    const handleEditPertemuan = async () => {
+        if(editCurrentDeskripsiPertemuan === "") {
+            deskripsiEditPertemuanVaidation()
+        } else {
+            setUbahPertemuanButton(true)
+            console.log("id" + currentIdMeeting)
+            console.log("desc" + editCurrentDeskripsiPertemuan)
+            try {
+                const sectionMeetingsCollection = collection(db, "sectionMeetings");
+                const querySnapshot = query(sectionMeetingsCollection, where("idMeeting", "==", currentIdMeeting));
+                const sectionMeetingsSnapshot = await getDocs(querySnapshot);
+    
+                if (sectionMeetingsSnapshot.size === 0) {
+                    console.log("data more than 2, please fix")
+                  } else {
+                    console.log("Document with the same idProject already exists (jalankan update)");
+                    const doc = sectionMeetingsSnapshot.docs[0];
+                    try {
+                        await updateDoc(doc.ref, {
+                          descriptionMeeting: editCurrentDeskripsiPertemuan ? editCurrentDeskripsiPertemuan : "",
+                        });
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000); 
+                        
+                        console.log("Updated Data Completed!!!");
+                      } catch (e) {
+                        console.error("Error updating document ERROR: ", e);
+                      }
+                  }
+            } catch (error) {
+                console.log("Error semua maszzeh: " + error)
+            }
+        }
+    }
+
+    // Hapus Pertemuan
+    const [ openHapusPertemuan, setOpenHapusPertemuan ] = useState(false);
+    const [ yakinHapusPertemuanText, setYakinHapusPertemuanText ] = useState(false)
+    const cancelButtonRefPertemuan = useRef(null);
+
+    const [ deleteIdPertemuan, setDeleteIdPertemuan ] = useState('')
+    const [ currentTitleSectionForPertemuanDelete, setCurrentTitleSectionForPertemuanDelete ] = useState('')
+
+    const setPertemuanParameter = (idMeeting, titleSection) => {
+        setDeleteIdPertemuan(idMeeting)
+        setCurrentTitleSectionForPertemuanDelete(titleSection)
+
+        console.log("id = " + deleteIdPertemuan)
+        console.log("title = " + currentTitleSectionForPertemuanDelete)
+    }
+
+    const handleHapusPertemuan = async () => {
+        setYakinHapusPertemuanText(true);
+        try {
+            const sectionMeetingsCollection = collection(db, "sectionMeetings");
+    
+            const querySnapshot = await getDocs(query(sectionMeetingsCollection,
+                where("idMeeting", "==", deleteIdPertemuan)
+            ));
+
+            if (querySnapshot.size === 0) {
+                  console.log("Tidak ketemu id yang akan di hapus");
+              } else if (querySnapshot.size === 1){
+                // Document with the same idUsers already exists, handle accordingly
+                querySnapshot.forEach(async (doc) => {
+                    try {
+                        await deleteDoc(doc.ref);
+                        console.log("Document successfully deleted!");
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 250);
+                    } catch (error) {
+                        console.error("Error deleting document: ", error);
+                    }
+                });
+                
+              } else {
+                console.log("ada 2 result yang akan di hapus");
+              }
+
+        } catch (error) {
+            console.error("Error getting documents: ", error);
+        }
+    }
 
     if (isLoading) {
         return <BaseLoading />
@@ -1379,7 +1740,7 @@ const ProjekKu = () => {
 
     {projectData ? (
         <>
-        {/* Modal Hapus Berita */}
+    {/* Modal Hapus Berita */}
     <Transition.Root show={openHapusBerita} as={Fragment}>
             <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRefBerita} onClose={setOpenHapusBerita}>
                 <Transition.Child
@@ -1777,7 +2138,7 @@ const ProjekKu = () => {
                                         {errorMessageJudulBagian}
                                     </div>
                                     ) : (
-                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan judul berita yang akan dimasukkan.</p>
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan judul bagian yang akan dimasukkan.</p>
                                     )}
                             </div>
                        </div>
@@ -1797,7 +2158,7 @@ const ProjekKu = () => {
                             <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
                         </svg>
                     </div>
-                    <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{previewJudulBagian}</div>
+                    <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{previewJudulBagian ? previewJudulBagian : "Pertemuan 1"}</div>
                 </div>
                         {/* Content */}
                         <div className="card rounded-none w-auto border-2 border-gray-200">
@@ -1836,7 +2197,9 @@ const ProjekKu = () => {
                                             </span>
                                             <h3 className="mb-1 text-lg font-semibold text-gray-900 ">Link Penting</h3>
                                             <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada 20 Februari, 2024</time>
-                                            <p className="text-blue-600 underline font-normal text-base overflow-clip lg:overflow-hidden">https://www.youtube.com/watch?v=z2Iq9nrDZZU</p>
+                                            <p className="mb-4 text-base font-normal bg-gray-50 rounded-md border-2 border-slate-200 text-gray-800 w-48 overflow-x-scroll lg:overflow-hidden p-2 lg:w-auto"> Link Penting <br/> 
+                                                <p className="underline text-blue-600">https://www.youtube.com/watch?v=6NsiA6GFAbU&list=RDWGH7H5qySQw&index=3</p> 
+                                            </p>
                                         </li>
                                         <li className="ms-6">
                                             <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
@@ -1859,15 +2222,16 @@ const ProjekKu = () => {
                                     <div className="stats stats-vertical lg:stats-horizontal -mx-6 shadow-md border-2 borderslate-200/50 -mt-4 ">
                                         <div className="stat overflow-x-scroll lg:overflow-hidden">
                                             <div className='inline-flex'>
-                                            <div className="stat-title">Online</div>
+                                            <div className="stat-title">Online Asinkron</div>
+                                            <div className="stat-title">/</div>
+                                            <div className="stat-title">Online Sinkron</div>
                                             <div className="stat-title">/</div>
                                             <div className="stat-title font-bold text-blue-600">Offline</div>
-                                            <div className="stat-title">/</div>
-                                            <div className="stat-title">Izin</div>
                                             <div className="stat-title">/</div>
                                             <div className="stat-title">Tidak Hadir</div>
                                             </div>
                                             <div className="text-xl font-extrabold ">Ruang Q-903</div>
+                                            <div className="stat-desc mt-1">Deskripsi... (Opsional)</div>
                                             <div className="stat-desc mt-1">07:00 - 08:30 (1 jam 30 menit)</div>
                                         </div>
                                     </div>
@@ -2036,7 +2400,7 @@ const ProjekKu = () => {
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Buat Aktivitas - {judulBagianToBagianAktivitas}
+                    {judulBagianToBagianAktivitas} - Buat Aktivitas
                   </Dialog.Title>
                   <div className="divider"></div> 
                   <div className="-mt-3">
@@ -2154,7 +2518,7 @@ const ProjekKu = () => {
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                     >
-                    {titleSections} - Edit Aktivitas 
+                    {titleSection} - Edit Aktivitas 
                     </Dialog.Title>
                     <div className="divider"></div> 
                     <div className="-mt-3">
@@ -2291,6 +2655,376 @@ const ProjekKu = () => {
             </div>
         </Dialog>
         </Transition>
+
+    {/* Modal Tambah Pertemuan */}
+    <Transition appear show={meetingIsOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={meetingCloseModal}>
+        <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+        >
+            <div className="fixed inset-0 bg-black/25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+            >
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                >
+                   {titleSectionForMeeting} - Buat Detail Pertemuan
+                </Dialog.Title>
+                <div className="divider"></div> 
+                <div className="-mt-3">
+                    <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Pilih Status Pertemuan
+                        </label>
+                        <select
+                        onChange={handleStatusPertemuan} 
+                        className={`mt-2 select select-bordered w-full max-w-xs ${errorMessageStatusPertemuan ? "border-red-500" : ""}`}>
+                            <option disabled selected>Pilih Status</option>
+                            <option>Online Asinkron</option>
+                            <option>Online Sinkron</option>
+                            <option>Offline</option>
+                            <option>Tidak Hadir</option>
+                        </select>
+                        {errorMessageStatusPertemuan ? (
+                            <div className="text-red-500 text-sm mt-1">
+                            {errorMessageStatusPertemuan}
+                        </div>
+                        ) : (
+                            <p className="mt-1 text-sm leading-6 text-gray-600">Pilih status pertemuan online, offline, atau tidak hadir.</p>
+                        )}
+                    </div>
+                </div>
+                <div className="mt-4">
+                    <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Tempat Pertemuan
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <input
+                                    autoFocus
+                                    onChange={handleNamaPertemuan}
+                                    type="text"
+                                    placeholder="ex: Zoom Meetings"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageNamaPertemuan ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageNamaPertemuan ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageNamaPertemuan}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan nama/tempat pertemuan sesuai dengan pertemuan yang dilakukan.</p>
+                                    )}
+                            </div>
+                    </div>
+                </div>
+                <div className="mt-4">
+                    <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Deskripsi Pertemuan
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <textarea
+                                    autoFocus
+                                    onChange={handleTanggalPertemuan}
+                                    type="text"
+                                    rows="7"
+                                    placeholder="format:
+                                     12 Februari 2024,
+                                     {lalu isikan deskripsi sesuai pertemuan, jika ada}"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageDeskripsiPertemuan ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageDeskripsiPertemuan ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageDeskripsiPertemuan}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan deskripsi pertemuan dengan detail.</p>
+                                    )}
+                            </div>
+                    </div>
+                </div>
+                <div className="mt-4">
+                    <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Lama Pertemuan
+                        </label>
+                        <div className="inline-flex">
+                            <div className="mt-2 sm:max-w-md">
+                            <div className="flex mb-2 space-x-2 rtl:space-x-reverse">
+                                <div>
+                                    <label for="code-1" className="sr-only"></label>
+                                    <input
+                                    onChange={handleAwal1Pertemuan}
+                                    autoComplete='off' type="text" maxLength="2" id="code-1" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                </div>
+                                <div>
+                                    <label for="code-2" className="sr-only"></label>
+                                    <input
+                                    onChange={handleAwal2Pertemuan}
+                                    autoComplete='off' type="text" maxLength="2" id="code-2" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                </div>
+                                <div  className="mt-1.5"> - </div>
+                            </div>
+                                
+                            </div>
+                            <div className="mt-2 sm:max-w-md ml-2">
+                            <div className="flex mb-2 space-x-2 rtl:space-x-reverse">
+                                <div>
+                                    <label for="code-1" className="sr-only"></label>
+                                    <input
+                                    onChange={handleAkhir1Pertemuan}
+                                    autoComplete='off' type="text" maxLength="2" id="code-1" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                </div>
+                                <div>
+                                    <label for="code-2" className="sr-only"></label>
+                                    <input
+                                    onChange={handleAkhir2Pertemuan}
+                                    autoComplete='off' type="text" maxLength="2" id="code-2" placeholder='00' className="block w-12 h-9 py-3 text-sm  text-center text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required />
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                            <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan jam pertemuan, ex: 07:00 - 08:30.</p>
+                    </div>
+                </div>
+                <div className="divider"></div> 
+                <div className="mt-4">
+                    {buatTambahPertemuanButton ? (
+                        <>
+                            <button
+                                type="submit"
+                                disabled
+                                className={`rounded-md bg-indigo-400 px-10 py-2 text-sm font-semibold float-right animate-pulse
+                                text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                >
+                                Loading...
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                type="submit"
+                                onClick={handleBuatPertemuan}
+                                className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
+                                text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                >
+                                Buat
+                            </button>
+                        </>
+                    )}
+                
+                </div>
+                </Dialog.Panel>
+            </Transition.Child>
+            </div>
+        </div>
+        </Dialog>
+    </Transition>
+
+     {/* Edit Tambah Pertemuan */}
+     <Transition appear show={editMeetingIsOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={editMeetingCloseModal}>
+        <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+        >
+            <div className="fixed inset-0 bg-black/25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+            >
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                >
+                   {titleSectionForEditPertemuan} - Edit Detail Pertemuan
+                </Dialog.Title>
+                <div className="divider"></div> 
+                <div className="-mt-3">
+                    <div className="sm:col-span-3">
+                        <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
+                            Deskripsi Pertemuan
+                        </label>
+                            <div className="mt-2 sm:max-w-md">
+                                <textarea
+                                    onChange={handleEditTanggalPertemuan}
+                                    type="text"
+                                    defaultValue={`${editCurrentDeskripsiPertemuan}`}
+                                    rows="7"
+                                    placeholder="format:
+                                     12 Februari 2024,
+                                     {lalu isikan deskripsi sesuai pertemuan, jika ada}"
+                                    name="first-name"
+                                    id="first-name"
+                                    autoComplete="off"
+                                    className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${errorMessageeditCurrentDeskripsiPertemuan ? 'ring-red-600' : 'ring-gray-300'}`}
+                                    />
+                                    {errorMessageeditCurrentDeskripsiPertemuan ? (
+                                        <div className="text-red-500 text-sm mt-1">
+                                        {errorMessageeditCurrentDeskripsiPertemuan}
+                                    </div>
+                                    ) : (
+                                        <p className="mt-1 text-sm leading-6 text-gray-600">Masukkan deskripsi pertemuan dengan detail.</p>
+                                    )}
+                            </div>
+                    </div>
+                </div>
+                <div className="divider"></div> 
+                <div className="mt-4">
+                    {ubahPertemuanButton ? (
+                        <>
+                            <button
+                                type="submit"
+                                disabled
+                                className={`rounded-md bg-indigo-400 px-10 py-2 text-sm font-semibold float-right animate-pulse
+                                text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                >
+                                Loading...
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                type="submit"
+                                onClick={handleEditPertemuan}
+                                className={`rounded-md bg-indigo-600 px-10 py-2 text-sm font-semibold float-right
+                                text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                                >
+                                Ubah
+                            </button>
+                        </>
+                    )}
+                
+                </div>
+                </Dialog.Panel>
+            </Transition.Child>
+            </div>
+        </div>
+        </Dialog>
+    </Transition>
+
+    {/* Modal Hapus Berita */}
+    <Transition.Root show={openHapusPertemuan} as={Fragment}>
+            <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRefBerita} onClose={setOpenHapusPertemuan}>
+                <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+                >
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                </Transition.Child>
+
+                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    enterTo="opacity-100 translate-y-0 sm:scale-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                    leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    >
+                    <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                        <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div className="sm:flex sm:items-start">
+                            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <ExclamationCircleIcon className="h-6 w-6 text-yellow-600" aria-hidden="true" />
+                            </div>
+                            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                                Yakin untuk menghapus?
+                            </Dialog.Title>
+                            <div className="mt-2">
+                                <p className="text-sm text-gray-500">
+                                 Apakah kamu yakin menghapus pertemuan di {currentTitleSectionForPertemuanDelete} ini? Proses ini tidak bisa dibatalkan.
+                                </p>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                            {yakinHapusPertemuanText ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        disabled
+                                        className="inline-flex w-full justify-center rounded-md animate-pulse
+                                         bg-indigo-400 px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto"
+                                    >
+                                        Loading...
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto"
+                                        onClick={handleHapusPertemuan}
+                                    >
+                                        Yakin
+                                    </button>
+                                </>
+                            )}
+                        <button
+                            type="button"
+                            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                            onClick={() => setOpenHapusPertemuan(false)}
+                            ref={cancelButtonRefPertemuan}
+                        >
+                            Batalkan
+                        </button>
+                        </div>
+                    </Dialog.Panel>
+                    </Transition.Child>
+                </div>
+                </div>
+            </Dialog>
+            </Transition.Root>
 
     {/* Modal Tersimpan */}
     <Transition.Root show={tersimpan} as={Fragment}>
@@ -2853,7 +3587,9 @@ const ProjekKu = () => {
                         
                         <div data-dial-init className="flex ml-auto">
                             <div id="speed-dial-menu-horizontal" className="flex me-1 space-x-1 items-center">
-                                <div className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200" data-tip="Download">
+                                <div
+                                onClick={handleDownload}
+                                className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200" data-tip="Download Materi">
                                     <button  type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 scale-110 text-gray-600">
                                            <path fillRule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V3a.75.75 0 0 1 .75-.75Zm-9 13.5a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
@@ -2932,9 +3668,11 @@ const ProjekKu = () => {
                                                                 }
                                                                 }
                                                                 type="submit"
-                                                                className={`text-sm font-semibold fle hover:underline mt-2 text-red-500`}
-                                                                >
-                                                                Hapus
+                                                                className={`text-sm font-semibold scale-100 transition-all duration-200 hover:scale-105 mt-2 text-red-500 lg:tooltip`}
+                                                                data-tip="Hapus Berita">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-red-600">
+                                                                    <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                                                                </svg>
                                                             </button>
                                                         )}
                                                         {getCurrentRole === "admin" && (
@@ -2945,9 +3683,11 @@ const ProjekKu = () => {
                                                                 }
                                                                 }
                                                                 type="submit"
-                                                                className={`text-sm font-semibold fle hover:underline mt-2 text-red-500`}
-                                                                >
-                                                                Hapus
+                                                                className={`text-sm font-semibold scale-100 transition-all duration-200 hover:scale-105 mt-2 text-red-500 lg:tooltip`}
+                                                                data-tip="Hapus Berita">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-red-600">
+                                                                    <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                                                                </svg>
                                                             </button>
                                                         )}
                                                     </div>
@@ -3368,13 +4108,13 @@ const ProjekKu = () => {
                                             <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
                                         </svg>
                                     </div>
-                                    <div className="text-lg mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{bagian.titleSections}</div>
+                                    <div className="text-lg mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">{bagian.titleSection}</div>
                                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                                     <>
                                         <div className={`lg:tooltip ml-auto`} data-tip='Ubah Judul'>
                                             <button
                                                 onClick={() => {
-                                                    editBagianOpenModal(bagian.titleSections, bagian.idSection)
+                                                    editBagianOpenModal(bagian.titleSection, bagian.idSection)
                                                 }
                                                 }
                                                 className={`transition-all duration-100 sclae-100 hover:scale-110 mt-2`}>
@@ -3392,7 +4132,7 @@ const ProjekKu = () => {
                                         <div className={`lg:tooltip ml-auto`} data-tip='Ubah Judul'>
                                             <button
                                                 onClick={() => {
-                                                    editBagianOpenModal(bagian.titleSections, bagian.idSection)
+                                                    editBagianOpenModal(bagian.titleSection, bagian.idSection)
                                                 }
                                                 }
                                                 className={`transition-all duration-100 sclae-100 hover:scale-110 mt-2`}>
@@ -3416,7 +4156,7 @@ const ProjekKu = () => {
                                                             <>
                                                                  <div className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200 -mt-10" data-tip="Tambah Aktivitas">
                                                                     <button 
-                                                                    onClick={() => bagianAktivitasOpenModal(bagian.titleSections, bagian.idSection)}
+                                                                    onClick={() => bagianAktivitasOpenModal(bagian.titleSection, bagian.idSection)}
                                                                     type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[35px] h-[35px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50 focus:outline-none">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 scale-110 text-gray-600">
                                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
@@ -3429,7 +4169,7 @@ const ProjekKu = () => {
                                                             <>
                                                                 <div className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200 -mt-10" data-tip="Tambah Aktivitas">
                                                                     <button 
-                                                                    onClick={() => bagianAktivitasOpenModal(bagian.titleSections, bagian.idSection)}
+                                                                    onClick={() => bagianAktivitasOpenModal(bagian.titleSection, bagian.idSection)}
                                                                     type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[35px] h-[35px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 scale-110 text-gray-600">
                                                                             <path fillRule="evenodd" d="M19.5 21a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3h-5.379a.75.75 0 0 1-.53-.22L11.47 3.66A2.25 2.25 0 0 0 9.879 3H4.5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h15Zm-6.75-10.5a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V10.5Z" clipRule="evenodd" />
@@ -3460,7 +4200,7 @@ const ProjekKu = () => {
                                                                                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                                                                                     <>
                                                                                         <div
-                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity, bagian.titleSections, bagian.idSection)}
+                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity, bagian.titleSection)}
                                                                                         className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip" data-tip="Ubah Aktivitas">
                                                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-600">
                                                                                                 <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
@@ -3473,7 +4213,7 @@ const ProjekKu = () => {
                                                                                     {getCurrentRole === "admin" && (
                                                                                     <>
                                                                                         <div
-                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity, bagian.titleSections, bagian.idSection)}
+                                                                                        onClick={() => editBagianAktivitasOpenModal(aktivitas.titleActivity, aktivitas.idActivity, aktivitas.descriptionActivity, bagian.titleSection)}
                                                                                         className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip" data-tip="Ubah Aktivitas">
                                                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-600">
                                                                                                 <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
@@ -3513,7 +4253,7 @@ const ProjekKu = () => {
                                                                                                         <a href={attachments.urlAttachment} target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-gray-500 underline'>{attachments.nameAttachment}</a>
                                                                                                 </div>
                                                                                                 <div className='flex justify-start'>
-                                                                                                    <div className='font-extralight -mt-2 ml-0.5'>{attachments.sizeAttachment}</div>
+                                                                                                    <div className='font-extralight -mt-1 ml-0.5'>Ukuran file: {attachments.sizeAttachment}</div>
                                                                                                 </div>
                                                                                             </div>
                                                                                         ) : (
@@ -3576,7 +4316,7 @@ const ProjekKu = () => {
                                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
                                                                     </svg>
                                                                     </span>
-                                                                    <p onClick={() => bagianAktivitasOpenModal(bagian.titleSections, bagian.idSection)} className="text-base font-normal text-gray-500 lg:w-72 cursor-pointer hover:text-gray-700">Tambah Aktivitas baru</p>
+                                                                    <p onClick={() => bagianAktivitasOpenModal(bagian.titleSection, bagian.idSection)} className="text-base font-normal text-gray-500 lg:w-72 cursor-pointer hover:text-gray-700">Tambah Aktivitas baru</p>
                                                                 </li>
                                                             </ol>
                                                             </>
@@ -3591,7 +4331,7 @@ const ProjekKu = () => {
                                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
                                                                     </svg>
                                                                     </span>
-                                                                    <p onClick={() => bagianAktivitasOpenModal(bagian.titleSections, bagian.idSection)} className="text-base font-normal text-gray-500 lg:w-72 cursor-pointer hover:text-gray-700">Tambah Aktivitas baru</p>
+                                                                    <p onClick={() => bagianAktivitasOpenModal(bagian.titleSection, bagian.idSection)} className="text-base font-normal text-gray-500 lg:w-72 cursor-pointer hover:text-gray-700">Tambah Aktivitas baru</p>
                                                                 </li>
                                                             </ol>
                                                             </>
@@ -3613,25 +4353,180 @@ const ProjekKu = () => {
                                                 </div>
                                             </div>
                                             <div className="card-body">
-                                                    <h2 className="card-title mb-5 -mx-6 -mt-10">Detail Pertemuan</h2>
+                                                    <div className="flex justify-between">
+                                                        <h2 className="card-title mb-5 -mx-6 -mt-10">Detail Pertemuan</h2>
+                                                        {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                                                            <>
+                                                                 <div className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200 -mt-10" data-tip="Tambah Pertemuan">
+                                                                    <button 
+                                                                    onClick={() => {
+                                                                        meetingOpenModal(true)
+                                                                        handleTambahPertemuanModalSendingParameter(bagian.titleSection, bagian.idSection)
+                                                                        }
+                                                                    }
+                                                                    type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[35px] h-[35px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 scale-110 text-gray-600">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+                                                            </>
+                                                            )}
+                                                            {getCurrentRole === "admin" && (
+                                                            <>
+                                                                <div className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200 -mt-10" data-tip="Tambah Pertemuan">
+                                                                    <button 
+                                                                    onClick={() => {
+                                                                        meetingOpenModal(true)
+                                                                        handleTambahPertemuanModalSendingParameter(bagian.titleSection, bagian.idSection)
+                                                                        }
+                                                                    }
+                                                                    type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[35px] h-[35px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 scale-110 text-gray-600">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+                                                            </>
+                                                            )}
+                                                    </div>
                                                     <div className='-mt-12'></div>
                                                     <div className='divider -mx-6'></div>
-                                                    <div className="stats stats-vertical lg:stats-horizontal -mx-6 shadow-md border-2 borderslate-200/50 -mt-4 ">
-                                                        <div className="stat overflow-x-scroll lg:overflow-hidden">
-                                                            <div className='inline-flex'>
-                                                            <div className="stat-title font-bold text-blue-600">Online</div>
-                                                            <div className="stat-title">/</div>
-                                                            <div className="stat-title">Offline</div>
-                                                            <div className="stat-title">/</div>
-                                                            <div className="stat-title">Izin</div>
-                                                            <div className="stat-title">/</div>
-                                                            <div className="stat-title">Tidak Hadir</div>
+                                                    
+                                                    {fetchedPertemuan.length > 0 ? (
+                                                        <>
+                                                        {fetchedPertemuan.map((meet) => 
+                                                            <>
+                                                            {bagian.idSection === meet.idSection ? (
+                                                                <>
+                                                                <div className={`${bagian.idSection !== meet.idSection ? "hidden" : ""} stats mt-3 lg:-mt-2 stats-vertical lg:stats-horizontal -mx-6 shadow-md border-2 borderslate-200/50`}>
+                                                                    <div className="stat overflow-x-scroll lg:overflow-hidden">
+                                                                        <div className='inline-flex'>
+                                                                        <div className={`stat-title ${meet.statusMeeting === "Online Asinkron" ? "font-bold text-blue-600": ""}`}>Online Asinkron</div>
+                                                                        <div className="stat-title">/</div>
+                                                                        <div className={`stat-title ${meet.statusMeeting === "Online Sinkron" ? "font-bold text-blue-600": ""}`}>Online Sinkron</div>
+                                                                        <div className="stat-title">/</div>
+                                                                        <div className={`stat-title ${meet.statusMeeting === "Offline" ? "font-bold text-blue-600": ""}`}>Offline</div>
+                                                                        <div className="stat-title">/</div>
+                                                                        <div className={`stat-title ${meet.statusMeeting === "Tidak Hadir" ? "font-bold text-blue-600": ""}`}>Tidak Hadir</div>
+                                                                        {/* Edit Pertemuan */}
+                                                                        {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                                                                        <>
+                                                                            <div
+                                                                            onClick={() => {
+                                                                                editMeetingOpenModal(meet.idMeeting, meet.descriptionMeeting, bagian.titleSection)
+                                                                            }}
+                                                                            className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip lg:tooltip-bottom" data-tip="Ubah Pertemuan">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-600">
+                                                                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                                                                </svg>
+                                                                            </div>
+                                                                        </>
+                                                                        )}
+
+                                                                        {getCurrentRole === "admin" && (
+                                                                        <>
+                                                                            <div
+                                                                            onClick={() => {
+                                                                                editMeetingOpenModal(meet.idMeeting, meet.descriptionMeeting, bagian.titleSection)
+                                                                            }}
+                                                                            className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip lg:tooltip-bottom" data-tip="Ubah Pertemuan">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-600">
+                                                                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                                                                </svg>
+                                                                            </div>
+                                                                        </>
+                                                                        )}
+                                                                        {/* Delete Pertemuan */}
+                                                                        {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                                                                        <>
+                                                                            <div
+                                                                            onClick={() => {
+                                                                                setOpenHapusPertemuan(true)
+                                                                                setPertemuanParameter(meet.idMeeting, bagian.titleSection)
+                                                                            }}
+                                                                            className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip lg:tooltip-bottom" data-tip="Hapus Pertemuan">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-red-600">
+                                                                                    <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                                                                                </svg>
+                                                                            </div>
+                                                                        </>
+                                                                        )}
+
+                                                                        {getCurrentRole === "admin" && (
+                                                                        <>
+                                                                            <div
+                                                                            onClick={() => {
+                                                                                setOpenHapusPertemuan(true)
+                                                                                setPertemuanParameter(meet.idMeeting, bagian.titleSection)
+                                                                            }}
+                                                                            className="ml-0 lg:ml-2 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip lg:tooltip-bottom" data-tip="Hapus Pertemuan">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-red-600">
+                                                                                    <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                                                                                </svg>
+                                                                            </div>
+                                                                        </>
+                                                                        )}
+                                                                        </div>
+                                                                        <div className="text-xl font-extrabold ">{meet.nameMeeting}</div>
+                                                                        <div className="stat-desc mt-1">
+                                                                        {meet.descriptionMeeting && meet.descriptionMeeting.trim() && (
+                                                                            meet.descriptionMeeting.split('\n').map((line, index) => (
+                                                                                <p key={index} className=''>
+                                                                                    {line.split(/\s+/).map((word, wordIndex) => {
+                                                                                        if (word.startsWith('https://')) {
+                                                                                            return <a className='text-blue-600 hover:underline' href={word} target='_blank' rel="noreferrer" key={wordIndex}>{word}</a>;
+                                                                                        }
+                                                                                        return word + ' ';
+                                                                                    })}
+                                                                                    {/* Add a non-breaking space if it's not the last line */}
+                                                                                    {index !== meet.descriptionMeeting.split('\n').length - 1 && <br />}
+                                                                                </p>
+                                                                            ))
+                                                                        )}
+                                                                        </div>
+                                                                        <div className="stat-desc">{meet.firstHourMeeting} - {meet.lastHourMeeting} ({meet.durationMeeting})</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="mb-2"></div>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                {bagian.idSection !== meet.idSection ? (
+                                                                    <>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                    </>
+                                                                )}
+                                                                </>
+                                                            )}
+                                                            </>
+                                                        )}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                        <div className={`stats mt-3 lg:-mt-4 stats-vertical lg:stats-horizontal -mx-6 shadow-md border-2 borderslate-200/50`}>
+                                                            <div className="stat overflow-x-scroll lg:overflow-hidden">
+                                                                <div className='inline-flex'>
+                                                                <div className="stat-title">Online Asinkron</div>
+                                                                <div className="stat-title">/</div>
+                                                                <div className="stat-title">Online Sinkron</div>
+                                                                <div className="stat-title">/</div>
+                                                                <div className="stat-title">Offline</div>
+                                                                <div className="stat-title">/</div>
+                                                                <div className="stat-title">Tidak Hadir</div>
+                                                                </div>
+                                                                <div className="text-xl font-extrabold ">Belum ada pertemuan</div>
+                                                                <div className="stat-desc mt-1">00 bulan 0000,</div>
+                                                                <div className="stat-desc">00:00 - 00:00 (0 jam 0 menit)</div>
                                                             </div>
-                                                            <div className="text-xl font-extrabold ">Belum ada detail pertemuan</div>
-                                                            <div className="stat-desc mt-1">07:00 - 08:09 (1 jam 9 menit)</div>
                                                         </div>
-                                                    </div>
-                                                        <div className="stat-title hidden lg:invisible lg:block">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</div>
+                                                        </>
+                                                    )}
+                                                    <div className="stat-title hidden lg:invisible lg:block">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -3996,8 +4891,6 @@ const ProjekKu = () => {
                                                     <div className="stat-title">Online</div>
                                                     <div className="stat-title">/</div>
                                                     <div className="stat-title">Offline</div>
-                                                    <div className="stat-title">/</div>
-                                                    <div className="stat-title">Izin</div>
                                                     <div className="stat-title">/</div>
                                                     <div className="stat-title">Tidak Hadir</div>
                                                     </div>

@@ -214,7 +214,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
                                   </div>
                                   <div>
                                     <Link to="/projek" className="font-semibold text-gray-900">
-                                      Daftar Mata Kuliah
+                                      Cari Mata Kuliah
                                       <span className="absolute inset-0" />
                                     </Link>
                                     <p className="mt-1 text-gray-600">Menampilkan list mata kuliah</p>
@@ -452,7 +452,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
                               </div>
                               <div>
                                 <Link to="/projek" className="font-semibold text-gray-900">
-                                  Daftar Mata Kuliah
+                                  Cari Mata Kuliah
                                   <span className="absolute inset-0" />
                                 </Link>
                                 <p className="mt-1 text-gray-600">Menampilkan list mata kuliah</p>

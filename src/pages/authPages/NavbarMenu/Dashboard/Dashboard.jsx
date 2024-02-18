@@ -198,12 +198,12 @@ const Dashboard = () => {
         </section>
 
         <section className="bg-gray-50">
-            <div className="px-4 mx-auto max-w-screen-xl">
+            <div className="px-0 lg:px-4 mx-auto max-w-screen-xl">
                 <div className="grid md:grid-cols-2 gap-6">
 
                   {/* Section 1 */}
 
-                    <div className="bg-white border border-gray-200 rounded-lg p-6 md:px-6 md:py-6 shadow-xl">
+                    <div className="bg-white border border-gray-200 lg:rounded-lg p-6 md:px-6 md:py-6 lg:shadow-xl">
                       <div className="inline-flex">
                         <div className="bg-indigo-100 text-indigo-900  items-center px-2.5 py-0.5 rounded-md mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -212,7 +212,7 @@ const Dashboard = () => {
                         </div>
                         <div className="text-xl font-medium ml-2 text-gray-700">Aktivitas Perkuliahan</div>
                       </div>
-                      <h2 className="text-gray-900 text-md md:text-xl lg:text-3xl font-bold lg:font-extrabold mb-2">Deadline Tugas</h2>
+                      {/* <h2 className="text-gray-900 text-md md:text-xl lg:text-3xl font-bold lg:font-extrabold mb-2">Deadline Tugas</h2> */}
                       <hr className="h-0.5 bg-gray-950 border-2"></hr>
                       <div role="alert" className="alert rounded-xl mt-2 bg-gray-200/50">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-blue-800 shrink-0 w-6 h-6 lg:-mt-11"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -238,7 +238,7 @@ const Dashboard = () => {
 
                     {/* Section 2 */}
 
-                    <div className="bg-white border border-gray-200 rounded-lg p-6 md:px-6 md:py-6 shadow-xl">
+                    <div className="bg-white border border-gray-200 lg:rounded-lg p-6 md:px-6 md:py-6 lg:shadow-xl">
                           <div className="inline-flex">
                             <div className="bg-red-100 text-red-800  items-center px-2.5 py-0.5 rounded-md mb-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -249,7 +249,7 @@ const Dashboard = () => {
                             </div>
                             <div className="text-xl font-medium ml-2 text-gray-700">Mata Kuliahku</div>
                           </div>
-                        <h2 className="text-gray-900 text-md md:text-xl lg:text-3xl font-bold lg:font-extrabold mb-2">Universitas 17 Agustus 1945 Surabaya</h2>
+                        {/* <h2 className="text-gray-900 text-md md:text-xl lg:text-3xl font-bold lg:font-extrabold mb-2">Universitas 17 Agustus 1945 Surabaya</h2> */}
                         <hr className="h-0.5 bg-gray-950 border-2"></hr>
 
                         {/* Daftar Mata Kuliah */}
@@ -289,25 +289,20 @@ const Dashboard = () => {
                           )}
                           {fetchedProjects.length > 0 ? (
                               <>
-                                {fetchedProjects.map((matkul) => 
-                                    <li className={`flex items-center justify-between py-4 pl-1 pr-5 text-md text-gray-900 rounded-lg bg-gray-200/50`}>
-                                      <div className="flex w-0 flex-1 items-center">
-                                          <div className="ml-4 flex min-w-0 flex-1 gap-2 ">
-                                          <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
-                                          <span className="truncate font-medium">
-                                            {matkul.nameProject} - {matkul.labelProject}
-                                          </span>
-                                          {/* <span className="flex-shrink-0 text-gray-400">2.4mb</span> */}
-                                          </div>
+                                {fetchedProjects.map((matkul) =>
+                                    <>
+                                    <div role="alert" className="alert rounded-xl mt-2 bg-gray-200/50 lg:flex lg:justify-between">
+                                      <div className='flex'>
+                                        <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
+                                        <h3 className="font-bold ml-1 -mt-0.5">{matkul.nameProject} - {matkul.labelProject}</h3>
                                       </div>
-                                      <div className="ml-4 flex-shrink-0">
-                                        <Link
-                                          to="/personal/projekku" state={{projectData: matkul, clicked: "true"}}
-                                          className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:px-6 drop-shadow-md shadow-cla-blue px-4 py-1 rounded-lg">
-                                          Buka
-                                        </Link>
-                                      </div>
-                                    </li>
+                                      <Link
+                                        to="/personal/projekku" state={{projectData: matkul, clicked: "true"}}
+                                        className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white transition-all duration-150 hover:px-8 drop-shadow-md shadow-cla-blue w-full lg:w-auto lg:px-6 py-1 rounded-lg">
+                                        Buka
+                                      </Link>
+                                    </div>
+                                    </>
                                   )}
                               </>
                           ) : (
