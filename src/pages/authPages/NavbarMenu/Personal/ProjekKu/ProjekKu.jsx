@@ -3,11 +3,11 @@ import Navbar from '../../../../../components/Navbar/Navbar'
 import { Link, useLocation } from 'react-router-dom';
 import { BookOpenIcon } from '@heroicons/react/20/solid';
 import { auth, db, storage } from '../../../../../config/firebase/firebase';
-import { Timestamp, addDoc, collection, deleteDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
+import { Timestamp, addDoc, collection, deleteDoc, getDocs, limit, onSnapshot, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { Dialog, Transition } from '@headlessui/react';
 import Bottom from '../../../../../components/BottomBar/Bottom';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import BaseLoading from '../../../../../components/Loading/BaseLoading/BaseLoading';
 
@@ -42,6 +42,8 @@ const ProjekKu = () => {
     // Get Current auth
     const [ getCurrentEmail, setGetCurrentEmail ] = useState("")
     const [ getCurrentRole, setGetCurrentRole ] = useState("")
+    const [ getCurrentImage, setGetCurrentImage ] = useState("")
+    const [ getCurrentUsername, setGetCurrentUsername ] = useState("")
 
     // Countdown
     const [count, setCount] = useState(null);
@@ -75,9 +77,14 @@ const ProjekKu = () => {
             const querySnapshot = await getDocs(query(usersCollection, where("idUser", "==", user.uid)));
             const getEmail = querySnapshot.docs[0].data().emailUser;
             const getRole = querySnapshot.docs[0].data().roleUser;
+            const getImage = querySnapshot.docs[0].data().imageUser;
+            const getUsername = querySnapshot.docs[0].data().usernameUser;
 
             setGetCurrentEmail(getEmail);
             setGetCurrentRole(getRole);
+            setGetCurrentImage(getImage);
+            setGetCurrentUsername(getUsername);
+
             setTimeout(() => {
                 setIsLoading(false)
             }, 1400);
@@ -635,6 +642,7 @@ const ProjekKu = () => {
                     nameAttachment: doc.data().nameAttachment,
                     sizeAttachment: doc.data().sizeAttachment,
                     urlAttachment: doc.data().urlAttachment,
+                    fileNameAttachment: doc.data().fileNameAttachment,
                 }));
 
                 setFetchedAttachmentDeadlines(fetchedAttachmentDeadlines);
@@ -1731,6 +1739,227 @@ const ProjekKu = () => {
         }
     }
 
+    // Hapus Lampiran Aktivitas
+    const [ openHapusLampiranAktivitas, setOpenHapusLampiranAktivitas ] = useState(false);
+    const [ yakinHapusLampiranAktivitas, setYakinHapusLampiranAktivitas ] = useState(false)
+    const cancelButtonRefLampiranAktivitas = useRef(null);
+
+    const [ namaLampiranForDelete, setNamaLampiranForDelete ] = useState("")
+    const [ fileNameDelete, setFileNameDelete ] = useState("")
+    const [ titleSectionDelete, setTitleSectionDelete ] = useState("")
+    const [ titleActivityDelete, setTitleActivityDelete ] = useState("")
+
+    const setLampiranAktivitasParameter = (nameAttachment, fileNameAttachment, titleSection, titleActivity) => {
+        setNamaLampiranForDelete(nameAttachment)
+        setFileNameDelete(fileNameAttachment)
+        setTitleSectionDelete(titleSection)
+        setTitleActivityDelete(titleActivity)
+
+        console.log("1 " + namaLampiranForDelete)
+        console.log("2 " + fileNameDelete)
+        console.log("3 " + titleSectionDelete)
+        console.log("4 " + titleActivityDelete)
+    }
+    
+    const handleHapusLampiranAktivitas = async() => {
+        setYakinHapusLampiranAktivitas(true);
+        
+        const filePathToDelete = `Semester-6/${projectData.nameProject}-${projectData.labelProject}/${titleSectionDelete}/${titleActivityDelete}/${fileNameDelete}`;
+        try {
+            const activityAttachmentsCollection = collection(db, "activityAttachments");
+    
+            const querySnapshot = await getDocs(query(activityAttachmentsCollection,
+                where("fileNameAttachment", "==", fileNameDelete)
+            ));
+
+            if (querySnapshot.size === 0) {
+                  console.log("Tidak ketemu id yang akan di hapus");
+              } else if (querySnapshot.size === 1){
+                // Document with the same idUsers already exists, handle accordingly
+                querySnapshot.forEach(async (doc) => {
+                    try {
+                        await deleteDoc(doc.ref);
+                        console.log("Document successfully deleted!");
+                        try {
+                            await deleteObject(ref(storage, filePathToDelete));                            
+                            console.log("File successfully deleted!");
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 250);
+                        } catch (error) {
+                            console.log("Delete File Error")
+                        }
+                    } catch (error) {
+                        console.error("Error deleting document: ", error);
+                    }
+                });
+                
+              } else {
+                console.log("ada 2 result yang akan di hapus");
+              }
+
+        } catch (error) {
+            console.error("Error getting documents: ", error);
+        }
+
+    }
+
+    const [ deadlineAttachmentDeleting, setDeadlineAttachmentDeleting ] = useState(false)
+    const [ endingDeadlineAttachmentDeleting, setEndingDeadlineAttachmentDeleting ] = useState(false)
+
+    const handleHapusLampiranDeadline = async (nameDeadline, fileNameAttachment) => {
+        setDeadlineAttachmentUpload(true)
+        setDeadlineAttachmentDeleting(true)
+        const filePathToDelete = `Semester-6/${projectData.nameProject}-${projectData.labelProject}/Assignments/${nameDeadline}/${fileNameAttachment}`
+        try {
+            const deadlineAttachmentsCollection = collection(db, "deadlineAttachments");
+    
+            const querySnapshot = await getDocs(query(deadlineAttachmentsCollection,
+                where("fileNameAttachment", "==", fileNameAttachment)
+            ));
+
+            if (querySnapshot.size === 0) {
+                  console.log("Tidak ketemu id yang akan di hapus");
+              } else if (querySnapshot.size === 1){
+                // Document with the same idUsers already exists, handle accordingly
+                querySnapshot.forEach(async (doc) => {
+                    try {
+                        await deleteDoc(doc.ref);
+                        console.log("Document successfully deleted!");
+                        try {
+                            await deleteObject(ref(storage, filePathToDelete));                            
+                            console.log("File successfully deleted!");
+                            setEndingDeadlineAttachmentDeleting(true)
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        } catch (error) {
+                            console.log("Delete File Error")
+                        }
+                    } catch (error) {
+                        console.error("Error deleting document: ", error);
+                    }
+                });
+                
+              } else {
+                console.log("ada 2 result yang akan di hapus");
+              }
+
+        } catch (error) {
+            console.error("Error getting documents: ", error);
+        }
+
+    }
+
+    // Chat
+    const [ inputChatChange, setInputChatChange ] = useState("")
+    const [ inputChatSending, setInputChatSending ] = useState(false)
+    
+    const handleChatSendMessageOnChange = (e) => {
+        setInputChatChange(e.target.value)
+    }
+
+    const handleSendMessageChat = async () => {
+        console.log("pesan: " + inputChatChange)
+        if(inputChatChange === "") {
+            console.log("empty")
+        } else {
+            setInputChatSending(true)
+            try {
+                const projectMessagesCollection = collection(db, "projectMessages");
+
+                const setIdProjectMessages = `${uuidv4()}`
+                // Get the current Firestore timestamp
+                const currentTimestamp = Timestamp.now();
+                
+                // Convert the timestamp to a JavaScript Date object
+                const currentDate = currentTimestamp.toDate();
+                
+                    // Define month names in Indonesian
+                    const monthNames = [
+                    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                    ];
+
+                    // Pad single digits with leading zero
+                    const padWithZero = (num) => (num < 10 ? '0' : '') + num;
+
+                    // Format the date string according to Indonesian locale
+                    const currentDateString = `${padWithZero(currentDate.getDate())} ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}, Pukul ${padWithZero(currentDate.getHours())}:${padWithZero(currentDate.getMinutes())}:${padWithZero(currentDate.getSeconds())}`;
+                    const timeSent = `${padWithZero(currentDate.getHours())}:${padWithZero(currentDate.getMinutes())}, ${padWithZero(currentDate.getDate())} ${monthNames[currentDate.getMonth()]}`;
+                    
+                    try {
+                        const docRef = await addDoc(projectMessagesCollection, {
+                            idMessage: `messages-${setIdProjectMessages}`, 
+                            idProject: projectData.idProject,
+                            message: inputChatChange,
+                            timeMessage: timeSent,
+                            roleMessage: getCurrentRole,
+                            emailMessage: getCurrentEmail,
+                            imageMessage: getCurrentImage,
+                            usernameMessage: getCurrentUsername,
+                            createdAt: currentDateString ? currentDateString : "null",
+                        });
+                      console.log("Document written with ID: ", docRef.id);
+                    } catch (e) {
+                        console.error("Error adding document: ", e);
+                    }
+                    setInputChatSending(false)
+                    setInputChatChange("")
+                    
+            } catch (error) {
+                console.log("Error semua maszzeh: " + error)
+            }
+        }
+    }
+    
+    const [ messages, setMessages ] = useState([])
+    
+    const messagesEndRef = useRef(null);
+
+    // Auto Scroll Chat
+    const scrollToBottom = () => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+
+    try {
+        useEffect(() => {
+            try {
+                const q = query (
+                  collection(db, "projectMessages"),
+                  where("idProject", "==", projectData.idProject),
+                  orderBy("createdAt", "asc"),
+                  limit(50)
+                )
+          
+                console.log("test leak chat")
+                const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                  const message = [];
+                  querySnapshot.forEach((doc) => {
+                      message.push({ ...doc.data() })
+                  })
+                  setMessages(message);
+                })
+                return () => unsubscribe;
+            } catch (error) {
+                console.log("error: " + error)
+            }
+          console.log("test leak chat")
+        }, [projectData.idProject])
+    } catch (error) {
+        console.log("error")
+    }
+
+   
+    
+
     if (isLoading) {
         return <BaseLoading />
     }
@@ -2082,7 +2311,6 @@ const ProjekKu = () => {
           </div>
         </Dialog>
       </Transition>
-
 
     {/* Modal Bagian */}
     <Transition appear show={sectionIsOpen} as={Fragment}>
@@ -2943,7 +3171,7 @@ const ProjekKu = () => {
         </Dialog>
     </Transition>
 
-    {/* Modal Hapus Berita */}
+    {/* Modal Hapus Pertemuan */}
     <Transition.Root show={openHapusPertemuan} as={Fragment}>
             <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRefBerita} onClose={setOpenHapusPertemuan}>
                 <Transition.Child
@@ -3015,6 +3243,89 @@ const ProjekKu = () => {
                             className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
                             onClick={() => setOpenHapusPertemuan(false)}
                             ref={cancelButtonRefPertemuan}
+                        >
+                            Batalkan
+                        </button>
+                        </div>
+                    </Dialog.Panel>
+                    </Transition.Child>
+                </div>
+                </div>
+            </Dialog>
+            </Transition.Root>
+
+     {/* Modal Hapus Lampiran Aktivitas */}
+     <Transition.Root show={openHapusLampiranAktivitas} as={Fragment}>
+            <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRefBerita} onClose={setOpenHapusLampiranAktivitas}>
+                <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+                >
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                </Transition.Child>
+
+                <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    enterTo="opacity-100 translate-y-0 sm:scale-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                    leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    >
+                    <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                        <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div className="sm:flex sm:items-start">
+                            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <ExclamationCircleIcon className="h-6 w-6 text-yellow-600" aria-hidden="true" />
+                            </div>
+                            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                                Yakin untuk menghapus?
+                            </Dialog.Title>
+                            <div className="mt-2">
+                                <p className="text-sm text-gray-500">
+                                 Apakah kamu yakin menghapus lampiran <p className="text-gray-700 underline">{namaLampiranForDelete}</p> Proses ini tidak bisa dibatalkan.
+                                </p>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                            {yakinHapusLampiranAktivitas ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        disabled
+                                        className="inline-flex w-full justify-center rounded-md animate-pulse
+                                         bg-indigo-400 px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto"
+                                    >
+                                        Loading...
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto"
+                                        onClick={handleHapusLampiranAktivitas}
+                                    >
+                                        Yakin
+                                    </button>
+                                </>
+                            )}
+                        <button
+                            type="button"
+                            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                            onClick={() => setOpenHapusLampiranAktivitas(false)}
+                            ref={cancelButtonRefLampiranAktivitas}
                         >
                             Batalkan
                         </button>
@@ -3299,6 +3610,33 @@ const ProjekKu = () => {
                         <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
                     </svg>
                         <div className='font-extralight -mt-2 ml-0.5'>Ukuran: {attachment.sizeAttachment}</div>
+                        {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                        <>
+                            <div
+                            onClick={() => {
+                                handleHapusLampiranDeadline(nameDeadline, attachment.fileNameAttachment)
+                            }}
+                            className="ml-0 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip lg:tooltip-right" data-tip="Hapus Lampiran">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 -mt-1.5 text-red-600">
+                                    <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                        </>
+                        )}
+
+                        {getCurrentRole === "admin" && (
+                        <>
+                            <div
+                            onClick={() => {
+                                handleHapusLampiranDeadline(nameDeadline, attachment.fileNameAttachment)
+                            }}
+                            className="ml-0 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip lg:tooltip-right" data-tip="Hapus Lampiran">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 -mt-1.5 text-red-600">
+                                    <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                        </>
+                        )}
                     </div>
                     </>
                 )}
@@ -3350,10 +3688,32 @@ const ProjekKu = () => {
                             </>
                         ) : (
                             <>
-                            <div 
-                            className={`mt-2 label justify-end`}>
-                                <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Uploading...</span>
-                            </div>
+                            {deadlineAttachmentDeleting ? (
+                                <>
+                                {endingDeadlineAttachmentDeleting ? (
+                                    <>
+                                    <div 
+                                    className={`mt-2 label justify-end`}>
+                                        <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md">Deleted</span>
+                                    </div>
+                                    </>
+                                ) : (
+                                    <>
+                                    <div 
+                                    className={`mt-2 label justify-end`}>
+                                        <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Deleting...</span>
+                                    </div>
+                                    </>
+                                )}
+                                </>
+                            ) : (
+                                <>
+                                <div 
+                                className={`mt-2 label justify-end`}>
+                                    <span className="label-text-alt bg-indigo-400 text-white px-4 py-2 rounded-md animate-pulse">Uploading...</span>
+                                </div>
+                                </>
+                            )}
                             </>
                         )}
                         </>
@@ -3509,7 +3869,93 @@ const ProjekKu = () => {
         <>
         </>
     )}
-    
+
+    {/* Modal Chat */}
+    {/* You can open the modal using document.getElementById('ID').showModal() method */}
+    <dialog id="my_modal_4" className="modal">
+    <div className="modal-box w-11/12 max-w-5xl">
+        <div className="flex justify-between mb-2">
+            <h3 className="font-bold text-lg">{projectData.nameProject} {projectData.nameProject.includes("-") ? '' : `- ${projectData.labelProject}`}</h3>
+            <div className="">
+                <form method="dialog">
+                    {/* if there is a button, it will close the modal */}
+                    <button className="btn -mt-3">Tutup</button>
+                </form>
+            </div>
+        </div>
+        {/* Content */}
+
+            {/* Chat */}
+            <div className="h-96 flex flex-col">
+                <div className="bg-gray-50 flex-1 overflow-y-scroll rounded-t-xl">
+                    <div className="px-4 py-3">
+                        {/* Bubble Chat */}
+                        {messages.map((message) => 
+                        <div className={`chat ${message.emailMessage === getCurrentEmail ? "chat-end" : "chat-start"}`}>
+                            <div className="chat-image avatar">
+                                <div className="w-10 rounded-full">
+                                <img alt="Tailwind CSS chat bubble component" src={message.imageMessage} />
+                                </div>
+                            </div>
+                            <div className="chat-header mb-1">
+                            <div className="inline-flex">
+                                    {message.emailMessage === getCurrentEmail ? "" : message.usernameMessage}
+                                    {message.emailMessage !== getCurrentEmail && (
+                                        <>
+                                        {message.roleMessage === "admin" && (
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1  text-blue-600">
+                                                <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                                            </svg>
+                                        )}
+                                        </>
+                                    )}
+                            </div>
+                                <time className="text-xs opacity-50 ml-1">{message.timeMessage}</time>
+                            </div>
+                            <div className="chat-bubble">{message.message}</div>
+                            <div className={`chat-footer  ${message.emailMessage !== getCurrentEmail ? "opacity-50" : "mt-1"}`}>
+                                <div className="inline-flex">
+                                    {message.emailMessage !== getCurrentEmail ? "Delivered" : message.usernameMessage}
+                                    {message.emailMessage === getCurrentEmail && (
+                                        <>
+                                        {message.roleMessage === "admin" && (
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1  text-blue-600">
+                                                <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                                            </svg>
+                                        )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                            )}
+                            <div ref={messagesEndRef}></div>
+                    </div>
+                </div>
+                <div className="bg-gray-100 px-4 py-2 rounded-b-xl">
+                    <div className="flex items-center">
+                        <textarea value={inputChatChange} onChange={handleChatSendMessageOnChange} rows="1" className="w-full border rounded-md py-2 px-4 mr-2" type="text" placeholder="Tuliskan pesan..." />
+                        {inputChatSending ? (
+                            <>
+                            <button disabled className="bg-indigo-400  text-white font-medium py-2 px-4 rounded-full animate-pulse">
+                                Kirim
+                            </button>
+                            </>
+                        ) : (
+                            <>
+                            <button onClick={handleSendMessageChat} className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-full">
+                                Kirim
+                            </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+            {/* End Chat */}
+
+        {/* End Content */}
+    </div>
+    </dialog>
    
 
     {projectData ? (
@@ -3521,6 +3967,19 @@ const ProjekKu = () => {
                 <div className="lg:flex lg:justify-between">
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900">
                         {projectData.nameProject} {projectData.nameProject.includes("-") ? '' : `- ${projectData.labelProject}`}
+                        <button className="lg:tooltip lg:tooltip-right
+                         transition-all duration-200
+                         scale-110 hover:scale-125 hover:bg-gray-100
+                         p-1 ml-1
+                         bg-gray-50 rounded-full" data-tip="Chat" onClick={()=>{
+                             document.getElementById('my_modal_4').showModal()
+                            }
+                         }>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-600">
+                                <path d="M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 0 0-1.032-.211 50.89 50.89 0 0 0-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 0 0 2.433 3.984L7.28 21.53A.75.75 0 0 1 6 21v-4.03a48.527 48.527 0 0 1-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979Z" />
+                                <path d="M15.75 7.5c-1.376 0-2.739.057-4.086.169C10.124 7.797 9 9.103 9 10.609v4.285c0 1.507 1.128 2.814 2.67 2.94 1.243.102 2.5.157 3.768.165l2.782 2.781a.75.75 0 0 0 1.28-.53v-2.39l.33-.026c1.542-.125 2.67-1.433 2.67-2.94v-4.286c0-1.505-1.125-2.811-2.664-2.94A49.392 49.392 0 0 0 15.75 7.5Z" />
+                            </svg>
+                        </button>
                     </h1>
                     <div onClick={() =>  {
                          document.getElementById('modal_pendaftar').showModal()
@@ -3739,7 +4198,11 @@ const ProjekKu = () => {
                                             <>
                                                 {fetchedDeadlines.map((deadline, index) => (
                                                     <>
-                                                    <div key={index}>
+                                                    <div key={index} className={
+                                                        projectData.picProject === getCurrentEmail && deadline.nameDeadline.indexOf("[hidden]") !== -1 ? "opacity-30" 
+                                                        : getCurrentRole === "admin" && deadline.nameDeadline.indexOf("[hidden]") !== -1 ? "opacity-30" 
+                                                        : projectData.picProject !== getCurrentEmail && deadline.nameDeadline.indexOf("[hidden]") !== -1 ? "hidden" 
+                                                        : ""}>
                                                         <ul onClick={() => handleDetailDeadline(deadline, index)}>
                                                             {timeRemaining[index + 0] && (
                                                                 <>
@@ -4268,6 +4731,36 @@ const ProjekKu = () => {
                                                                                                 </div>
                                                                                                 <div className='flex justify-start'>
                                                                                                     <div className='font-extralight -mt-1 ml-0.5'>Ukuran file: {attachments.sizeAttachment}</div>
+                                                                                                    {/* Delete Attachments */}
+                                                                                                    {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
+                                                                                                    <>
+                                                                                                        <div
+                                                                                                        onClick={() => {
+                                                                                                            setOpenHapusLampiranAktivitas(true)
+                                                                                                            setLampiranAktivitasParameter(attachments.nameAttachment, attachments.fileNameAttachment, bagian.titleSection, aktivitas.titleActivity)
+                                                                                                        }}
+                                                                                                        className="ml-0 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip lg:tooltip-right" data-tip="Hapus Lampiran">
+                                                                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-red-600">
+                                                                                                                <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                                                                                                            </svg>
+                                                                                                        </div>
+                                                                                                    </>
+                                                                                                    )}
+
+                                                                                                    {getCurrentRole === "admin" && (
+                                                                                                    <>
+                                                                                                        <div
+                                                                                                        onClick={() => {
+                                                                                                            setOpenHapusLampiranAktivitas(true)
+                                                                                                            setLampiranAktivitasParameter(attachments.nameAttachment, attachments.fileNameAttachment, bagian.titleSection, aktivitas.titleActivity)
+                                                                                                        }}
+                                                                                                        className="ml-0 transition-all duration-200 scale-100 hover:scale-110 cursor-pointer lg:tooltip lg:tooltip-right" data-tip="Hapus Lampiran">
+                                                                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-red-600">
+                                                                                                                <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                                                                                                            </svg>
+                                                                                                        </div>
+                                                                                                    </>
+                                                                                                    )}
                                                                                                 </div>
                                                                                             </div>
                                                                                         ) : (
