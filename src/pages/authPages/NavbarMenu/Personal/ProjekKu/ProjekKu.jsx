@@ -7,7 +7,7 @@ import { Timestamp, addDoc, collection, deleteDoc, getDocs, orderBy, query, upda
 import { v4 as uuidv4 } from 'uuid';
 import { Dialog, Transition } from '@headlessui/react';
 import Bottom from '../../../../../components/BottomBar/Bottom';
-import { getDownloadURL, getMetadata, listAll, ref, uploadBytes } from 'firebase/storage'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import BaseLoading from '../../../../../components/Loading/BaseLoading/BaseLoading';
 
@@ -18,7 +18,7 @@ const ProjekKu = () => {
 
     // Download Materi
     const handleDownload = async () => {
-        console.log("awaw")
+        console.log("download clicked")
     }
 
     // Set Edit Button
@@ -1854,7 +1854,7 @@ const ProjekKu = () => {
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Buat Berita Mata Kuliah
+                    {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Buat Berita Bangkit" : projectData.labelProject === "MGE" ? "Buat Berita Pekerjaan" : "Buat Berita Mata Kuliah"}
                   </Dialog.Title>
                   <div className="divider"></div> 
                   <div className="-mt-3">
@@ -1971,7 +1971,7 @@ const ProjekKu = () => {
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Buat Deadline Mata Kuliah - {projectData.nameProject} {projectData.nameProject.includes("-") ? '' : `(${projectData.labelProject})`}
+                    {projectData.labelProject.split(" ")[0] === `Bangkit` ? "Buat Deadline Bangkit" : projectData.labelProject === "MGE" ? "Buat Deadline Pekerjaan" : `Buat Deadline Mata Kuliah - ${projectData.nameProject} ${projectData.nameProject.includes("-") ? '' : `(${projectData.labelProject})`}`}
                   </Dialog.Title>
                   <div className="divider"></div> 
                   <div className="-mt-3">
@@ -3549,7 +3549,7 @@ const ProjekKu = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
                         </svg>
-                            Mata Kuliahku
+                        {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Mata Kuliahku" : projectData.labelProject === "MGE" ? "Projek" : "Mata Kuliahku"}
                         </Link>
                         </li> 
                         <li>
@@ -3583,7 +3583,9 @@ const ProjekKu = () => {
                             <path d="M4.462 19.462c.42-.419.753-.89 1-1.395.453.214.902.435 1.347.662a6.742 6.742 0 0 1-1.286 1.794.75.75 0 0 1-1.06-1.06Z" />
                         </svg>
                     </div>
-                        <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">Kegiatan Perkuliahan</div>
+                        <div className="text-sm mt-1 lg:text-xl lg:mt-0 font-medium ml-1.5 text-gray-700">
+                        {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Kegiatan Bangkit" : projectData.labelProject === "MGE" ? "Kegiatan Pekerjaan" : "Kegiatan Perkuliahan"}
+                        </div>
                         
                         <div data-dial-init className="flex ml-auto">
                             <div id="speed-dial-menu-horizontal" className="flex me-1 space-x-1 items-center">
@@ -3637,7 +3639,9 @@ const ProjekKu = () => {
                             <div className="card rounded-md w-auto bg-base-100 shadow-xl">
                                 <figure><img className='lg:h-64 md:h-32 w-full object-cover' src={projectData.imageUrlProject} alt="Shoes" /></figure>
                                 <div className="card-body">
-                                    <h2 className="card-title mb-5 ">Berita Mata Kuliah</h2>
+                                    <h2 className="card-title mb-5 ">
+                                    {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Berita Bangkit" : projectData.labelProject === "MGE" ? "Berita Pekerjaan" : "Berita Mata Kuliah"}
+                                    </h2>
                                     <div className='-mt-12'></div>
                                     <div className='divider'></div>
                                     {fetchedBerita.length > 0 ? (
@@ -3726,7 +3730,9 @@ const ProjekKu = () => {
                                 <ul className="menu w-auto rounded-box -my-5">
                                 <li>
                                     <details open>
-                                    <summary className='font-bold text-lg'>Deadline Tugas Mahasiswa</summary>
+                                    <summary className='font-bold text-lg'>
+                                    {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Deadline Bangkit" : projectData.labelProject === "MGE" ? "Deadline Pekerjaan" : "Deadline Tugas Mahasiswa"}
+                                    </summary>
                                     <ul>
                                         <li>
                                         {fetchedDeadlines.length > 0 ?(
@@ -3770,7 +3776,9 @@ const ProjekKu = () => {
                                             </>
                                         ) : (
                                             <>
-                                              <summary className='font-medium'>Belum ada tugas :D !!!</summary>
+                                              <summary className='font-medium'>
+                                              {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Belum Ada Deadline Bangkit!" : projectData.labelProject === "MGE" ? "Belum Ada Deadline Pekerjaan!" : "Belum Ada Deadline!"}
+                                              </summary>
                                             </>
                                         )}
                                         </li>
@@ -3801,12 +3809,14 @@ const ProjekKu = () => {
                         <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
 
                             {/* Section 1 */}
-                            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} ${index + 1 > 1 ? "md:invisible hidden" : ""} md:block col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
+                            <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} ${index + 1 > 1 ? "md:invisible hidden" : ""} ${projectData.labelProject === "MGE" ? "invisible" : ""} md:block col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
                                 <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                                     <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                                         <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
                                     </div>
-                                    <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkul</div>
+                                    <div className="text-xl font-medium ml-1.5 text-gray-700">
+                                        {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Informasi Bangkit" : projectData.labelProject === "MGE" ? "Informasi Projek" : "Informasi"}
+                                    </div>
                                     {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                                     <>
                                         <div className={`${buttonEdit ? "hidden" : ""} lg:tooltip ml-auto`}>
@@ -3860,7 +3870,9 @@ const ProjekKu = () => {
                                     {fetchedInfoMatkul.map((dosen) => 
                                     <>
                                         <div key={dosen.idLecturers}  className="px-4 py-4 grid">
-                                            <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
+                                            <dt className="text-md font-bold leading-6 text-gray-900">
+                                                {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Mentor" : projectData.labelProject === "MGE" ? "Penanggung Jawab" : "Dosen Pengampu"}
+                                            </dt>
                                                     <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 lg:w-56 ${buttonEdit ? "hidden" : ""} `}>
                                                             {dosen.nameLecturers}
                                                     </dd>
@@ -3942,7 +3954,7 @@ const ProjekKu = () => {
                                             {/* End Form Khusus Jadwal */}
                                         </div>
                                         <div className="px-4 grid -mt-1">
-                                            <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
+                                            <dt className="text-md font-bold leading-6 text-gray-900">Link Group</dt>
                                             {dosen.groupLinkLecturers === "null" || dosen.groupLinkLecturers === "" ? (
                                                 <div
                                                 className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
@@ -3950,7 +3962,7 @@ const ProjekKu = () => {
                                                 </div>
                                             ) : (
                                                 <a href={`${dosen.groupLinkLecturers}`} target='_blank' rel="noreferrer" className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700 hover:underline`}>
-                                                    Link Group WhatsApp
+                                                    Link
                                                 </a>
                                             )}
                                             <input
@@ -3970,7 +3982,9 @@ const ProjekKu = () => {
                                 ) : (
                                     <>
                                         <div  className="px-4 py-4 grid">
-                                            <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
+                                            <dt className="text-md font-bold leading-6 text-gray-900">
+                                            {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Mentor" : projectData.labelProject === "MGE" ? "Penanggung Jawab" : "Dosen Pengampu"}
+                                            </dt>
                                                     <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 ${buttonEdit ? "hidden" : ""} `}>
                                                         Belum ada dosen pengampu
                                                     </dd>
@@ -4052,7 +4066,7 @@ const ProjekKu = () => {
                                             {/* End Form Khusus Jadwal */}
                                         </div>
                                         <div className="px-4 grid -mt-1">
-                                            <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
+                                            <dt className="text-md font-bold leading-6 text-gray-900">Link Group</dt>
                                                 <div
                                                 className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
                                                     Belum ada link group
@@ -4223,7 +4237,7 @@ const ProjekKu = () => {
                                                                                     </>
                                                                                     )}
                                                                                 </div>
-                                                                                <time className="block mb-2 text-sm font-normal leading-none text-gray-400 ">dibuat pada {aktivitas.dateActivity}</time>
+                                                                                <time className="block mb-2 text-sm font-normal leading-none text-gray-400">dibuat pada {aktivitas.dateActivity}</time>
                                                                                 <p className={`${aktivitas.descriptionActivity === "" ? "hidden" : ""}
                                                                                 mb-4 text-base font-normal bg-gray-50 rounded-md border-2 border-slate-200 text-gray-800 w-48 overflow-x-scroll lg:overflow-hidden p-2 lg:w-auto`}>
                                                                                 {aktivitas.descriptionActivity && aktivitas.descriptionActivity.trim() && (
@@ -4250,7 +4264,7 @@ const ProjekKu = () => {
                                                                                                         <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clipRule="evenodd" />
                                                                                                         <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
                                                                                                     </svg>
-                                                                                                        <a href={attachments.urlAttachment} target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-gray-500 underline'>{attachments.nameAttachment}</a>
+                                                                                                        <a href={attachments.urlAttachment} target='_blank' rel="noreferrer" className='mr-2 hover:underline hover:text-gray-500 truncate w-40 lg:w-auto'>{attachments.nameAttachment}</a>
                                                                                                 </div>
                                                                                                 <div className='flex justify-start'>
                                                                                                     <div className='font-extralight -mt-1 ml-0.5'>Ukuran file: {attachments.sizeAttachment}</div>
@@ -4549,12 +4563,14 @@ const ProjekKu = () => {
                 <div className="grid grid-rows-1 md:grid-rows-3 md:grid-flow-col gap-4 px-2">
 
                     {/* Section 1 */}
-                    <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
+                    <div className={`row-span-3 ${!buttonEdit ? "h-96" : ""} ${projectData.labelProject === "MGE" ? "invisible" : ""} col-span-7 md:col-span-1 bg-white border-2 border-gray-300/40 shadow-md rounded-md`}>
                         <div className="inline-flex bg-gray-300/40 w-full rounded-t-md p-2">
                             <div className="bg-gray-100 text-gray-800  items-center px-1.5 py-0.5 mt-0.5 rounded-md">
                                 <BookOpenIcon className="h-5 w-5 mt-0.5 text-gray-600" aria-hidden="true" />
                             </div>
-                            <div className="text-xl font-medium ml-1.5 text-gray-700">Informasi Matkul</div>
+                            <div className="text-xl font-medium ml-1.5 text-gray-700">
+                                {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Informasi Bangkit" : projectData.labelProject === "MGE" ? "Informasi Projek" : "Informasi Mata Kuliah"}
+                            </div>
                             {projectData.picProject === getCurrentEmail && getCurrentRole === "user" && (
                             <>
                                 <div className={`${buttonEdit ? "hidden" : ""} lg:tooltip ml-auto`} data-tip='Ubah'>
@@ -4608,7 +4624,9 @@ const ProjekKu = () => {
                             {fetchedInfoMatkul.map((dosen) => 
                             <>
                                 <div key={dosen.idLecturers}  className="px-4 py-4 grid">
-                                    <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
+                                    <dt className="text-md font-bold leading-6 text-gray-900">
+                                    {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Mentor" : projectData.labelProject === "MGE" ? "Penanggung Jawab" : "Dosen Pengampu"}
+                                    </dt>
                                             <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 lg:w-56 ${buttonEdit ? "hidden" : ""} `}>
                                                     {dosen.nameLecturers}
                                             </dd>
@@ -4690,7 +4708,7 @@ const ProjekKu = () => {
                                     {/* End Form Khusus Jadwal */}
                                 </div>
                                 <div className="px-4 grid -mt-1">
-                                    <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
+                                    <dt className="text-md font-bold leading-6 text-gray-900">Link Group</dt>
                                     {dosen.groupLinkLecturers === "null" || dosen.groupLinkLecturers === "" ? (
                                         <div
                                         className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
@@ -4698,7 +4716,7 @@ const ProjekKu = () => {
                                         </div>
                                     ) : (
                                         <a href={`${dosen.groupLinkLecturers}`} target='_blank' rel="noreferrer" className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700 hover:underline`}>
-                                            Link Group WhatsApp
+                                            Link Group
                                         </a>
                                     )}
                                     <input
@@ -4718,7 +4736,9 @@ const ProjekKu = () => {
                         ) : (
                             <>
                                 <div  className="px-4 py-4 grid">
-                                    <dt className="text-md font-bold leading-6 text-gray-900">Dosen Pengampu</dt>
+                                    <dt className="text-md font-bold leading-6 text-gray-900">
+                                    {projectData.labelProject.split(" ")[0] === "Bangkit" ? "Mentor" : projectData.labelProject === "MGE" ? "Penanggung Jawab" : "Dosen Pengampu"}
+                                    </dt>
                                             <dd className={`mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 ${buttonEdit ? "hidden" : ""} `}>
                                                 Belum ada dosen pengampu
                                             </dd>
@@ -4800,7 +4820,7 @@ const ProjekKu = () => {
                                     {/* End Form Khusus Jadwal */}
                                 </div>
                                 <div className="px-4 grid -mt-1">
-                                    <dt className="text-md font-bold leading-6 text-gray-900">Grup WhatsApp</dt>
+                                    <dt className="text-md font-bold leading-6 text-gray-900">Link Group</dt>
                                         <div
                                         className={`${buttonEdit ? "hidden" : ""} mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0 text-blue-700`}>
                                             Belum ada link group
