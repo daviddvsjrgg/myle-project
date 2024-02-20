@@ -3864,13 +3864,8 @@ const ProjekKu = () => {
         <button>close</button>
     </form>
     </dialog>
-        </>
-    ) : (
-        <>
-        </>
-    )}
 
-    {/* Modal Chat */}
+     {/* Modal Chat */}
     {/* You can open the modal using document.getElementById('ID').showModal() method */}
     <dialog id="my_modal_4" className="modal">
     <div className="modal-box w-11/12 max-w-5xl">
@@ -3885,77 +3880,82 @@ const ProjekKu = () => {
         </div>
         {/* Content */}
 
-            {/* Chat */}
-            <div className="h-96 flex flex-col">
-                <div className="bg-gray-50 flex-1 overflow-y-scroll rounded-t-xl">
-                    <div className="px-4 py-3">
-                        {/* Bubble Chat */}
-                        {messages.map((message) => 
-                        <div className={`chat ${message.emailMessage === getCurrentEmail ? "chat-end" : "chat-start"}`}>
-                            <div className="chat-image avatar">
-                                <div className="w-10 rounded-full">
-                                <img alt="Tailwind CSS chat bubble component" src={message.imageMessage} />
-                                </div>
-                            </div>
-                            <div className="chat-header mb-1">
-                            <div className="inline-flex">
-                                    {message.emailMessage === getCurrentEmail ? "" : message.usernameMessage}
-                                    {message.emailMessage !== getCurrentEmail && (
-                                        <>
-                                        {message.roleMessage === "admin" && (
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1  text-blue-600">
-                                                <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
-                                            </svg>
-                                        )}
-                                        </>
-                                    )}
-                            </div>
-                                <time className="text-xs opacity-50 ml-1">{message.timeMessage}</time>
-                            </div>
-                            <div className="chat-bubble">{message.message}</div>
-                            <div className={`chat-footer  ${message.emailMessage !== getCurrentEmail ? "opacity-50" : "mt-1"}`}>
-                                <div className="inline-flex">
-                                    {message.emailMessage !== getCurrentEmail ? "Delivered" : message.usernameMessage}
-                                    {message.emailMessage === getCurrentEmail && (
-                                        <>
-                                        {message.roleMessage === "admin" && (
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1  text-blue-600">
-                                                <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
-                                            </svg>
-                                        )}
-                                        </>
-                                    )}
-                                </div>
+        {/* Chat */}
+        <div className="h-96 flex flex-col">
+            <div className="bg-gray-50 flex-1 overflow-y-scroll rounded-t-xl">
+                <div className="px-4 py-3">
+                    {/* Bubble Chat */}
+                    {messages.map((message) => 
+                    <div className={`chat ${message.emailMessage === getCurrentEmail ? "chat-end" : "chat-start"}`}>
+                        <div className="chat-image avatar">
+                            <div className="w-10 rounded-full">
+                            <img alt="Tailwind CSS chat bubble component" src={message.imageMessage} />
                             </div>
                         </div>
-                            )}
-                            <div ref={messagesEndRef}></div>
+                        <div className="chat-header mb-1">
+                        <div className="inline-flex">
+                                {message.emailMessage === getCurrentEmail ? "" : message.usernameMessage}
+                                {message.emailMessage !== getCurrentEmail && (
+                                    <>
+                                    {message.roleMessage === "admin" && (
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1  text-blue-600">
+                                            <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                                        </svg>
+                                    )}
+                                    </>
+                                )}
+                        </div>
+                            <time className="text-xs opacity-50 ml-1">{message.timeMessage}</time>
+                        </div>
+                        <div className="chat-bubble">{message.message}</div>
+                        <div className={`chat-footer  ${message.emailMessage !== getCurrentEmail ? "opacity-50" : "mt-1"}`}>
+                            <div className="inline-flex">
+                                {message.emailMessage !== getCurrentEmail ? "Delivered" : message.usernameMessage}
+                                {message.emailMessage === getCurrentEmail && (
+                                    <>
+                                    {message.roleMessage === "admin" && (
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1  text-blue-600">
+                                            <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                                        </svg>
+                                    )}
+                                    </>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div className="bg-gray-100 px-4 py-2 rounded-b-xl">
-                    <div className="flex items-center">
-                        <textarea value={inputChatChange} onChange={handleChatSendMessageOnChange} rows="1" className="w-full border rounded-md py-2 px-4 mr-2" type="text" placeholder="Tuliskan pesan..." />
-                        {inputChatSending ? (
-                            <>
-                            <button disabled className="bg-indigo-400  text-white font-medium py-2 px-4 rounded-full animate-pulse">
-                                Kirim
-                            </button>
-                            </>
-                        ) : (
-                            <>
-                            <button onClick={handleSendMessageChat} className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-full">
-                                Kirim
-                            </button>
-                            </>
                         )}
-                    </div>
+                        <div ref={messagesEndRef}></div>
                 </div>
             </div>
-            {/* End Chat */}
+            <div className="bg-gray-100 px-4 py-2 rounded-b-xl">
+                <div className="flex items-center">
+                    <textarea value={inputChatChange} onChange={handleChatSendMessageOnChange} rows="1" className="w-full border rounded-md py-2 px-4 mr-2" type="text" placeholder="Tuliskan pesan..." />
+                    {inputChatSending ? (
+                        <>
+                        <button disabled className="bg-indigo-400  text-white font-medium py-2 px-4 rounded-full animate-pulse">
+                            Kirim
+                        </button>
+                        </>
+                    ) : (
+                        <>
+                        <button onClick={handleSendMessageChat} className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-full">
+                            Kirim
+                        </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+        {/* End Chat */}
 
-        {/* End Content */}
-    </div>
-    </dialog>
+    {/* End Content */}
+</div>
+</dialog>
+        </>
+    ) : (
+        <>
+        </>
+    )}
    
 
     {projectData ? (
