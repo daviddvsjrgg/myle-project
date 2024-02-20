@@ -17,9 +17,9 @@ const ProjekKu = () => {
     const projectData = location.state ? location.state.projectData : null;
 
     // Download Materi
-    const handleDownload = async () => {
-        console.log("download clicked")
-    }
+    // const handleDownload = async () => {
+    //     console.log("download clicked")
+    // }
 
     // Set Edit Button
     const [ buttonEdit, setButtonEdit ] = useState(false)
@@ -631,32 +631,30 @@ const ProjekKu = () => {
 
     try {
         useEffect(() => {
-            if(idDeadline) {
-            const fetchDataDeadline = async () => {
             try {
-                const deadlineAttachmentCollection = collection(db, "deadlineAttachments");
-                const orderedQuery = query(deadlineAttachmentCollection, where("idDeadline", "==", idDeadline)); // Assuming projectData is available
-                
-                const snapshot = await getDocs(orderedQuery);
-                const fetchedAttachmentDeadlines = snapshot.docs.map(doc => ({
-                    nameAttachment: doc.data().nameAttachment,
-                    sizeAttachment: doc.data().sizeAttachment,
-                    urlAttachment: doc.data().urlAttachment,
-                    fileNameAttachment: doc.data().fileNameAttachment,
-                }));
-
-                setFetchedAttachmentDeadlines(fetchedAttachmentDeadlines);
-                console.log("Open after deadline clicked :D");
+                if(idDeadline) {
+                const q = query (
+                  collection(db, "deadlineAttachments"),
+                  where("idDeadline", "==", idDeadline),
+                )
+          
+                console.log("test leak deadline")
+                const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                  const deadlineAttachments = [];
+                  querySnapshot.forEach((doc) => {
+                      deadlineAttachments.push({ ...doc.data() })
+                  })
+                  setFetchedAttachmentDeadlines(deadlineAttachments);
+                })
+                return () => unsubscribe;
+                }
             } catch (error) {
-                console.log("Error fetching data: ", error);
+                console.log("error: " + error)
             }
-            };
-            console.log("test leak data");
-            fetchDataDeadline();
-         }
-        }, [idDeadline]);
+          console.log("test leak deadline")
+        }, [idDeadline])
     } catch (error) {
-        console.log(error);
+        console.log("error")
     }
     
  
@@ -801,8 +799,8 @@ const ProjekKu = () => {
             });
             setEndingDeadlinneAttachmentUpload(true);
             setTimeout(() => {
-                window.location.reload()
-            }, 1250);
+                setDeadlineAttachmentUpload(false)
+            }, 1000);
             console.log("ednding upload...")
           } catch (error) {
             console.error('Error getting download URL:', error);
@@ -905,30 +903,33 @@ const ProjekKu = () => {
 
     try {
         useEffect(() => {
-            const fetchSections = async () => {
             try {
-                const newsCollection = collection(db, "sections");
-                const orderedQuery = query(newsCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "asc")); // Assuming projectData is available
-                
-                const snapshot = await getDocs(orderedQuery);
-                const fetchedDataBerita = snapshot.docs.map(doc => ({
-                    idSection: doc.data().idSection,
-                    titleSection: doc.data().titleSection,
-                    createdAt: doc.data().createdAt,
-                }));
-                setFetchedBagian(fetchedDataBerita);
-                console.log("test leak data");
+                const q = query (
+                  collection(db, "sections"),
+                  where("idProject", "==", projectData.idProject),
+                  orderBy("createdAt", "asc")
+                )
+          
+                console.log("test leak sections")
+                const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                  const fetchedBagian = [];
+                  querySnapshot.forEach((doc) => {
+                      fetchedBagian.push({ 
+                        idSection: doc.data().idSection,
+                        titleSection: doc.data().titleSection,
+                        createdAt: doc.data().createdAt,
+                       })
+                  })
+                  setFetchedBagian(fetchedBagian);
+                })
+                return () => unsubscribe;
             } catch (error) {
-                console.log("Error fetching data: ", error);
+                console.log("error: " + error)
             }
-            };
-        
-            // Invoke the fetch function
-            console.log("test leak data");
-            fetchSections();
-        }, [projectData.idProject]);
+          console.log("test leak sections")
+        }, [projectData.idProject])
     } catch (error) {
-        console.log(error);
+        console.log("error")
     }
 
     // Modal Edit Bagian
@@ -988,9 +989,13 @@ const ProjekKu = () => {
                         await updateDoc(doc.ref, {
                           titleSection: judulBagianTextEdit ? judulBagianTextEdit : "null",
                         });
+                        setCount(3);
+                        setTersimpan(true);
+                        setEditBagianIsOpen(false)
+                        setUbahEditJudulBagianText(false)
                         setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
+                            setTersimpan(false)
+                        }, 3500);
                         
                         console.log("Updated Data Completed!!!");
                       } catch (e) {
@@ -1089,8 +1094,9 @@ const ProjekKu = () => {
                         setCount(3);
                         setTersimpan(true);
                         setbagianAktivitasIsOpen(false)
+                        setBuatAktivitasText(false)
                         setTimeout(() => {
-                            window.location.reload();
+                            setTersimpan(false)
                         }, 3500);
     
                       console.log("Document written with ID: ", docRef.id);
@@ -1109,34 +1115,36 @@ const ProjekKu = () => {
 
     try {
         useEffect(() => {
-            const fetchDataSectionActivities = async () => {
             try {
-                const sectionActivitiesCollection = collection(db, "sectionActivities");
-                const orderedQuery = query(sectionActivitiesCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "asc")); // Assuming projectData is available
-                
-                const snapshot = await getDocs(orderedQuery);
-                const fetchedDataBerita = snapshot.docs.map(doc => ({
-                    idActivity: doc.data().idActivity,
-                    idSection: doc.data().idSection,
-                    titleActivity: doc.data().titleActivity,
-                    descriptionActivity: doc.data().descriptionActivity,
-                    dateActivity: doc.data().dateActivity,
-                    createdAt: doc.data().createdAt,
-                }));
-                setFetchedBagianAktivitas(fetchedDataBerita);
-                console.log("test leak data");
-                
+                const q = query (
+                  collection(db, "sectionActivities"),
+                  where("idProject", "==", projectData.idProject),
+                  orderBy("createdAt", "asc")
+                )
+          
+                console.log("test leak sectionActivities")
+                const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                  const fetchedDataBerita = [];
+                  querySnapshot.forEach((doc) => {
+                      fetchedDataBerita.push({ 
+                        idActivity: doc.data().idActivity,
+                        idSection: doc.data().idSection,
+                        titleActivity: doc.data().titleActivity,
+                        descriptionActivity: doc.data().descriptionActivity,
+                        dateActivity: doc.data().dateActivity,
+                        createdAt: doc.data().createdAt,
+                       })
+                  })
+                  setFetchedBagianAktivitas(fetchedDataBerita);
+                })
+                return () => unsubscribe;
             } catch (error) {
-                console.log("Error fetching data: ", error);
+                console.log("error: " + error)
             }
-            };
-        
-            // Invoke the fetch function
-            console.log("test leak data");
-            fetchDataSectionActivities();
-        }, [projectData.idProject]);
+          console.log("test leak sectionActivities")
+        }, [projectData.idProject])
     } catch (error) {
-        console.log(error);
+        console.log("error")
     }
 
     // Edit Bagian Aktivitas
@@ -1207,9 +1215,14 @@ const ProjekKu = () => {
                           titleActivity: editJudulBagianAktivitasInput ? editJudulBagianAktivitasInput : "null",
                           descriptionActivity: editDeskripsiBagianAktivitasInput ? editDeskripsiBagianAktivitasInput : "",
                         });
+                        setCount(3);
+                        setTersimpan(true);
+                        setEditBagianAktivitasIsOpen(false)
+                        setEditUbahBagianAktivitas(false)
                         setTimeout(() => {
-                            window.location.reload();
-                        }, 1000); 
+                            setTersimpan(false)
+                        }, 3500);
+    
                         
                         console.log("Updated Data Completed!!!");
                       } catch (e) {
@@ -1359,10 +1372,16 @@ const ProjekKu = () => {
                     fileNameAttachment: `${fileNameAttachment}`,
                     createdAt: currentDateString,
                 });
+                setErrorMessageUploadActivityAttachments("")
                 setEndingActivityAttachmentUpload(true)
+                setCount(3);
+                setTersimpan(true);
+                setEditBagianAktivitasIsOpen(false)
+                setActivityAttachmentUpload(false)
+                setSelectedActivityAttachmentFile(null)
                 setTimeout(() => {
-                    window.location.reload()
-                }, 1250);
+                    setTersimpan(false)
+                }, 3500);
                 console.log("ednding upload...")
             } catch (error) {
                 console.error('Error getting download URL:', error);
@@ -1377,29 +1396,31 @@ const ProjekKu = () => {
      const [ fetchedActivityAttachments, setFetchedActivityAttachments ] = useState([]);
 
      try {
-         useEffect(() => {
-             const fetchDataActivityAttachments = async () => {
-             try {
-                 const activityAttachmentCollection = collection(db, "activityAttachments");
-                 const orderedQuery = query(activityAttachmentCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "desc")); // Assuming projectData is available
-                 
-                 const snapshot = await getDocs(orderedQuery);
-                 const fetchedActivityAttachments = snapshot.docs.map(doc => ({
-                     ...doc.data(),
-                 }));
- 
-                 setFetchedActivityAttachments(fetchedActivityAttachments);
-                 console.log("Test leak data");
-             } catch (error) {
-                 console.log("Error fetching data: ", error);
-             }
-             };
-             console.log("test leak data");
-             fetchDataActivityAttachments();
-         }, [projectData.idProject]);
-     } catch (error) {
-         console.log(error);
-     }
+        useEffect(() => {
+            try {
+                const q = query (
+                  collection(db, "activityAttachments"),
+                  where("idProject", "==", projectData.idProject),
+                  orderBy("createdAt", "desc")
+                )
+          
+                console.log("test leak activityAttachments")
+                const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                  const activityAtatchments = [];
+                  querySnapshot.forEach((doc) => {
+                      activityAtatchments.push({ ...doc.data() })
+                  })
+                  setFetchedActivityAttachments(activityAtatchments);
+                })
+                return () => unsubscribe;
+            } catch (error) {
+                console.log("error: " + error)
+            }
+          console.log("test leak activityAttachments")
+        }, [projectData.idProject])
+    } catch (error) {
+        console.log("error")
+    }
 
      // Modal Tambah Pertemuan
     let [ meetingIsOpen, meetingSetIsOpen ] = useState(false)
@@ -1567,8 +1588,9 @@ const ProjekKu = () => {
                             setCount(3);
                             setTersimpan(true);
                             meetingSetIsOpen(false)
+                            setBuatTambahPertemuanButton(false)
                             setTimeout(() => {
-                                window.location.reload();
+                                setTersimpan(false);
                             }, 3500);
         
                           console.log("Document written with ID: ", docRef.id);
@@ -1581,37 +1603,37 @@ const ProjekKu = () => {
                 }
 
             }
-
             
         }
         
-        // Fetch Bagian Aktivitas
+        // Fetch Pertemuan
         const [ fetchedPertemuan, setFetchedPertemuan ] = useState([]);
-    
+
         try {
             useEffect(() => {
-                const fetchDataPertemuan = async () => {
                 try {
-                    const sectionMeetingsCollection = collection(db, "sectionMeetings");
-                    const orderedQuery = query(sectionMeetingsCollection, where("idProject", "==", projectData.idProject), orderBy("createdAt", "desc")); // Assuming projectData is available
-                    
-                    const snapshot = await getDocs(orderedQuery);
-                    const fetchedDataPertemuan = snapshot.docs.map(doc => ({
-                        ...doc.data()
-                    }));
-                    setFetchedPertemuan(fetchedDataPertemuan);
-                    
+                    const q = query (
+                      collection(db, "sectionMeetings"),
+                      where("idProject", "==", projectData.idProject),
+                      orderBy("createdAt", "desc")
+                    )
+              
+                    console.log("test leak sectionMeetings")
+                    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                      const fetchedDataPertemuan = [];
+                      querySnapshot.forEach((doc) => {
+                          fetchedDataPertemuan.push({ ...doc.data() })
+                      })
+                      setFetchedPertemuan(fetchedDataPertemuan);
+                    })
+                    return () => unsubscribe;
                 } catch (error) {
-                    console.log("Error fetching data: ", error);
+                    console.log("error: " + error)
                 }
-                };
-            
-                // Invoke the fetch function
-                console.log("test leak data");
-                fetchDataPertemuan();
-            }, [projectData.idProject]);
+              console.log("test leak sectionMeetings")
+            }, [projectData.idProject])
         } catch (error) {
-            console.log(error);
+            console.log("error")
         }
 
     // Modal Edit Pertemuan
@@ -1674,9 +1696,13 @@ const ProjekKu = () => {
                         await updateDoc(doc.ref, {
                           descriptionMeeting: editCurrentDeskripsiPertemuan ? editCurrentDeskripsiPertemuan : "",
                         });
+                        setCount(3);
+                        setTersimpan(true);
+                        editMeetingSetIsOpen(false)
+                        setUbahPertemuanButton(false)
                         setTimeout(() => {
-                            window.location.reload();
-                        }, 1000); 
+                            setTersimpan(false);
+                        }, 3500);
                         
                         console.log("Updated Data Completed!!!");
                       } catch (e) {
@@ -1722,9 +1748,15 @@ const ProjekKu = () => {
                     try {
                         await deleteDoc(doc.ref);
                         console.log("Document successfully deleted!");
+                        setCount(3);
+                        setTersimpan(true);
+                        setOpenHapusPertemuan(false)
                         setTimeout(() => {
-                            window.location.reload();
-                        }, 250);
+                            setYakinHapusPertemuanText(false)                            
+                        }, 500);
+                        setTimeout(() => {
+                            setTersimpan(false);
+                        }, 3500);
                     } catch (error) {
                         console.error("Error deleting document: ", error);
                     }
@@ -1783,9 +1815,13 @@ const ProjekKu = () => {
                         try {
                             await deleteObject(ref(storage, filePathToDelete));                            
                             console.log("File successfully deleted!");
+                            setCount(3);
+                            setTersimpan(true);
+                            setYakinHapusLampiranAktivitas(false)
+                            setOpenHapusLampiranAktivitas(false)
                             setTimeout(() => {
-                                window.location.reload();
-                            }, 250);
+                                setTersimpan(false);
+                            }, 3500);
                         } catch (error) {
                             console.log("Delete File Error")
                         }
@@ -1831,8 +1867,8 @@ const ProjekKu = () => {
                             console.log("File successfully deleted!");
                             setEndingDeadlineAttachmentDeleting(true)
                             setTimeout(() => {
-                                window.location.reload();
-                            }, 500);
+                                setDeadlineAttachmentUpload(false)
+                            }, 1000);
                         } catch (error) {
                             console.log("Delete File Error")
                         }
@@ -3378,7 +3414,7 @@ const ProjekKu = () => {
                             </Dialog.Title>
                             <div className="mt-2">
                             <p className="text-sm text-gray-500">
-                                Informasi Mata Kuliah berhasil tersimpan, refresh halaman dalam {count} detik
+                                Informasi Mata Kuliah berhasil tersimpan, kembali dalam {count} detik
                             </p>
                             </div>
                         </div>
@@ -4048,7 +4084,7 @@ const ProjekKu = () => {
                         
                         <div data-dial-init className="flex ml-auto">
                             <div id="speed-dial-menu-horizontal" className="flex me-1 space-x-1 items-center">
-                                <div
+                                {/* <div
                                 onClick={handleDownload}
                                 className="lg:tooltip tooltip-left scale-100 hover:scale-110 transition-all duration-200" data-tip="Download Materi">
                                     <button  type="button" data-tooltip-target="tooltip-share tooltip"  data-tip="Share" data-tooltip-placement="top" className="flex justify-center items-center w-[30px] h-[30px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50   focus:ring-4 focus:ring-gray-300 focus:outline-none">
@@ -4056,7 +4092,7 @@ const ProjekKu = () => {
                                            <path fillRule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V3a.75.75 0 0 1 .75-.75Zm-9 13.5a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
                                         </svg>
                                     </button>
-                                </div>
+                                </div> */}
                                 {(getCurrentRole === "admin" || (projectData.picProject === getCurrentEmail && getCurrentRole === "user")) && (
                                     <>
                                         <div className="lg:tooltip scale-100 hover:scale-110 transition-all duration-200" data-tip="Berita">
@@ -4666,7 +4702,11 @@ const ProjekKu = () => {
                                                                 {bagian.idSection === aktivitas.idSection ? (
                                                                     <>
                                                                         <ol className={` relative border-s border-gray-200`}>                
-                                                                            <li className="mb-10 ms-6">            
+                                                                            <li className={`mb-10 ms-6 
+                                                                            ${projectData.picProject === getCurrentEmail && aktivitas.titleActivity.indexOf("[hidden]") !== -1 ? "opacity-30" 
+                                                                            : getCurrentRole === "admin" && aktivitas.titleActivity.indexOf("[hidden]") !== -1 ? "opacity-30" 
+                                                                            : projectData.picProject !== getCurrentEmail && aktivitas.titleActivity.indexOf("[hidden]") !== -1 ? "hidden" 
+                                                                            : ""}`}>            
                                                                                 <span className="absolute flex items-center justify-center w-7 h-7 bg-indigo-100 rounded-full -start-3 ring-8 ring-white ">
                                                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
