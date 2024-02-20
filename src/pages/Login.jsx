@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithRedirect  } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup} from 'firebase/auth';
 import { useNavigate } from 'react-router-dom'
 
 // Login
@@ -21,7 +21,7 @@ const Login = () => {
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      signInWithRedirect(auth, provider);
+      signInWithPopup(auth, provider);
     } catch (error) {
       console.error("An error occurred during Google sign-in:", error);
     }

@@ -260,10 +260,10 @@ const Dashboard = () => {
                                   <div className="bg-gray-50 border border-gray-200  rounded-lg p-2 md:p-4">
                                       <a href="/projek" className=" text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md  mb-2">
                                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-indigo-600">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="m9 13.5 3 3m0 0 3-3m-3 3v-6m1.06-4.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
                                       </svg>
                                       </a>
-                                      <p className="font-extrabold text-md text-gray-600 ml-2  -mt-2">Projek</p>
+                                      <p className="font-extrabold text-md text-gray-600 ml-2  -mt-2">Mata Kuliah</p>
                                   </div>
                               </a>
                               </div>
