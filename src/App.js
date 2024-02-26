@@ -23,12 +23,12 @@ import UserProfile from "./pages/authPages/NavbarMenu/ManajemenUser/UserProfile/
 import Profile from "./pages/authPages/NavbarMenu/ManajemenUser/Profile/Profile";
 import DetailProjek from "./pages/authPages/NavbarMenu/ManajemenProjek/DetailProjek/DetailProjek";
 import ProjekKu from "./pages/authPages/NavbarMenu/Personal/ProjekKu/ProjekKu";
-import LoadingNavbar from "./components/Loading/LoadingNavbar/LoadingNavbar";
+import BaseLoading from "./components/Loading/BaseLoading/BaseLoading";
 
 function LoadingSpinner() {
   return (
     <>
-      <LoadingNavbar />
+      <BaseLoading/>
     </>
   );
 }
